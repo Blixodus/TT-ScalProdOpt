@@ -20,12 +20,11 @@ class SouG{
 
 class SimpleG : public Algorithm{
     public:
-    SouG sgref;
+    SouG sgref; //structure avec son propre graphe qu'on peut modifier librement
     vector<pair<int, int>> E; //liste des arêtes (fixe)
     Tab G; //size*(size+1)
-    Tab S;
-    //Tab O;
-    //Tab C;
+    Tab S; //les indices des arêtes
+
     unordered_map<unsigned long long, int> O;
     unordered_map<unsigned long long, Cost> C;
 

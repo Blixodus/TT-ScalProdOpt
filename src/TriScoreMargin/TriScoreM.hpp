@@ -22,21 +22,20 @@ class TriScoreM : public Algorithm{
     public:
     TriScore triscore;
 
-    vector<pair<int, int>> E;
-    Tab G;
+    vector<pair<int, int>> E; //liste d'arêtes
+    Tab G; //matrice d'djacence
 
-    Tab R;
+    Tab R; //liste d'indice des arêtes de E : R[0] = 2 signifie que la première arête considérée sera l'arête E[2]
     vector<bool> VB;
 
     SousG getSG(){SousG sg; sg.set(G, vector<int> (size, -1)); return sg;}
-    void solve(int cr, int s, int n);
+    void solve(int cr, int s);
     void follow_order(Tab S);
     Cost contract(int i, SousG& sg);
     bool is_still_in(int s);
     Tab still_in();
     bool place_to_default(Tab& R);
     Tab generate_order(Tab R);
-    unsigned long long convert(Tab S);
 
     void display_order();
 

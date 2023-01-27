@@ -11,8 +11,11 @@
 void MatrixSolver::solve(int n, Cost cost, vector<pair<int, int>> v, Network N){
     for(int j = 1; j < n; j++){
         for(int i = 0; i < j; i++){
+            //on copie l'ordre actuel
             vector<pair<int, int>> v2 = v;
+            //on rajoute l'arête en considération l'ordre
             v2.push_back(make_pair(i, j));
+            //on continue d'itérer
             solve(n-1, cost + contractionCost(i, j, N), v2, contract(i, j, N));
         }
     }

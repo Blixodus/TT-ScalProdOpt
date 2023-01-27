@@ -19,24 +19,14 @@
 
 using namespace chrono_literals;
 
-ofstream result_file("../results/results.txt");
-ofstream cost_file("../results/cost.csv");
-ofstream time_file("../results/time.csv");
-string separator(" ");
-string instance_dir;
-string instance_file;
-std::chrono::seconds WAIT_TIME = 1800s;
-
-MatrixSolver matrix;
-Split split;
-VSplit vsplit;
-ESplit esplit;
-SideEx sideex;
-SimpleG simpleg;
-TriScore triscore;
-TriScoreM mts;
-NTS nts;
-vector<Algorithm*> algos;
+ofstream result_file("../results/results.txt"); //fichier où les résultats détaillés seront envoyé
+ofstream cost_file("../results/cost.csv"); //fichier où les seront envoyés 
+ofstream time_file("../results/time.csv"); //fichier où les temps seront envoyés
+string separator(" "); //séparateur utilisé pour les csv
+string instance_dir; //répertoire
+string instance_file; //fichier d'instance
+std::chrono::seconds WAIT_TIME = 1800s; //délai d'attente avant de timeout un algo
+vector<Algorithm*> algos; //liste des algos utilisés
 
 void init_algos();
 void add_separator();

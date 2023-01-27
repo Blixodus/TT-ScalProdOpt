@@ -3,7 +3,7 @@
 #include "../Components.hpp"
 
 /**
- * @brief Algorithme glouton calculant le meilleur coût en considérant toutes les séparations possible du TT
+ * @brief Algorithme calculant le meilleur coût en considérant toutes les séparations possible du TT
  * Complexité : 2^4D
  */
 
@@ -12,9 +12,9 @@ class Split : public Algorithm{
     CostTab G; //la matrice d'adjacence + 1 colonne donnant le poids sortant de chaque sommet
     Tab S; //un état (ensemble de sommets)
     CostTab A; //un tableau donnant pour chaque taille d'état le poids sortant des sommets
-    unordered_map<unsigned long long, Cost> C;//vector<Cost> C; //la liste des coûts obtenus
-    unordered_map<unsigned long long, int> P1;//vector<long int> P1; //la liste des ordres S1
-    unordered_map<unsigned long long, int> P2;//vector<long int> P2; //la liste des ordres S2
+    unordered_map<unsigned long long, Cost> C; //la liste des coûts obtenus
+    unordered_map<unsigned long long, int> P1; //la liste des ordres S1
+    unordered_map<unsigned long long, int> P2; //la liste des ordres S2
 
     //A : Un tableau de taille n*n, le poids des arrêtes sortantes de chaque sommet, pour les n états S d'un "plongeon"
     //G : un tableau de taille n+1*n, la matrice d'adjacence + la colonne A de départ. M[i][j] = G[i*size+j]

@@ -62,6 +62,7 @@ Cost VSplit::solve(Tab S){
  */
 CostTab VSplit::computeA(Tab S){
     for(int i : S){
+        //poids sortant de i dans l'ensemble de taille S.size() = G[ofs + i] / le poids des liaisons avec des sommets dans S
         A[size*(S.size()-1) + i] = G[size*size + i];
         A[size*(S.size()-1) + i+size/2] = G[size*size + i+size/2];
         

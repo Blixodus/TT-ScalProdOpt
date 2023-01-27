@@ -8,7 +8,7 @@
  * @param s the index we are considering
  * @param n the amount of indexes left to place
  */
-void TriScoreM::solve(int cr, int s, int n){
+void TriScoreM::solve(int cr, int s){
     //si il nous reste du crédit
     if(cr > 0){
         //pour toutes les distances qui sont inférieures ou égales au crédit
@@ -19,16 +19,9 @@ void TriScoreM::solve(int cr, int s, int n){
                 VB[s] = 1;
                 
                 //si on a encore des arêtes à placer après celle-là, on poursuit le parcours
-                if(n > 1){
+                if(s < E.size()-1){
                     //si l'arête à l'indice où on a atterri n'a pas encore été placée, on poursuit l'exécution sur elle
-                    if(is_still_in(s-d)){
-                        solve(cr-d, s-d, n-1);
-                    //sinon on prend les arêtes encore à placer et on tente notre chance
-                    }else{
-                        for(int i : still_in()){
-                            solve(cr-d, i, n-1);
-                        }
-                    }
+                        solve(cr-d, s+1);
                 }else{
                     //Si on a plus d'arêtes à placer, on converti le tableau R en un ordre, puis on calcule
                     follow_order(generate_order(R));
@@ -42,14 +35,8 @@ void TriScoreM::solve(int cr, int s, int n){
             if(s+d < R.size() && R[s+d]==-1){
                 R[s+d] = s;
                 VB[s] = 1;
-                if(n > 1){
-                    if(is_still_in(s+d)){
-                        solve(cr-d, s+d, n-1);
-                    }else{
-                        for(int i : still_in()){
-                            solve(cr-d, i, n-1);
-                        }
-                    }
+                if(s > E.size()-1){
+                    solve(cr-d, s+1);
                 }else{
                     follow_order(generate_order(R));
                 }
@@ -59,9 +46,15 @@ void TriScoreM::solve(int cr, int s, int n){
         }
     }else{
         Tab R_copy (R);
-        if(place_to_default(R_copy)){
-            follow_order(generate_order(R_copy));
+        for(int i = s; i < E.size(); i++){
+            if(R_copy[i] != -1){
+                break;
+            }
+            R_copy[i] = i;
         }
+        /*if(place_to_default(R_copy)){
+            follow_order(generate_order(R_copy));
+        }*/
     }
 }
 
@@ -167,10 +160,6 @@ bool TriScoreM::place_to_default(Tab& R){
     return true;
 }
 
-unsigned long long TriScoreM::convert(Tab S){
-
-}
-
 Tab TriScoreM::generate_order(Tab R){
     Tab res;
     for(int i : R){
@@ -230,6 +219,9 @@ void TriScoreM::init(string file){
 }
 
 Cost TriScoreM::call_solve(){
-    solve(delta, 0, E.size());
+    solve(delta, 0);
+    /*for(int i : generate_order({1, 0, 6, 3, 4, 5, 2})){
+        cout << i << '\n';
+    }*/
     return bestCost;
 }
