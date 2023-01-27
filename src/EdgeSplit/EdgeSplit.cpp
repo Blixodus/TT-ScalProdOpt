@@ -9,7 +9,7 @@ Cost ESplit::solve(int i1, int i2, int j1, int j2, CostTab A){
         //affiche(i1, i2, j1, j2);
         //affiche_A(A);
         //valeur par défaut, facilite les comparaisons
-        M[key] = bestCost+1UL;
+        M[key] = bestCost+1;
         //coupes diagonales
         solve_diag(i1, i2, j1, j2, key, A, S_cost);
         //coupes verticales
@@ -38,6 +38,9 @@ Cost ESplit::solve_diag(int i1, int i2, int j1, int j2, unsigned long long key, 
     int end = min(i2, j2); //le côté droit du sous-bloc
 
     int ignored = E.size()-1;
+    //size <-> size
+    //A[size] = 1
+    //W[E.size()-1] = 1
     
     //on itère sur les arêtes centrales du sous-bloc
     //Si la forme est une ligne, on aura start > end et cette boucle sera passée 
@@ -45,6 +48,8 @@ Cost ESplit::solve_diag(int i1, int i2, int j1, int j2, unsigned long long key, 
         CostTab A_copy (A);
         //on multiplie de manière permanente le poids des extrémités de ofs (même fonctionnement que pour y_cost)
         //on multiplie de manière temporaire le poids des extrémités de start et de end (qu'on reset après chaque solve)
+        //x = en haut
+        //z = en bas
         int y = D-1+ofsy; //l'indice de l'arête
         //arête supérieure avant y, et arête inférieure avant y, initialisé à une valeur qui ne posera pas de problème
         int cx = y-D;
@@ -378,6 +383,11 @@ void ESplit::init(string file){
     W.push_back(1);
 }
 
+/**
+ * @brief dummy function called by exec_file 
+ * 
+ * @return Cost 
+ */
 Cost ESplit::call_solve(){
     return solve(0, D-1, 0, D-1, CostTab (size+1, 1));
 }

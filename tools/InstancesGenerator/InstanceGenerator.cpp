@@ -56,6 +56,15 @@ void init_instance(int n ,int min, int max, string dir ){
         }
 }
 
+/**
+ * @brief calls init_instance amount times to generate amount instances, each one having a different number
+ * 
+ * @param n 
+ * @param min 
+ * @param max 
+ * @param amount 
+ * @param dir 
+ */
 void init_multiple(int n, int min, int max, int amount, string dir){
     for(int i = 1; i <= amount; i++){
         string name = dir + "_" + to_string(i);
@@ -70,6 +79,14 @@ int main(int argc, char* argv[]){
     chrono::system_clock::now().time_since_epoch()
     );
     srand(ms.count());
+    if(argc < 3){
+        cout << "s : number of nodes (default 6)" << '\n';
+        cout << "d : path (default test/instance)" << '\n';
+        cout << "n : number of instances (default 1)" << '\n';
+        cout << "m : minimum weight (default 1)" << '\n';
+        cout << "M : maximum weight (default 9)" << '\n';
+        exit(0);
+    }
     for(int i = 1; i < argc - 1; i++){
         switch(*argv[i]){
             case 'm': //poids min
@@ -91,12 +108,6 @@ int main(int argc, char* argv[]){
             case 'd': //répertoire
                 dir = argv[i+1];
                 i++;
-                break;
-            case 'h': //aide
-
-                break;
-            case 't': //trial
-                
                 break;
         }
     }

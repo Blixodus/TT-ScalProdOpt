@@ -24,6 +24,6 @@ int m = 1; //poids minimum
 
 int M = 9; //poids maximum
 
-string dir = "autre"; //répertoire par défaut
+string dir = "test/instance"; //path par défaut
 
 #endif

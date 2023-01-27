@@ -1,5 +1,9 @@
 #include "Main.hpp"
 
+/**
+ * @brief Initializes the list of algorithm to use (TODO: use parameters to customize it upon execution)
+ * 
+ */
 void init_algos(){
     algos.push_back(new MatrixSolver());
     algos.push_back(new Split());
@@ -12,6 +16,8 @@ void init_algos(){
     algos.push_back(new NTS());
 }
 
+//TODO: From here
+
 /**
  * @brief adds 'separator' to cost_file and time_file
  * 
@@ -21,10 +27,15 @@ void add_separator(){
     time_file << separator << flush;
 }
 
+/**
+ * @brief add default error values in cost_file and time_file
+ * 
+ */
 void add_error_values(){
     cost_file << -1 << separator << flush;
     time_file << 0.0 << separator << flush;
 }
+
 /**
  * @brief exports solver's name into result_file
  * 
@@ -80,6 +91,7 @@ void launch_exec(T& solver, int delta){
             export_header(*solver);
             //Template défini dans components, permettant d'initialiser l'algorithme et de résoudre l'instance
             execfile(*solver, instance_file);
+            //export des résultats
             export_results(*solver);
             cv.notify_all();
         });
@@ -104,23 +116,18 @@ void launch_exec(T& solver, int delta){
     }else{ //processus parent
         wait(&status);
         if(status!=0){ //si timeout
+            //l'algorithme ne sera plus jamais appelé
             solver->still_up = false;
-            //add_error_values();
         }
     }
 }
 
 /**
- * @brief initializes .csv's header
+ * @brief initializes .csv's header (TODO: creates the header based on the list of algorithm in use)
  * 
  */
 void init_csv(){
     /*size, Matrix, Split, VSplit, EdgeSplit, SideEx, SimpleG, TriScore, MTS, NTS*/
-    /*for(auto algo = algos.begin(); algo != algos.end(); algo++){
-        cout << "in" << '\n';
-        launch_exec(*algo);
-
-    }*/
     string header = "size" + separator + 
     "Matrix" + separator + 
     "Split" + separator + 
@@ -216,7 +223,7 @@ void export_display(){
             }
         }
     }
-    result_file << '\n';
+    result_file << endl;
 }
 
 /**
@@ -232,12 +239,14 @@ void export_order(Tab O){
     result_file << '\n';
 }
 
+//TODO: To here, should not be in this file
+
 /**
  * @brief initializes various files
  * 
  */
 void init_files(){
-    result_file << instance_file << '\n';
+    result_file << instance_file << endl;
     display(instance_file);
     export_display();
     get_size();
@@ -251,31 +260,16 @@ void execfile_on_all(){
     init_files();
     
     for(auto algo = algos.begin(); algo != algos.end(); algo++){
-        cout << typeid((*algo)).name() << '\n';
-        cout << (*algo)->still_up << '\n';
         if((*algo)->still_up){
-            cout << "in exec" << '\n';
             launch_exec(*algo);
         }else{
-            cout << "in trash" << '\n';
-            //cost_file << "-1";
-            //time_file << "0" + separator;
             add_error_values();
         }
     }
-    /*launch_exec(matrix);
-    launch_exec(split);
-    launch_exec(vsplit, 3);
-    launch_exec(esplit);
-    launch_exec(sideex);
-    launch_exec(simpleg);
-    launch_exec(triscore);
-    launch_exec(mts, 3);
-    launch_exec(nts);*/
 
     cost_file << endl;
     time_file << endl;
-    result_file << "----------" << "\n\n";
+    result_file << "----------" << endl << endl;
 }
 
 /**

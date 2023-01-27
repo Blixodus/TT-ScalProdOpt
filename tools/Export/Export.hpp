@@ -3,6 +3,15 @@
 #include <fstream>
 #include "../src/Components.hpp"
 
+//TODO:
+struct Result_exporter{
+    //std::string result_path; //not very useful
+    std::string cost_path;
+    std::string time_path;
+    //must not authorize both files having no values ?
+    //parameter to determine whether or not we export to begin with
+};
+
 /**
  * @brief exports results into the different files
  * 
