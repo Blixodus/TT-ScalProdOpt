@@ -1,2 +1,6 @@
 f test/test1.txt
 o 5 4 6 0 3 2 1
+o 5 0 4 2 1 3
+
+f test/test0.txt
+o 2 3
