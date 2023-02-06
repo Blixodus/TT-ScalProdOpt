@@ -11,13 +11,18 @@
 #include <fstream>
 #include <unordered_map>
 #include <limits>
-#include "../tools/Sort/Sort.hpp"
-#include "../tools/Display/Display.hpp"
+#include "../../tools/Sort/Sort.hpp"
+#include "../../tools/Display/Display.hpp"
 
 using namespace std;
 
+//Type for costs
 typedef int Cost;
+//Type for network dimensions
+typedef int Dim;
+//Type for vector of cost
 typedef vector<Cost> CostTab;
+//Type for vector of integer
 typedef vector<int> Tab;
 
 template<class T>
@@ -64,31 +69,5 @@ void execdir(T solver, string dir){
     closedir(dp);
 }
 
-
-class Algorithm{
-    public:
-    //valeur de référence pour delta, celle qui a été passée en entrée du programme
-    int refdelta = -1;
-    //valeur effective de delta, qui va s'adapter au cas par cas
-    int delta = -1;
-    //(seulement utile pour les algorithmes paramétrés)
-
-    //taille de l'instance en nombre de sommets
-    int size;
-
-    //meilleur coût
-    Cost refCost = numeric_limits<Cost>::max() - 1;
-    Cost bestCost = numeric_limits<Cost>::max() - 1;
-    //meilleur ordre
-    Tab bestOrder;
-    //temps
-    chrono::duration<double> time;
-
-    bool still_up = true;
-
-    virtual void init(string file) {};
-    virtual Cost call_solve() {return 0;};
-    virtual void display_order() {};
-};
 
 #endif

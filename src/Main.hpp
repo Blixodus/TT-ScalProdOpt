@@ -19,36 +19,33 @@
 
 using namespace chrono_literals;
 
-ofstream result_file("../results/results.txt"); //fichier où les résultats détaillés seront envoyé
-ofstream cost_file("../results/cost.csv"); //fichier où les seront envoyés 
-ofstream time_file("../results/time.csv"); //fichier où les temps seront envoyés
+//csv file to send the results
+ofstream result_file("../results/results.csv");
 string separator(" "); //séparateur utilisé pour les csv
-string instance_dir; //répertoire
 string instance_file; //fichier d'instance
-std::chrono::seconds WAIT_TIME = 1800s; //délai d'attente avant de timeout un algo
-vector<Algorithm*> algos; //liste des algos utilisés
+vector<Algorithm*> algorithms; //liste des algos utilisés
 
 void init_algos();
-void add_separator();
+// void add_separator();
 
-template<class T>
-void export_header(T& solver);
+// template<class T>
+// void export_header(T& solver);
 
-template<class T>
-void export_results(T& solver);
+// template<class T>
+// void export_results(T& solver);
 
 template<class T>
 void launch_exec(T& solver, int delta = -1);
 
-void init_csv();
+// void init_csv();
 
-void get_size();
+// void get_size();
 
-void export_display();
+// void export_display();
 
-void export_order(Tab O);
+// void export_order(Tab order);
 
-void init_files();
+// void init_files();
 
 void execfile_on_all();
 

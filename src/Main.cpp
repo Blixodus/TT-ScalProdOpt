@@ -5,36 +5,18 @@
  * 
  */
 void init_algos(){
-    algos.push_back(new MatrixSolver());
-    algos.push_back(new Split());
-    algos.push_back(new VSplit());
-    algos.push_back(new ESplit());
-    algos.push_back(new SideEx());
-    algos.push_back(new SimpleG());
-    algos.push_back(new TriScore());
-    algos.push_back(new TriScoreM());
-    algos.push_back(new NTS());
+    // algorithms.push_back(new MatrixSolver());
+    // algorithms.push_back(new Split());
+    // algorithms.push_back(new VSplit());
+    // algorithms.push_back(new ESplit());
+    // algorithms.push_back(new SideEx());
+    // algorithms.push_back(new SimpleG());
+    // algorithms.push_back(new TriScore());
+    // algorithms.push_back(new TriScoreM());
+    // algorithms.push_back(new NTS());
 }
 
 //TODO: From here
-
-/**
- * @brief adds 'separator' to cost_file and time_file
- * 
- */
-void add_separator(){
-    cost_file << separator << flush;
-    time_file << separator << flush;
-}
-
-/**
- * @brief add default error values in cost_file and time_file
- * 
- */
-void add_error_values(){
-    cost_file << -1 << separator << flush;
-    time_file << 0.0 << separator << flush;
-}
 
 /**
  * @brief exports solver's name into result_file
@@ -42,18 +24,18 @@ void add_error_values(){
  * @tparam T the solver's type
  * @param solver 
  */
-template<class T>
-void export_header(T& solver){
-    string class_name = typeid(solver).name();
-    do{
-        class_name.erase(class_name.begin());
-    }while(isdigit(class_name[0]));
-    cout << "--- "<< class_name <<" ---" << '\n';
-    result_file << "--- " << class_name << " ---" << '\n';
-    if(solver.delta != -1){
-        result_file << "Delta : " << solver.delta << '\n'; 
-    }
-}
+// template<class T>
+// void export_header(T& solver){
+//     string class_name = typeid(solver).name();
+//     do{
+//         class_name.erase(class_name.begin());
+//     }while(isdigit(class_name[0]));
+//     cout << "--- "<< class_name <<" ---" << '\n';
+//     result_file << "--- " << class_name << " ---" << '\n';
+//     if(solver.delta != -1){
+//         result_file << "Delta : " << solver.delta << '\n'; 
+//     }
+// }
 
 /**
  * @brief exports results into the different files
@@ -61,15 +43,14 @@ void export_header(T& solver){
  * @tparam T the solver's type
  * @param solver 
  */
-template<class T>
-void export_results(T& solver){
-    result_file << "Best cost : " << solver.bestCost << '\n';
-    result_file << "Time : " << solver.time.count() << endl;
-
-    cost_file << solver.bestCost;
-    time_file << solver.time.count();
-    add_separator();
-}
+// template<class T>
+// void export_results(T& solver){
+//     result_file << "Best cost : " << solver.bestCost << '\n';
+//     result_file << "Time : " << solver.time.count() << endl;
+//     cost_file << solver.bestCost;
+//     time_file << solver.time.count();
+//     add_separator();
+// }
 
 /**
  * @brief executes solver.execfile inside a thread, and stops it after the time limit is reached 
@@ -126,118 +107,115 @@ void launch_exec(T& solver, int delta){
  * @brief initializes .csv's header (TODO: creates the header based on the list of algorithm in use)
  * 
  */
-void init_csv(){
-    /*size, Matrix, Split, VSplit, EdgeSplit, SideEx, SimpleG, TriScore, MTS, NTS*/
-    string header = "size" + separator + 
-    "Matrix" + separator + 
-    "Split" + separator + 
-    "VSplit" + separator + 
-    "EdgeSplit" + separator +
-    "SideEx" + separator + 
-    "SimpleG" + separator +
-    "TriScore" + separator +
-    "TriScoreMargin" + separator +
-    "TriScoreNaive"
-    + '\n';
-    cost_file << header;
-    time_file << header;
-}
+// void init_csv(){
+//     /*size, Matrix, Split, VSplit, EdgeSplit, SideEx, SimpleG, TriScore, MTS, NTS*/
+//     string header = "size" + separator + 
+//     "Matrix" + separator + 
+//     "Split" + separator + 
+//     "VSplit" + separator + 
+//     "EdgeSplit" + separator +
+//     "SideEx" + separator + 
+//     "SimpleG" + separator +
+//     "TriScore" + separator +
+//     "TriScoreMargin" + separator +
+//     "TriScoreNaive"
+//     + '\n';
+//     cost_file << header;
+//     time_file << header;
+// }
 
 /**
  * @brief puts the size of instances into the .csv
  * 
  */
-void get_size(){
-    string path = "../instances/" + instance_file;
-    string filename(path);
-    string line;
-    ifstream input_file(filename);
-    if (!input_file.is_open()) {
-        cerr << "Could not open the file - '"
-             << filename << "'" << endl;
-        exit(-1);
-    }
-
-     while(getline(input_file, line)){
-        if(line.size() > 2){
-            if(line[0] == 'p'){
-                /*cost_file << inst_num;
-                time_file << inst_num;
-                add_separator();
-                inst_num++;*/
-                cost_file << &line[2];
-                time_file << &line[2];
-                add_separator();
-                break;
-            }
-        }
-     }
-
-}
+// void get_size(){
+//     string path = "../instances/" + instance_file;
+//     string filename(path);
+//     string line;
+//     ifstream input_file(filename);
+//     if (!input_file.is_open()) {
+//         cerr << "Could not open the file - '"
+//              << filename << "'" << endl;
+//         exit(-1);
+//     }
+//      while(getline(input_file, line)){
+//         if(line.size() > 2){
+//             if(line[0] == 'p'){
+//                 /*cost_file << inst_num;
+//                 time_file << inst_num;
+//                 add_separator();
+//                 inst_num++;*/
+//                 cost_file << &line[2];
+//                 time_file << &line[2];
+//                 add_separator();
+//                 break;
+//             }
+//         }
+//      }
+// }
 
 /**
  * @brief output the display into result_file
  * 
  */
-void export_display(){
-    string path = "../instances/" + instance_file;
-    string filename(path);
-    string line;
-    ifstream input_file(filename);
-    if (!input_file.is_open()) {
-        cerr << "Could not open the file - '"
-             << filename << "'" << endl;
-        exit(-1);
-    }
-
-    char mot[200];
-    int n = 0;
-    int nL = 0;
-    while(getline(input_file, line) && line[0] != 'e'){
-        if(line.size() > 2){
-            istringstream flux(&line[2]);
-            switch(line[0]){
-                case 'v':
-                   while(flux >> mot){
-                        if(mot[0] == '*'){
-                            char* padding;
-                            if(nL == 1){
-                                padding = "       ";
-                            }else{
-                                padding = "   ";
-                            }
-                            result_file << mot << "(" << n << ")" << padding;
-                            n++;
-                        }else{
-                            result_file << mot << "   ";
-                        }
-                    }
-                    nL++;
-                    result_file << '\n';
-                break;
-                case 'p':
-                    result_file << '\n' << "Sommets : " << &line[2] << '\n';
-                break;
-                default:
-                break;
-            }
-        }
-    }
-    result_file << endl;
-}
+// void export_display(){
+//     string path = "../instances/" + instance_file;
+//     string filename(path);
+//     string line;
+//     ifstream input_file(filename);
+//     if (!input_file.is_open()) {
+//         cerr << "Could not open the file - '"
+//              << filename << "'" << endl;
+//         exit(-1);
+//     }
+//     char mot[200];
+//     int n = 0;
+//     int nL = 0;
+//     while(getline(input_file, line) && line[0] != 'e'){
+//         if(line.size() > 2){
+//             istringstream flux(&line[2]);
+//             switch(line[0]){
+//                 case 'v':
+//                    while(flux >> mot){
+//                         if(mot[0] == '*'){
+//                             char* padding;
+//                             if(nL == 1){
+//                                 padding = "       ";
+//                             }else{
+//                                 padding = "   ";
+//                             }
+//                             result_file << mot << "(" << n << ")" << padding;
+//                             n++;
+//                         }else{
+//                             result_file << mot << "   ";
+//                         }
+//                     }
+//                     nL++;
+//                     result_file << '\n';
+//                 break;
+//                 case 'p':
+//                     result_file << '\n' << "Sommets : " << &line[2] << '\n';
+//                 break;
+//                 default:
+//                 break;
+//             }
+//         }
+//     }
+//     result_file << endl;
+// }
 
 /**
  * @brief exports a contraction order into result_file
  * 
- * @param O a vector<int> representing a series of edges
+ * @param order a vector<int> representing a series of edges
  */
-void export_order(Tab O){
-    result_file << "Best order : ";
-    for(int i : O){
-        result_file << i << " ";
-    }
-    result_file << '\n';
-}
+// void export_order(Tab order){
+//     result_file << "Best order : ";
+//     for(int i : order){
+//         result_file << i << " ";
+//     }
+//     result_file << '\n';
+// }
 
 //TODO: To here, should not be in this file
 
@@ -246,10 +224,10 @@ void export_order(Tab O){
  * 
  */
 void init_files(){
-    result_file << instance_file << endl;
+    // result_file << instance_file << endl;
     display(instance_file);
-    export_display();
-    get_size();
+    // export_display();
+    // get_size();
 }
 
 /**
@@ -259,17 +237,13 @@ void init_files(){
 void execfile_on_all(){
     init_files();
     
-    for(auto algo = algos.begin(); algo != algos.end(); algo++){
+    for(auto algo = algorithms.begin(); algo != algorithms.end(); algo++){
         if((*algo)->still_up){
             launch_exec(*algo);
         }else{
             add_error_values();
         }
     }
-
-    cost_file << endl;
-    time_file << endl;
-    result_file << "----------" << endl << endl;
 }
 
 /**
@@ -317,6 +291,7 @@ void execdir(){
 }
 
 int main(int argc, char* argv[]){
+    
     switch (argc){
     case 1:
         cout << "Missing argument : instance file" << '\n';

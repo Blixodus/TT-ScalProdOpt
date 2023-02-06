@@ -5,8 +5,8 @@ Cost SideEx::solve(){
     //nombre max d'arêtes centrales accumulées
     int kmax = 2*delta + 1;
     //passage de l'état s, à s+1
-    for(int s = 0; s < size/2-1; s++){
-        int N = G[size*s + s+size/2]; //arête centrale à multiplier
+    for(int s = 0; s < n_vertex/2-1; s++){
+        int N = G[n_vertex*s + s+n_vertex/2]; //arête centrale à multiplier
         int ofs = 2*s; //offset dans le tableau T
         int ofsc = (s+1)*(s+1)-1; //offset dans le tableau C
         for(int k = min(2*(s+1), kmax); k >= 2; k--){
@@ -39,8 +39,8 @@ Cost SideEx::solve(){
             }
         }
         //on ajoute les 2 nouvelles arêtes latérale
-        T[0] = G[size*s + s+1];
-        T[1] = G[size*(s+size/2) + s+1+size/2];
+        T[0] = G[n_vertex*s + s+1];
+        T[1] = G[n_vertex*(s+n_vertex/2) + s+1+n_vertex/2];
 
         //on range le meilleur coût pour R et Q
         C[0] = P[ofs];
@@ -48,8 +48,8 @@ Cost SideEx::solve(){
     }
 
     //gestion de la dernière étape, on récupère directement le résultat
-    int s = size/2-1;
-    int N = G[size*s + s+size/2];
+    int s = n_vertex/2-1;
+    int N = G[n_vertex*s + s+n_vertex/2];
     int cost = INT32_MAX;
 
     for(int k = 0; k <= min(2*s, kmax); k++){
@@ -76,8 +76,8 @@ Cost SideEx::contract(int s, int k, int x, pair<int, int>& p){
     //on calcule les poids sortants des sommets s et s+D
     computeA(s, k);
     //on récupère les poids des arêtes latérales (pas nécessaire mais plus lisible)
-    Cost G1 = G[size*(s+size/2) + s+1+size/2];
-    Cost G0 = G[size*s + s+1];
+    Cost G1 = G[n_vertex*(s+n_vertex/2) + s+1+n_vertex/2];
+    Cost G0 = G[n_vertex*s + s+1];
 
     //les coûts associés aux différents ordres de contraction
     Cost r12;
@@ -94,10 +94,10 @@ Cost SideEx::contract(int s, int k, int x, pair<int, int>& p){
         //on garde l'arête du dessus (R)
         case 0:
             //Q puis N
-            r12 = A[s+1+size/2]*T[k] + A[s]*A[s+1+size/2]/G1;
+            r12 = A[s+1+n_vertex/2]*T[k] + A[s]*A[s+1+n_vertex/2]/G1;
 
             //N puis Q
-            r21 = G0*G1*T[k] + G0*A[s+1+size/2];
+            r21 = G0*G1*T[k] + G0*A[s+1+n_vertex/2];
             if(r12 < r21){
                 cost = r12;
                 p = make_pair(1, 2);
@@ -108,7 +108,7 @@ Cost SideEx::contract(int s, int k, int x, pair<int, int>& p){
             break;
         //cas arête du dessous (Q)
         case 1:
-            r02 = A[s+1]*T[k] + A[s+size/2]*A[s+1]/G0;
+            r02 = A[s+1]*T[k] + A[s+n_vertex/2]*A[s+1]/G0;
             r20 = G1*(G0*T[k] + A[s+1]);
             if(r02 < r20){
                 cost = r02;
@@ -120,7 +120,7 @@ Cost SideEx::contract(int s, int k, int x, pair<int, int>& p){
             break;
         //cas arête centrale
         case 2:
-            cost = T[k]*(A[s+1] + A[s+1+size/2]);
+            cost = T[k]*(A[s+1] + A[s+1+n_vertex/2]);
             p = make_pair(0, 1);
             break;
         default:
@@ -139,8 +139,8 @@ Cost SideEx::contract(int s, int k, int x, pair<int, int>& p){
  * @param s the state we are currently at
  */
 void SideEx::computeA(int s, int k){
-    A[s] = G[size*s + s+1]*T[k];
-    A[s+size/2] = G[size*(s+size/2) + s+1+size/2]*T[k];
+    A[s] = G[n_vertex*s + s+1]*T[k];
+    A[s+n_vertex/2] = G[n_vertex*(s+n_vertex/2) + s+1+n_vertex/2]*T[k];
 }
 
 /**
@@ -149,8 +149,8 @@ void SideEx::computeA(int s, int k){
  * @param s the state
  */
 void SideEx::restoreA(int s){
-    A[s] = G[size*size + s]; //stock le poids sortant du sommet s
-    A[s+size/2] = G[size*size + s+size/2];
+    A[s] = G[n_vertex*n_vertex + s]; //stock le poids sortant du sommet s
+    A[s+n_vertex/2] = G[n_vertex*n_vertex + s+n_vertex/2];
 }
 
 /**
@@ -172,10 +172,10 @@ void SideEx::display_order(int s, int k){
 }
 
 void SideEx::display_order(){
-    for(int i = 0; i < bestOrder.size()-1; i++){
-        cout << bestOrder[i] << " - ";
+    for(int i = 0; i < best_order.size()-1; i++){
+        cout << best_order[i] << " - ";
     }
-    cout << bestOrder.back() << '\n';
+    cout << best_order.back() << '\n';
 }
 
 void SideEx::get_order(int s, int k){
@@ -191,25 +191,25 @@ void SideEx::get_order(int s, int k){
 
         switch(e1){
             case 0:
-                bestOrder.push_back(s);
+                best_order.push_back(s);
             break;
             case 2:
-                bestOrder.push_back(size/2-1 + s);
+                best_order.push_back(n_vertex/2-1 + s);
             break;
             case 1:
-                bestOrder.push_back(size-1+s);
+                best_order.push_back(n_vertex-1+s);
             break;
         }
 
         switch(e2){
             case 0:
-                bestOrder.push_back(s);
+                best_order.push_back(s);
             break;
             case 2:
-                bestOrder.push_back(size/2-1 + s);
+                best_order.push_back(n_vertex/2-1 + s);
             break;
             case 1:
-                bestOrder.push_back(size-1 + s);
+                best_order.push_back(n_vertex-1 + s);
             break;
         }
         //cout << "|" << O.at(ofs + k).first << " - " << O.at(ofs + k).second << "|";
@@ -224,7 +224,7 @@ void SideEx::init(string file){
     T.clear();
     O.clear();
     Z.clear();
-    bestOrder.clear();
+    best_order.clear();
     int kmax;
 
     ifstream ifile(file);
@@ -234,27 +234,27 @@ void SideEx::init(string file){
         istringstream flux(&line[2]);
         switch(line[0]){
             case 'p':
-                size = atoi(&line[2]);
+                n_vertex = atoi(&line[2]);
                 if(refdelta <= 0){ //on pourrait mettre une inégalité stricte, celà impliquerait qu'on s'interdit de garder l'arête centrale, mais nécessiterait de modifier la boucle principal
-                    delta = size/2; //pk tu casses
+                    delta = n_vertex/2; //pk tu casses
                 }else{
-                    delta = min(refdelta, size/2);
+                    delta = min(refdelta, n_vertex/2);
                 }
                 kmax = 2*delta+1;
-                G.resize(size*(size+1), 1);
-                A.resize(size, 1);
-                P.resize(size, -1);
-                C.resize(min(2*(size/2)-1, kmax), 0); //tableau des coûts
-                T.resize(min(2*(size/2)-1, kmax), 1); //tableau des arêtes centrales
-                O.resize(size*size/4, {-1, -1});
-                Z.resize(size/2, -1);
+                G.resize(n_vertex*(n_vertex+1), 1);
+                A.resize(n_vertex, 1);
+                P.resize(n_vertex, -1);
+                C.resize(min(2*(n_vertex/2)-1, kmax), 0); //tableau des coûts
+                T.resize(min(2*(n_vertex/2)-1, kmax), 1); //tableau des arêtes centrales
+                O.resize(n_vertex*n_vertex/4, {-1, -1});
+                Z.resize(n_vertex/2, -1);
             break;
             case 'e':
                 flux >> i >> j >> w;
-                G[size*i + j] = w;
-                G[size*j + i] = w;
-                G[size*size + i] *= w;
-                G[size*size + j] *= w;
+                G[n_vertex*i + j] = w;
+                G[n_vertex*j + i] = w;
+                G[n_vertex*n_vertex + i] *= w;
+                G[n_vertex*n_vertex + j] *= w;
                 A[i] *= w;
                 A[j] *= w;
             break;
@@ -266,7 +266,7 @@ void SideEx::init(string file){
 
 Cost SideEx::call_solve(){
     Cost c = solve();
-    get_order(size/2-2, Z[size/2-1]);
-    bestOrder.push_back(size-2);
+    get_order(n_vertex/2-2, Z[n_vertex/2-1]);
+    best_order.push_back(n_vertex-2);
     return c;
 }

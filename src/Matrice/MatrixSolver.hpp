@@ -1,12 +1,14 @@
 #ifndef MATRIXSOLVER_HPP
 #define MATRIXSOLVER_HPP
-#include "../Components.hpp"
+#include "../Components/Components.hpp"
+#include "../Components/Algorithm.hpp"
 
 /**
- * @brief algorithme glouton calculant le meilleur coût en testant toutes les paires possibles d'une matrice d'adjacence
+ * @brief algorithme calculant le meilleur coût en testant toutes les paires possibles d'une matrice d'adjacence
  * Complexité (N!)^2
  */
 
+//TODO: Remove this type, define it as a 1D vector, and rework the algorithm
 typedef vector<vector<int>> Network; 
 
 Network contract(int i, int j, Network N);

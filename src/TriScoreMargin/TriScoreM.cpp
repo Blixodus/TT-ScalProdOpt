@@ -70,14 +70,14 @@ void TriScoreM::follow_order(Tab S){
     bool still_up = true;
     for(int i : S){
         cost += contract(i, sg);
-        if(cost >= bestCost /*&& bestCost != -1*/){
+        if(cost >= best_cost /*&& best_cost != -1*/){
             still_up = false;
             break;
         }
     }
-    if(still_up && cost < bestCost){
-        bestCost = cost;
-        bestOrder = S;
+    if(still_up && cost < best_cost){
+        best_cost = cost;
+        best_order = S;
     }
 }
 
@@ -93,21 +93,21 @@ Cost TriScoreM::contract(int i, SousG &sg){
     int b = sg.C(E[i].second);
 
     if(a != b){
-        int res = sg.G[size*a + b];
-        for(int j = 0; j < size; j++){
+        int res = sg.adjacence_matrix[n_vertex*a + b];
+        for(int j = 0; j < n_vertex; j++){
             if(a != j){
-                res *= max(1, sg.G[size*b + j]);
+                res *= max(1, sg.adjacence_matrix[n_vertex*b + j]);
             }
             if(b != j){ 
-                res *= max(1, sg.G[size*a + j]);
+                res *= max(1, sg.adjacence_matrix[n_vertex*a + j]);
             }
         }
 
-        for(int j = 0; j < size; j++){
-            sg.G[size*a + j] *= sg.G[size*b + j];
-            sg.G[size*b + j] = 0;
-            sg.G[size*j + b] = 0;
-            sg.G[size*j + a] = sg.G[size*a + j];
+        for(int j = 0; j < n_vertex; j++){
+            sg.adjacence_matrix[n_vertex*a + j] *= sg.adjacence_matrix[n_vertex*b + j];
+            sg.adjacence_matrix[n_vertex*b + j] = 0;
+            sg.adjacence_matrix[n_vertex*j + b] = 0;
+            sg.adjacence_matrix[n_vertex*j + a] = sg.adjacence_matrix[n_vertex*a + j];
         }
         sg.V[b] = a;
         return res;
@@ -163,16 +163,16 @@ bool TriScoreM::place_to_default(Tab& R){
 Tab TriScoreM::generate_order(Tab R){
     Tab res;
     for(int i : R){
-        res.push_back(triscore.bestOrder[i]);
+        res.push_back(triscore.best_order[i]);
     }
     return res;
 }
 
 void TriScoreM::display_order(){
-    for(int i = 0; i < bestOrder.size()-1; i++){
-        cout << bestOrder[i] << " - ";
+    for(int i = 0; i < best_order.size()-1; i++){
+        cout << best_order[i] << " - ";
     }
-    cout << bestOrder.back() << '\n';
+    cout << best_order.back() << '\n';
 }
 
 void TriScoreM::init(string file){
@@ -181,8 +181,8 @@ void TriScoreM::init(string file){
     E.clear();
     R.clear();
     VB.clear();
-    //bestCost = -1;
-    bestOrder.clear();
+    //best_cost = -1;
+    best_order.clear();
 
     ifstream ifile(file);
     string line;
@@ -191,28 +191,28 @@ void TriScoreM::init(string file){
         istringstream flux(&line[2]);
         switch(line[0]){
             case 'p':
-                size = atoi(&line[2]);
-                G.resize(size*size, 1);
-                delta = min(max(refdelta, 0), 3*size/2 - 2);
-                R.resize(3*size/2 - 2, -1);
-                VB.resize(3*size/2 - 2, false);
+                n_vertex = atoi(&line[2]);
+                G.resize(n_vertex*n_vertex, 1);
+                delta = min(max(refdelta, 0), 3*n_vertex/2 - 2);
+                R.resize(3*n_vertex/2 - 2, -1);
+                VB.resize(3*n_vertex/2 - 2, false);
             break;
             case 'e':
                 flux >> i >> j >> w;
                 E.push_back(make_pair(i, j));
-                G[size*i + j] = w;
-                G[size*j + i] = w;
+                G[n_vertex*i + j] = w;
+                G[n_vertex*j + i] = w;
             break;
             default:
             break;
         }
     }
 
-    bestCost = triscore.solve();
-    bestOrder = triscore.bestOrder;
+    best_cost = triscore.solve();
+    best_order = triscore.best_order;
 
-    for(int i = 0; i < size; i ++){
-        G[size*i + i] = 0;
+    for(int i = 0; i < n_vertex; i ++){
+        G[n_vertex*i + i] = 0;
     }
 
     sort_edges(E);
@@ -223,5 +223,5 @@ Cost TriScoreM::call_solve(){
     /*for(int i : generate_order({1, 0, 6, 3, 4, 5, 2})){
         cout << i << '\n';
     }*/
-    return bestCost;
+    return best_cost;
 }

@@ -1,6 +1,7 @@
 #ifndef TRISCOREN_HPP
 #define TRISCOREN_HPP
-#include "../Components.hpp"
+#include "../Components/Components.hpp"
+#include "../Components/Algorithm.hpp"
 
 /**
  * @brief Version alternative naïve de TriScore

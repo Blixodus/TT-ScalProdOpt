@@ -8,7 +8,7 @@ Cost SimpleG::solve(SouG& sg){
 
     //cas où il reste plusieurs arêtes, et le coût de l'ensemble n'a pas encore été calculé
     if(sg.S.size() > 1 && C.find(key) == C.end()){
-        C[key] = bestCost+1;
+        C[key] = best_cost+1;
 
         for(int i = 0; i < sgref.S.size(); i++){
             //on copie la copie, et on laisse l'arête en cours de côté
@@ -58,24 +58,24 @@ Cost SimpleG::contract(int i, SouG& sg){
 
     if(a != b){
         //calcul du coût
-        int res = sg.G[size*b + a];
+        int res = sg.G[n_vertex*b + a];
 
-        for(int j = 0; j < size; j++){
+        for(int j = 0; j < n_vertex; j++){
             if(b != j){
-                res *= max(1, sg.G[size*a + j]);
+                res *= max(1, sg.G[n_vertex*a + j]);
             }
 
             if(a != j){
-                res *= max(1, sg.G[size*b + j]);
+                res *= max(1, sg.G[n_vertex*b + j]);
             }
         }
 
         //mise à jour de G
-        for(int j = 0; j < size; j++){
-            sg.G[size*a + j] *= sg.G[size*b + j];
-            sg.G[size*b + j] = 0;
-            sg.G[size*j + b] = 0;
-            sg.G[size*j + a] = sg.G[size*a + j];
+        for(int j = 0; j < n_vertex; j++){
+            sg.G[n_vertex*a + j] *= sg.G[n_vertex*b + j];
+            sg.G[n_vertex*b + j] = 0;
+            sg.G[n_vertex*j + b] = 0;
+            sg.G[n_vertex*j + a] = sg.G[n_vertex*a + j];
         }
 
         //mise à jour de V
@@ -97,11 +97,11 @@ void SimpleG::cheap_contract(int i, SouG& sg){
     int b = sg.C(E[i].second);
 
     if(a != b){
-        for(int j = 0; j < size; j++){
-            sg.G[size*a + j] *= sg.G[size*b + j];
-            sg.G[size*b + j] = 0;
-            sg.G[size*j + b] = 0;
-            sg.G[size*j + a] = sg.G[size*a + j];
+        for(int j = 0; j < n_vertex; j++){
+            sg.G[n_vertex*a + j] *= sg.G[n_vertex*b + j];
+            sg.G[n_vertex*b + j] = 0;
+            sg.G[n_vertex*j + b] = 0;
+            sg.G[n_vertex*j + a] = sg.G[n_vertex*a + j];
         }
         sg.V[b] = a;
     }
@@ -155,10 +155,10 @@ void SimpleG::display_order(unsigned long long key){
 }
 
 void SimpleG::display_order(){
-    for(int i = 0; i < bestOrder.size()-1; i++){
-        cout << bestOrder[i] << " - ";
+    for(int i = 0; i < best_order.size()-1; i++){
+        cout << best_order[i] << " - ";
     }
-    cout << bestOrder.back() << '\n';
+    cout << best_order.back() << '\n';
 
 }
 
@@ -169,10 +169,10 @@ void SimpleG::get_order(unsigned long long key){
 
     if(next+1 > 0){
         get_order(next);
-        bestOrder.push_back(i);
+        best_order.push_back(i);
     }else{
-        bestOrder.clear();
-        bestOrder.push_back(i);
+        best_order.clear();
+        best_order.push_back(i);
     }
 }
 
@@ -183,8 +183,8 @@ void SimpleG::init(string file){
     C.clear();
     S.clear();
 
-    bestCost = numeric_limits<Cost>::max() - 1;
-    bestOrder.clear();
+    best_cost = numeric_limits<Cost>::max() - 1;
+    best_order.clear();
 
     ifstream ifile(file);
     string line;
@@ -193,24 +193,24 @@ void SimpleG::init(string file){
         istringstream flux(&line[2]);
         switch(line[0]){
             case 'p':
-                size = atoi(&line[2]);
-                G.resize(size*size, 1);
-                S.resize(3*size/2 - 2);
+                n_vertex = atoi(&line[2]);
+                G.resize(n_vertex*n_vertex, 1);
+                S.resize(3*n_vertex/2 - 2);
                 //O.resize(pow(2, 3*size/2-2)-1, -1);
                 //C.resize(pow(2, 3*size/2-2)-1, -1);
             break;
             case 'e':
                 flux >> i >> j >> w;
                 E.push_back(make_pair(i, j));
-                G[size*i + j] = w;
-                G[size*j + i] = w;
+                G[n_vertex*i + j] = w;
+                G[n_vertex*j + i] = w;
             break;
             default:
             break;
         }
     }
-    for(int i = 0; i < size; i ++){
-        G[size*i + i] = 0;
+    for(int i = 0; i < n_vertex; i ++){
+        G[n_vertex*i + i] = 0;
     }
 
     sort_edges(E);

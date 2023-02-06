@@ -19,23 +19,24 @@ class Group_manager_page(ctk.CTkFrame):
 
         #frame holding the algorithm entries
         self.algorithm_frame = algorithm_entries.Algo_list_frame(master=self, width=800)
+
         #button for adding entries
         add_entry_button = ctk.CTkButton(master=self, text="+", command=lambda:algorithm_entries.Algo_entry(self.algorithm_frame))
-        add_entry_button.pack(padx = 10, pady=10)
+        add_entry_button.pack(padx = 10, pady=10, side="left")
 
         #frame holding the instance entries
         self.instance_frame = instance_list.Instance_list_frame(master=self)
         #button for adding an instance file
         explore = ctk.CTkButton(master=self, text="Explore", command=lambda:instance_list.explore_files(self.instance_frame))
-        explore.pack()
+        explore.pack(padx=10, pady=10, side="left")
 
         #TODO: add an export functionality
         #It would be great to have a "select or create" dialog
         self.export_file_name = ctk.CTkEntry(master=self, placeholder_text="File path")
-        self.export_file_name.pack()
+        self.export_file_name.pack(side="left")
 
         launch=ctk.CTkButton(master=self, text="GO!", command=self.launch_execution)
-        launch.pack()
+        launch.pack(side="bottom")
 
         self.pack(fill="both", expand=True)
 
@@ -62,7 +63,7 @@ class Group_manager_page(ctk.CTkFrame):
 
 if __name__=="__main__":
     root = ctk.CTk()
-    root.geometry("1000x500")
+    root.geometry("1000x1000")
     group_manager = Group_manager_page(master=root)
     
     root.mainloop()

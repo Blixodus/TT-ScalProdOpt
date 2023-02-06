@@ -12,7 +12,7 @@ Cost Split::solve(Tab S){
 
     //si il reste plus d'1 sommet et que le coût n'a pas encore été calculé
     if(C.find(key) == C.end() && S.size() > 1){
-        C[key] = bestCost+1;
+        C[key] = best_cost+1;
         Cost cost;
         
         Tab S1;
@@ -59,9 +59,9 @@ Cost Split::solve(Tab S){
  */
 Tab Split::computeA(Tab S){
     for(int i : S){
-        A[size*(S.size()-1)+i] = G[size*size + i];
+        A[n_vertex*(S.size()-1)+i] = G[n_vertex*n_vertex + i];
         for(int k : S){
-            A[size*(S.size()-1)+i] /= G[size*i + k];
+            A[n_vertex*(S.size()-1)+i] /= G[n_vertex*i + k];
         }   
     }
     return A;
@@ -78,7 +78,7 @@ Cost Split::cut(Tab S1, Tab S2){
     Cost res = 1;
     for(int i : S1){
         for(int j : S2){
-            res *= G[size*i + j];
+            res *= G[n_vertex*i + j];
         }
     }
     return res;
@@ -94,7 +94,7 @@ Cost Split::cut(Tab S1, Tab S2){
 Cost Split::produit_sortant(Tab S, Tab A){
     Cost res = 1;
     for(int i : S){
-        res *= A[size*(S.size()-1) + i];
+        res *= A[n_vertex*(S.size()-1) + i];
     }
     return res;
 }
@@ -121,7 +121,7 @@ unsigned long long Split::convert(Tab S){
  */
 Tab Split::recover(unsigned long long key){
     Tab res;
-    for(int i = size; i >= 0; i--){
+    for(int i = n_vertex; i >= 0; i--){
         int p = pow(2, i);
         if(key >= p){
             res.push_back(i);
@@ -157,7 +157,7 @@ void Split::init(string file){
     C.clear();
     //P1.clear();
     //P2.clear();
-    bestCost = numeric_limits<Cost>::max() - 1;
+    best_cost = numeric_limits<Cost>::max() - 1;
 
     ifstream ifile(file);
     string line;
@@ -166,28 +166,28 @@ void Split::init(string file){
         istringstream flux(&line[2]);
         switch(line[0]){
             case 'p':
-                size = atoi(&line[2]);
+                n_vertex = atoi(&line[2]);
                 
-                S.resize(size);
-                G.resize(size*(size+1), 1);
-                A.resize(size*size, 1);
+                S.resize(n_vertex);
+                G.resize(n_vertex*(n_vertex+1), 1);
+                A.resize(n_vertex*n_vertex, 1);
                 //C.resize(pow(2, size), -1);
                 //P1.resize(pow(2, size), -1);
                 //P2.resize(pow(2,size), -1);
             break;
             case 'e':
                 flux >> i >> j >> w;
-                G[size*i + j] = w;
-                G[size*j + i] = w;
-                G[size*size + i] *= w;
-                G[size*size + j] *= w;
+                G[n_vertex*i + j] = w;
+                G[n_vertex*j + i] = w;
+                G[n_vertex*n_vertex + i] *= w;
+                G[n_vertex*n_vertex + j] *= w;
             break;
             default:
             break;
         }
     }
 
-    for(int k = 0; k < size; k ++){
+    for(int k = 0; k < n_vertex; k ++){
         S[k] = k;
     }
 }

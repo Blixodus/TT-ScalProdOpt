@@ -1,6 +1,7 @@
 #ifndef SPLITSOLVER_HPP
 #define SPLITSOLVER_HPP
-#include "../Components.hpp"
+#include "../Components/Components.hpp"
+#include "../Components/Algorithm.hpp"
 
 /**
  * @brief Algorithme calculant le meilleur coût en considérant toutes les séparations possible du TT

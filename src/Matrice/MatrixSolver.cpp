@@ -19,8 +19,8 @@ void MatrixSolver::solve(int n, Cost cost, vector<pair<int, int>> v, Network N){
             solve(n-1, cost + contractionCost(i, j, N), v2, contract(i, j, N));
         }
     }
-    if(n <= 1 && cost <= bestCost && cost > 0){
-        bestCost = cost;
+    if(n <= 1 && cost <= best_cost && cost > 0){
+        best_cost = cost;
         //bestOrder = v;
     }
 }
@@ -69,9 +69,9 @@ Cost contractionCost(int i, int j, Network N){
  * @param path a path to a textfile
  */
 void MatrixSolver::init(string file){
-    bestOrder.clear();
+    best_order.clear();
 
-    bestCost = numeric_limits<Cost>::max() - 1;
+    best_cost = numeric_limits<Cost>::max() - 1;
     for(int i = 0; i < network.size(); i ++){
         network[i].clear();
     }
@@ -83,11 +83,11 @@ void MatrixSolver::init(string file){
         istringstream flux(&line[2]);
         switch(line[0]){
             case 'p':
-                size = atoi(&line[2]);
+                n_vertex = atoi(&line[2]);
                 //bestOrder.resize(size);
-                network.resize(size);
-                for(int k = 0; k < size; k ++){
-                    network[k].resize(size, 1);
+                network.resize(n_vertex);
+                for(int k = 0; k < n_vertex; k ++){
+                    network[k].resize(n_vertex, 1);
                     network[k][k] = 0;
                 }
             break;
@@ -113,6 +113,6 @@ void MatrixSolver::display_order(){
 }
 
 Cost MatrixSolver::call_solve(){
-    solve(size, 0, {}, network);
-    return bestCost;
+    solve(n_vertex, 0, {}, network);
+    return best_cost;
 }

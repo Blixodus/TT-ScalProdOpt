@@ -1,6 +1,7 @@
 #ifndef SIDEEXSOLVER_HPP
 #define SIDEEXSOLVER_HPP
-#include "../Components.hpp"
+#include "../Components/Components.hpp"
+#include "../Components/Algorithm.hpp"
 
 /**
  * @brief Version optimisée de SideIter, n'autorisant pas l'accumulation de plus de DELTA arêtes centrales

@@ -9,7 +9,7 @@ Cost ESplit::solve(int i1, int i2, int j1, int j2, CostTab A){
         //affiche(i1, i2, j1, j2);
         //affiche_A(A);
         //valeur par défaut, facilite les comparaisons
-        M[key] = bestCost+1;
+        M[key] = best_cost+1;
         //coupes diagonales
         solve_diag(i1, i2, j1, j2, key, A, S_cost);
         //coupes verticales
@@ -100,7 +100,7 @@ Cost ESplit::solve_diag(int i1, int i2, int j1, int j2, unsigned long long key, 
             //arête finale en haut
             int x = ofs;
             //arête finale en bas
-            int z = size-1 + ofs;
+            int z = n_vertex-1 + ofs;
             //mise à jour du coût de séparation
             y_cost *= W.at(last_y);
             //mise à jour de A_copy
@@ -225,7 +225,7 @@ Cost ESplit::solve_vertical(int i1, int i2, int j1, int j2, unsigned long long k
 
             //cas on ne dépasse pas de la ligne j1 j2
             if(i >= j1 && i < j2){
-                z = size-1+i;
+                z = n_vertex-1+i;
                 cut *= W.at(z);
                 A.at(E.at(z).first) *= W.at(z);
                 A.at(E.at(z).second) *= W.at(z);
@@ -342,10 +342,10 @@ void ESplit::init(string file){
     M.clear();
     W.clear();
     E.clear();
-    bestOrder.clear();
+    best_order.clear();
     //get_approx_solution(bestCost, bestOrder, file);
-    bestCost = numeric_limits<short>::max() - 1; //je sais pas pourquoi passer autre chose qu'un short pose des soucis
-    M[0xFFFFFFFFFFFFFFFF] = bestCost;
+    best_cost = numeric_limits<short>::max() - 1; //je sais pas pourquoi passer autre chose qu'un short pose des soucis
+    M[0xFFFFFFFFFFFFFFFF] = best_cost;
 
     ifstream ifile(file);
     string line;
@@ -354,20 +354,20 @@ void ESplit::init(string file){
         istringstream flux(&line[2]);
         switch(line[0]){
             case 'p':
-                size = atoi(&line[2]);
-                D = size/2;
+                n_vertex = atoi(&line[2]);
+                D = n_vertex/2;
                 if(refdelta <= 0){
                     delta = D;
                 }else{
                     delta = min(refdelta, D);
                 }
-                A.resize(size+1, 1);
-                G.resize(size*size, 1);
+                A.resize(n_vertex+1, 1);
+                G.resize(n_vertex*n_vertex, 1);
             break;
             case 'e':
                 flux >> i >> j >> w;
                 E.push_back(make_pair(i,j));
-                G[size*i + j] = w;
+                G[n_vertex*i + j] = w;
                 //G[size*j + i] = w;
             break;
             default:
@@ -376,10 +376,10 @@ void ESplit::init(string file){
     }
     sort_edges(E);
     for(auto& p : E){
-        W.push_back(G[size*p.first + p.second]);
+        W.push_back(G[n_vertex*p.first + p.second]);
     }
     //petite manip pour éviter des segfault
-    E.push_back(make_pair(size, size));
+    E.push_back(make_pair(n_vertex, n_vertex));
     W.push_back(1);
 }
 
@@ -389,5 +389,5 @@ void ESplit::init(string file){
  * @return Cost 
  */
 Cost ESplit::call_solve(){
-    return solve(0, D-1, 0, D-1, CostTab (size+1, 1));
+    return solve(0, D-1, 0, D-1, CostTab (n_vertex+1, 1));
 }

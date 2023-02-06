@@ -1,12 +1,12 @@
 #include "TriScoreN.hpp"
 
 Cost NTS::solve(){
-    bestCost = 0;
+    best_cost = 0;
     //l'ordre R a été défini à l'initialisation
     for(auto& p : R){
-        bestCost += contract(p.first);
+        best_cost += contract(p.first);
     }
-    return bestCost;
+    return best_cost;
 }
 
 /**
@@ -20,21 +20,21 @@ Cost NTS::contract(int i){
     int b = C(E[i].second);
 
     if(a != b){
-        int res = G[size*a + b];
-        for(int j = 0; j < size; j++){
+        int res = G[n_vertex*a + b];
+        for(int j = 0; j < n_vertex; j++){
             if(a != j){
-                res *= max(1, G[size*b + j]);
+                res *= max(1, G[n_vertex*b + j]);
             }
             if(b != j){ 
-                res *= max(1, G[size*a + j]);
+                res *= max(1, G[n_vertex*a + j]);
             }
         }
 
-        for(int j = 0; j < size; j++){
-            G[size*a + j] *= G[size*b + j];
-            G[size*b + j] = 0;
-            G[size*j + b] = 0;
-            G[size*j + a] = G[size*a + j];
+        for(int j = 0; j < n_vertex; j++){
+            G[n_vertex*a + j] *= G[n_vertex*b + j];
+            G[n_vertex*b + j] = 0;
+            G[n_vertex*j + b] = 0;
+            G[n_vertex*j + a] = G[n_vertex*a + j];
         }
         V[b] = a;
         return res;
@@ -67,23 +67,23 @@ double NTS::ratio(int i){
     int a = E[i].first;
     int b = E[i].second;
     int res = 1;
-    for(int j = 0; j < size; j++){
+    for(int j = 0; j < n_vertex; j++){
         if(a != j){
-            res *= max(1, G[size*b + j]);
+            res *= max(1, G[n_vertex*b + j]);
         }
         if(b != j){ 
-            res *= max(1, G[size*a + j]);
+            res *= max(1, G[n_vertex*a + j]);
         }
     }
 
-    return G[size*a + b]/(double) res;
+    return G[n_vertex*a + b]/(double) res;
 }
 
 void NTS::display_order(){
-    for(int i = 0; i < bestOrder.size()-1; i++){
-        cout << bestOrder[i] << " - ";
+    for(int i = 0; i < best_order.size()-1; i++){
+        cout << best_order[i] << " - ";
     }
-    cout << bestOrder.back() << '\n';
+    cout << best_order.back() << '\n';
 }
 
 void NTS::init(string file){
@@ -91,7 +91,7 @@ void NTS::init(string file){
     E.clear();
     R.clear();
     V.clear();
-    bestOrder.clear();
+    best_order.clear();
 
     ifstream ifile(file);
     string line;
@@ -100,15 +100,15 @@ void NTS::init(string file){
         istringstream flux(&line[2]);
         switch(line[0]){
             case 'p':
-                size = atoi(&line[2]);
-                G.resize(size*size, 1);
-                V.resize(size, -1);
+                n_vertex = atoi(&line[2]);
+                G.resize(n_vertex*n_vertex, 1);
+                V.resize(n_vertex, -1);
             break;
             case 'e':
                 flux >> i >> j >> w;
                 E.push_back(make_pair(i, j));
-                G[size*i + j] = w;
-                G[size*j + i] = w;
+                G[n_vertex*i + j] = w;
+                G[n_vertex*j + i] = w;
             break;
             default:
             break;
@@ -116,8 +116,8 @@ void NTS::init(string file){
     }
     sort_edges(E);
 
-    for(int i = 0; i < size; i++){
-        G[size*i + i] = 0;
+    for(int i = 0; i < n_vertex; i++){
+        G[n_vertex*i + i] = 0;
     }
 
     for(int i = 0; i < E.size(); i++){
@@ -127,7 +127,7 @@ void NTS::init(string file){
     sort(R.begin(), R.end(), [](pair<int, double> a, pair<int, double> b){return a.second > b.second;});
 
     for(auto& p : R){
-        bestOrder.push_back(p.first);
+        best_order.push_back(p.first);
     }
 }
 

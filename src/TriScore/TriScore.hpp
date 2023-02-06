@@ -1,6 +1,7 @@
 #ifndef TRISCORE_HPP
 #define TRISCORE_HPP
-#include "../Components.hpp"
+#include "../Components/Components.hpp"
+#include "../Components/Algorithm.hpp"
 
 /**
  * @brief Algorithme naïf contractant l'arête maximisant le ratio (poids^2 / coût de contraction) à chaque étape

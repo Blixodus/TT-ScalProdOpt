@@ -6,16 +6,16 @@
  * @return int 
  */
 Cost TriScore::solve(){
-    bestCost = 0;
+    best_cost = 0;
     //tant qu'il reste des arêtes
     while(!R.empty()){
-        bestOrder.push_back(R.front().first);
+        best_order.push_back(R.front().first);
         //les vraies extrémités de l'arête
         int i = C(E[R.front().first].first);
         int k = C(E[R.front().first].second);
         if(i != k){
             //ajoute le coût de contraction de R.front à cost
-            bestCost += ext_cost(i, k)*G[size*i + k];
+            best_cost += ext_cost(i, k)*G[n_vertex*i + k];
             contract(i, k);
         }
         //suppression de l'arête
@@ -24,7 +24,7 @@ Cost TriScore::solve(){
         //update du tableau des ratio
         updateRatio();
     }
-    return bestCost;
+    return best_cost;
 }
 
 /**
@@ -35,7 +35,7 @@ void TriScore::updateRatio(){
     for(auto& p : R){
         int i = C(E[p.first].first);
         int k = C(E[p.first].second);
-        p.second = G[size*i + k]/(float) ext_cost(i, k);
+        p.second = G[n_vertex*i + k]/(float) ext_cost(i, k);
     }
     sort(R.begin(), R.end(), [](pair<int, double> a, pair<int, double> b){return a.second > b.second;});
 }
@@ -49,12 +49,12 @@ void TriScore::updateRatio(){
  */
 Cost TriScore::ext_cost(int i, int k){
     int res = 1;
-    for(int j = 0; j < size; j++){
+    for(int j = 0; j < n_vertex; j++){
         if(k != j){
-            res *= max(1, G[size*i + j]);
+            res *= max(1, G[n_vertex*i + j]);
         }
         if(i != j){ 
-            res *= max(1, G[size*k + j]);
+            res *= max(1, G[n_vertex*k + j]);
         }
     }
 
@@ -68,11 +68,11 @@ Cost TriScore::ext_cost(int i, int k){
  * @param k
  */
 void TriScore::contract(int i, int k){
-    for(int j = 0; j < size; j++){
-        G[size*i + j] *= G[size*k + j];
-        G[size*k + j] = 0;
-        G[size*j + k] = 0;
-        G[size*j + i] = G[size*i + j];
+    for(int j = 0; j < n_vertex; j++){
+        G[n_vertex*i + j] *= G[n_vertex*k + j];
+        G[n_vertex*k + j] = 0;
+        G[n_vertex*j + k] = 0;
+        G[n_vertex*j + i] = G[n_vertex*i + j];
     }
     V[k] = i;
 }
@@ -96,10 +96,10 @@ int TriScore::C(int i){
  * 
  */
 void TriScore::display_order(){
-    for(int i = 0; i < bestOrder.size()-1; i++){
-        cout << bestOrder[i] << " - ";
+    for(int i = 0; i < best_order.size()-1; i++){
+        cout << best_order[i] << " - ";
     }
-    cout << bestOrder.back() << '\n';
+    cout << best_order.back() << '\n';
 }
 
 void TriScore::init(string file){
@@ -107,7 +107,7 @@ void TriScore::init(string file){
     R.clear();
     V.clear();
     E.clear();
-    bestOrder.clear();
+    best_order.clear();
 
     ifstream ifile(file);
     string line;
@@ -116,23 +116,23 @@ void TriScore::init(string file){
         istringstream flux(&line[2]);
         switch(line[0]){
             case 'p':
-                size = atoi(&line[2]);
-                G.resize(size*size, 1);
-                V.resize(size, -1);
+                n_vertex = atoi(&line[2]);
+                G.resize(n_vertex*n_vertex, 1);
+                V.resize(n_vertex, -1);
             break;
             case 'e':
                 flux >> i >> j >> w;
                 E.push_back(make_pair(i, j));
-                G[size*i + j] = w;
-                G[size*j + i] = w;
+                G[n_vertex*i + j] = w;
+                G[n_vertex*j + i] = w;
             break;
             default:
             break;
         }
     }
 
-    for(int i = 0; i < size; i ++){
-        G[size*i + i] = 0;
+    for(int i = 0; i < n_vertex; i ++){
+        G[n_vertex*i + i] = 0;
     }
 
     sort_edges(E);
@@ -140,7 +140,7 @@ void TriScore::init(string file){
     for(int i = 0; i < E.size(); i++){
         int j = E[i].first;
         int k = E[i].second;
-        R.push_back(make_pair(i, G[size*j  + k]/ (float) ext_cost(j, k)));
+        R.push_back(make_pair(i, G[n_vertex*j  + k]/ (float) ext_cost(j, k)));
     }
 
     sort(R.begin(), R.end(), [](pair<int, double> a, pair<int, double> b){return a.second > b.second;});
@@ -154,6 +154,6 @@ void get_approx_solution(int& cost, Tab& O, string file){
     TriScore solver;
     solver.init(file.c_str());
     solver.solve();
-    cost = solver.bestCost;
-    O = solver.bestOrder;
+    cost = solver.best_cost;
+    O = solver.best_order;
 }

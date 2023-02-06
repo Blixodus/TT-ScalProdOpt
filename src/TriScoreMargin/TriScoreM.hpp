@@ -1,6 +1,7 @@
 #ifndef TRISCOREMARGIN_HPP
 #define TRISCOREMARGIN_HPP
-#include "../Components.hpp"
+#include "../Components/Components.hpp"
+#include "../Components/Algorithm.hpp"
 #include "../TriScore/TriScore.hpp"
 
 /**
@@ -11,11 +12,11 @@
 class SousG{
     public:
     Tab S;
-    Tab G;
+    Tab adjacence_matrix;
     Tab V;
 
     int C(int i);
-    void set(Tab G, Tab V){this->G = G; this->V = V;};
+    void set(Tab G, Tab V){this->adjacence_matrix = G; this->V = V;};
 };
 
 class TriScoreM : public Algorithm{
@@ -28,7 +29,7 @@ class TriScoreM : public Algorithm{
     Tab R; //liste d'indice des arêtes de E : R[0] = 2 signifie que la première arête considérée sera l'arête E[2]
     vector<bool> VB;
 
-    SousG getSG(){SousG sg; sg.set(G, vector<int> (size, -1)); return sg;}
+    SousG getSG(){SousG sg; sg.set(G, vector<int> (n_vertex, -1)); return sg;}
     void solve(int cr, int s);
     void follow_order(Tab S);
     Cost contract(int i, SousG& sg);

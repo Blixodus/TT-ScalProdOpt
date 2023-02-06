@@ -1,6 +1,8 @@
 #ifndef SIMPLEG_HPP
 #define SIMPLEG_HPP
-#include "../Components.hpp"
+#include "../Components/Components.hpp"
+#include "../Components/Algorithm.hpp"
+
 /**
  * @brief Algorithme glouton calculant le meilleurs coût en ne considérant que les liens effectifs entre les sommets
  * Complexité : 2^3D
@@ -28,7 +30,7 @@ class SimpleG : public Algorithm{
     unordered_map<unsigned long long, int> O;
     unordered_map<unsigned long long, Cost> C;
 
-    SouG getSG(){SouG sg; sg.set(S, G, vector<int> (size, -1)); return sg;}
+    SouG getSG(){SouG sg; sg.set(S, G, vector<int> (n_vertex, -1)); return sg;}
     Cost contract(int i, SouG& sg);
     void cheap_contract(int i, SouG& sg);
 

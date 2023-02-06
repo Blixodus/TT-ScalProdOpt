@@ -1,6 +1,7 @@
 #ifndef TEST_HPP
 #define TEST_HPP
-#include "../../src/Components.hpp"
+#include "../../src/Components/Components.hpp"
+#include "../../src/Components/Algorithm.hpp"
 #include <fstream>
 #include <sstream>
 //prend un fichier texte situé dans le répertoire 'calc' en entrée

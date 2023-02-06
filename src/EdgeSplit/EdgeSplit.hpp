@@ -1,6 +1,6 @@
 #ifndef EdgeSplit_HPP
 #define EdgeSplit_HPP
-#include "../Components.hpp"
+#include "../Components/Components.hpp"
 #include "../TriScore/TriScore.hpp"
 
 class ESplit : public Algorithm{

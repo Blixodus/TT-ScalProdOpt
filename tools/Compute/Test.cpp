@@ -2,6 +2,11 @@
 
 //Code de contraction d'un ordre sur une instance
 
+/**
+ * @brief Import the file containing the tests
+ * 
+ * @param test_file 
+ */
 void import_test(string test_file){
     path_test = "../calc/" + test_file;
     ifstream ifile(path_test);
@@ -31,6 +36,11 @@ void import_test(string test_file){
     }
 }
 
+/**
+ * @brief Import a network
+ * 
+ * @param file , file containing a network
+ */
 void import_instance(string file){
     G.clear();
     E.clear();
@@ -76,19 +86,19 @@ void import_instance(string file){
         }
         if(line[0] == 'p'){
             //istringstream taille(&line [2]);
-            l >> size;
+            l >> ::size;
 
-            G.resize(size*size, 1);
-            for(int i = 0; i < size; i++){
-                G[size*i + i] = 0;
+            G.resize(::size*::size, 1);
+            for(int i = 0; i < ::size; i++){
+                G[::size*i + i] = 0;
             }
         }
         if(line[0] == 'e'){
             //istringstream edge(&line[2]);
             l >> i >> j >> w;
 
-            G[size*i + j] = w;
-            G[size*j + i] = w;
+            G[::size*i + j] = w;
+            G[::size*j + i] = w;
             E.push_back(make_pair(i, j));
         }
     }
@@ -96,15 +106,21 @@ void import_instance(string file){
 }
 
 void Graph::init(){
-    V.resize(size, -1);
+    V.resize(::size, -1);
     G = ::G;
 }
 
+/**
+ * @brief Computes a given order
+ * 
+ * @param O 
+ * @return Cost 
+ */
 Cost follow_order(Tab O){
     Graph graph;
     graph.init();
     Cost cost = 0;
-    if(E.size() > 3*size/2 - 2){
+    if(E.size() > 3*::size/2 - 2){
         cout << "[WARNING] Too many edges given, skipping order" << '\n';
     }else{
         for(int i : O){
@@ -114,6 +130,14 @@ Cost follow_order(Tab O){
     return cost;
 }
 
+/**
+ * @brief Iterates over the nodes to find the relevant one
+ * When the edges contracts, the nodes merge, we store a link to the relevant node in a vector
+ * Any non-relevant nodes will then direct to a relevant one
+ * 
+ * @param i 
+ * @return int 
+ */
 int Graph::C(int i){
     while(V[i] != -1){
         i = V[i];
@@ -121,26 +145,32 @@ int Graph::C(int i){
     return i;
 }
 
+/**
+ * @brief Contracts an edge and return the contraction cost
+ * 
+ * @param i 
+ * @return Cost 
+ */
 Cost Graph::contract(int i){
     int a = C(E[i].first);
     int b = C(E[i].second);
 
     if(a != b){
-        int res = G[size*a + b];
-        for(int j = 0; j < size; j++){
+        int res = G[::size*a + b];
+        for(int j = 0; j < ::size; j++){
             if(a != j){
-                res *= max(1, G[size*b + j]);
+                res *= max(1, G[::size*b + j]);
             }
             if(b != j){ 
-                res *= max(1, G[size*a + j]);
+                res *= max(1, G[::size*a + j]);
             }
         }
 
-        for(int j = 0; j < size; j++){
-            G[size*a + j] *= G[size*b + j];
-            G[size*b + j] = 0;
-            G[size*j + b] = 0;
-            G[size*j + a] = G[size*a + j];
+        for(int j = 0; j < ::size; j++){
+            G[::size*a + j] *= G[::size*b + j];
+            G[::size*b + j] = 0;
+            G[::size*j + b] = 0;
+            G[::size*j + a] = G[::size*a + j];
         }
         V[b] = a;
         return res;
