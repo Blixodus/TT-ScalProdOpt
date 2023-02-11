@@ -1,14 +1,7 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 #include "Matrice/MatrixSolver.hpp"
-#include "VerticalSplit/VerticalSplitSolver.hpp"
-#include "SideEx/SideExSolver.hpp"
-#include "Split/SplitSolver.hpp"
-#include "EdgeSplit/EdgeSplit.hpp"
-#include "TriScore/TriScore.hpp"
-#include "TriScoreMargin/TriScoreM.hpp"
 #include "TriScoreNaive/TriScoreN.hpp"
-#include "SimpleGreedy/SimpleG.hpp"
 #include <signal.h>
 #include <chrono>
 #include <thread>

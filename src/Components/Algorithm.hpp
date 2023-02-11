@@ -1,6 +1,12 @@
 #ifndef ALGORITHM_HPP
 #define ALGORITHM_HPP
-#include "Components.hpp"
+// #include "Components.hpp"
+#include "Network.hpp"
+#include "../../tools/Compute/Compute.hpp"
+#include <sstream>
+#include <iterator>
+#include <map>
+#include <any>
 
 /**
  * @brief general algorithm class
@@ -9,9 +15,11 @@
 class Algorithm{
     public:
     // Minimum size of network the algorithm can handle, before delegating to sub_alg
+    int refdmin=0;
     int dmin=0;
     //Max size of sub-networks to be created by the main algorithm
-    int dmax=numeric_limits<Dim>::max()-1;
+    int refdmax=numeric_limits<dim_t>::max()-1;
+    int dmax=numeric_limits<dim_t>::max()-1;
     //(Only useful for some algorithms)
 
     //Size of the network in number of dimensions
@@ -22,7 +30,7 @@ class Algorithm{
     int n_vertex;
 
     //The current best cost
-    Cost best_cost=numeric_limits<Cost>::max()-1;
+    cost_t best_cost=numeric_limits<cost_t>::max()-1;
 
     //The current best order
     Tab best_order;
@@ -33,13 +41,98 @@ class Algorithm{
     //Maximum alloted time before timeout
     std::chrono::minutes timeout_time;
 
+    //Whether or not we should test the solution
+    bool to_test = true;
+
     //We can deactivate the algorithm in the execution queue once it times out
     bool still_up = true;
 
+    //TODO: make sure we cant modify the network
+    /*const*/ Network* m_network;
+
     virtual void init(string file) {};
-    virtual Cost call_solve() {return 0;};
+    virtual void init(Network& network){};
+    //TODO: this should take a bunch of parameters (dmin, dmax, time etc...)
+    Algorithm(){};
+    virtual cost_t call_solve() {return 0;};
     virtual void display_order() {};
+
+    std::string best_order_as_string() const;
+
+    const int verify();
 };
 
+/**
+ * @brief Executes an algorithm on a network
+ * 
+ * @tparam T 
+ * @param solver 
+ * @param network 
+ */
+template<class T>
+void execfile(T& solver, Network& network){
+    solver.init(network);
+    if(solver.dmax > -1){
+        std::cout << "Delta : " << solver.dmax << '\n';
+    }
+    auto start = std::chrono::high_resolution_clock::now();
+    solver.best_cost = solver.call_solve();
+    auto end = std::chrono::high_resolution_clock::now();
+    solver.time = end-start;
+    std::cout << "Best cost : " << solver.best_cost << '\n';
+    if(!solver.best_order.empty()){
+        std::cout << "Best order : ";
+        solver.display_order();
+    }
+    std::cout << std::scientific << "Temps : " << solver.time.count()  << "s" << '\n';
+    std::cout << "--------------" << std::endl;
+}
 
+/**
+ * @brief Executes an algorithm on a network given as a filename
+ * 
+ * @tparam T 
+ * @param solver 
+ * @param file 
+ */
+template<class T>
+void execfile(T& solver, std::string file){
+    std::string path = "instances/" + file;
+
+    //solver.init(path);
+    Network nw = Network(path);
+    execfile(solver, nw);
+    
+}
+
+/**
+ * @brief Executes an algorithm on a whole directory
+ * 
+ * @tparam T 
+ * @param solver 
+ * @param dir 
+ */
+template<class T>
+void execdir(T& solver, std::string dir){
+    std::string base = "instances/" + dir + "/";
+    DIR* dp = NULL;
+    struct dirent *file = NULL;
+    dp = opendir(base.c_str());
+    if(dp == NULL){
+        cerr << "Could not open directory : " << base << '\n';
+        exit(-1);
+    }
+    file = readdir(dp);
+    
+    while(file != NULL){
+        if(file->d_name[0] != '.'){
+            std::string path = base + file->d_name;
+            // display(path);
+            Network nw = Network(std::string(path));
+            execfile<T>(solver, nw);
+        }
+        file = readdir(dp);
+    }
+    closedir(dp);
+}
 #endif

@@ -9,30 +9,36 @@
  */
 struct Network{
     //dimension
-    unsigned int dimension;
+    dim_t dimension;
 
     //size in edges
-    unsigned int n_edge;
+    edgeID_t n_edge;
 
     //size in nodes
-    unsigned int n_vertex;
+    vertexID_t n_vertex;
 
     //Adjacence matrix
     Tab adjacence_matrix;
 
     //Edge list
-    std::vector<std::pair<int, int>> edge_list;
-
-    //Weight list
-    Tab weights;
+    //std::vector<edge_t> edge_list;
+    std::vector<std::pair<vertexID_t, vertexID_t>> edge_list;
 
     //density
     float density=0.;
 
     //file name the network was imported from
-    std::string filename;
+    std::string m_filename;
+
+    //string storing the display
+    std::string m_display="";
 
     Network(std::string file);
+    Network(){};
+    //Network(char* file){Network(std::string(file));};
+    Network(char* file) : Network(std::string(file)) {}
+    const void display(){std::cout << m_display << std::flush;}
+    void sort_edges();
 };
 
 #endif

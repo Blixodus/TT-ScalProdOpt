@@ -7,6 +7,14 @@
 #include <dirent.h>
 #include <sys/types.h>
 
+struct NetworkDisplay{
+    //TODO:
+
+    std::string filename;
+
+    NetworkDisplay(std::string file);
+};
+
 void display(std::string file);
 
 void display_dir(std::string file);
