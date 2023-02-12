@@ -291,8 +291,14 @@ void execdir(){
 }
 
 int main(int argc, char* argv[]){
-    
-    switch (argc){
+    Argparser parser(argc, argv);
+    auto dictionary_list = parser.grab_dictionary_list();
+
+    //TODO:
+    //instanciate the proper algortihm-object based on dictionary_list["main_alg"]
+    //We could define a map from string to Algorithm, to get the correspondance between name and Class
+
+    /*switch (argc){
     case 1:
         cout << "Missing argument : instance file" << '\n';
         cout << "Use 'h' to get infos" << '\n';
@@ -330,5 +336,5 @@ int main(int argc, char* argv[]){
         cout << "Error : check arguments list" << endl;
         break;
     }
-    return 0;
+    return 0;*/
 }

@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
                     cerr << "Missing argument : range" << '\n';
                     exit(-1);
                 }
-                solver.refdelta = atoi(argv[i+1]);
+                solver.refdmax = atoi(argv[i+1]);
                 i++;
             }else{
                 path = argv[i];
@@ -31,10 +31,10 @@ int main(int argc, char* argv[]){
         }   
     }
     if(sf){
-        display(path);
-        execfile<Shuffle>(solver, path);
+        // display(path);
+        execfile<Shuffle>(solver, std::string(path));
     }else{
-        execdir<Shuffle>(solver, path);
+        execdir<Shuffle>(solver, std::string(path));
     }
     return 0;
 }

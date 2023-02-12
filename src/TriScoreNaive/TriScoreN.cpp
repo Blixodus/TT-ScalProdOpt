@@ -1,6 +1,6 @@
 #include "TriScoreN.hpp"
 
-Cost NTS::solve(){
+cost_t NTS::solve(){
     best_cost = 0;
     //l'ordre R a été défini à l'initialisation
     for(auto& p : R){
@@ -13,9 +13,9 @@ Cost NTS::solve(){
  * @brief Computes the cost of contracting an edge i in the graph G, and updates G and V
  * 
  * @param i 
- * @return Cost 
+ * @return cost_t 
  */
-Cost NTS::contract(int i){
+cost_t NTS::contract(int i){
     int a = C(E[i].first);
     int b = C(E[i].second);
 
@@ -86,14 +86,14 @@ void NTS::display_order(){
     cout << best_order.back() << '\n';
 }
 
-void NTS::init(string file){
+void NTS::init(Network& network){
     G.clear();
     E.clear();
     R.clear();
     V.clear();
     best_order.clear();
 
-    ifstream ifile(file);
+    ifstream ifile(network.m_filename);
     string line;
     int i, j, w;
     while(getline(ifile, line)){
@@ -106,7 +106,7 @@ void NTS::init(string file){
             break;
             case 'e':
                 flux >> i >> j >> w;
-                E.push_back(make_pair(i, j));
+                // E.push_back(make_pair(i, j));
                 G[n_vertex*i + j] = w;
                 G[n_vertex*j + i] = w;
             break;
@@ -114,11 +114,12 @@ void NTS::init(string file){
             break;
         }
     }
-    sort_edges(E);
 
     for(int i = 0; i < n_vertex; i++){
         G[n_vertex*i + i] = 0;
     }
+
+    E = network.edge_list;
 
     for(int i = 0; i < E.size(); i++){
         R.push_back(make_pair(i, ratio(i)));
@@ -131,6 +132,6 @@ void NTS::init(string file){
     }
 }
 
-Cost NTS::call_solve(){
+cost_t NTS::call_solve(){
     return solve();
 }

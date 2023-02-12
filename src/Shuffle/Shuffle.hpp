@@ -19,7 +19,8 @@ class SousG{
     Tab m_corr_list;
 
     int rep(int i);
-    SousG(Tab state, Tab am, Tab corr_list) : S(state), m_adjacence_matrix(am), V(corr_list)
+    SousG(Tab am, Tab corr_list) : m_adjacence_matrix(am), m_corr_list(corr_list){}
+    SousG(Tab state, Tab am, Tab corr_list) : m_state(state), m_adjacence_matrix(am), m_corr_list(corr_list) {}
 };
 
 class Shuffle : public Algorithm{
@@ -36,10 +37,10 @@ class Shuffle : public Algorithm{
     
     vector<bool> VB;
 
-    SousG getSG(){SousG sg; sg.set(G, vector<int> (n_vertex, -1)); return sg;}
+    SousG getSG(){return SousG(m_adjacence_matrix, vector<int> (n_vertex, -1));}
     void solve(int cr, int s);
     void follow_order(Tab S);
-    Cost contract(int i, SousG& sg);
+    cost_t contract(int i, SousG& sg);
     bool is_still_in(int s);
     Tab still_in();
     bool place_to_default(Tab& R);
@@ -47,8 +48,8 @@ class Shuffle : public Algorithm{
 
     void display_order();
 
-    void init(string file);
-    Cost call_solve();
+    void init(Network& network);
+    cost_t call_solve();
 };
 
 #endif

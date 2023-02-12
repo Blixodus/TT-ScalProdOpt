@@ -15,14 +15,14 @@ class NTS : public Algorithm{
     vector<pair<int, int>> E;
     vector<pair<int, double>> R;
 
-    Cost solve();
+    cost_t solve();
     int C(int i);
-    Cost contract(int i);
+    cost_t contract(int i);
     double ratio(int i);
 
     void display_order();
 
-    void init(string file);
-    Cost call_solve();
+    void init(Network& network);
+    cost_t call_solve();
 };
 #endif

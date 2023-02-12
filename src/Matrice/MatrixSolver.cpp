@@ -6,9 +6,9 @@
  * @param n the depth (amount of remaining tensors)
  * @param cost the current cost
  * @param v the current order
- * @param N the current network
+ * @param N the current m_network
  */
-void MatrixSolver::solve(int n, Cost cost, vector<pair<int, int>> v, Network N){
+void MatrixSolver::solve(int n, cost_t cost, vector<pair<int, int>> v, network_t N){
     for(int j = 1; j < n; j++){
         for(int i = 0; i < j; i++){
             //on copie l'ordre actuel
@@ -31,9 +31,9 @@ void MatrixSolver::solve(int n, Cost cost, vector<pair<int, int>> v, Network N){
  * @param i 
  * @param j 
  * @param N
- * @return Network
+ * @return network_t
  */
-Network contract(int j, int i, Network N){
+network_t contract(int j, int i, network_t N){
     for(unsigned int k = 0; k < N.size(); k++){
         //migration des poids vers la j-ième ligne/colonne
         N[k][j] *= N[k][i]; //TODO: trouver une alternative à la matrice symétrique
@@ -55,7 +55,7 @@ Network contract(int j, int i, Network N){
  * @param N
  * @return int 
  */
-Cost contractionCost(int i, int j, Network N){
+cost_t contractionCost(int i, int j, network_t N){
     int cost = N[i][j];
     for(unsigned int k = 0; k < N.size(); k++){
         cost *= max(1, N[k][j]*N[k][i]);
@@ -64,19 +64,19 @@ Cost contractionCost(int i, int j, Network N){
 }
 
 /**
- * @brief initializes the network based on a textfile
+ * @brief initializes the network based on a network
  * 
  * @param path a path to a textfile
  */
-void MatrixSolver::init(string file){
+void MatrixSolver::init(Network& network){
     best_order.clear();
 
-    best_cost = numeric_limits<Cost>::max() - 1;
-    for(int i = 0; i < network.size(); i ++){
-        network[i].clear();
+    best_cost = numeric_limits<cost_t>::max() - 1;
+    for(int i = 0; i < m_network.size(); i ++){
+        m_network[i].clear();
     }
-    network.clear();
-    ifstream ifile(file);
+    m_network.clear();
+    ifstream ifile(network.m_filename);
     string line;
     int i, j, w;
     while(getline(ifile, line)){
@@ -85,16 +85,16 @@ void MatrixSolver::init(string file){
             case 'p':
                 n_vertex = atoi(&line[2]);
                 //bestOrder.resize(size);
-                network.resize(n_vertex);
+                m_network.resize(n_vertex);
                 for(int k = 0; k < n_vertex; k ++){
-                    network[k].resize(n_vertex, 1);
-                    network[k][k] = 0;
+                    m_network[k].resize(n_vertex, 1);
+                    m_network[k][k] = 0;
                 }
             break;
             case 'e':
                 flux >> i >> j >> w;
-                network[i][j] = w;
-                network[j][i] = w;
+                m_network[i][j] = w;
+                m_network[j][i] = w;
             break;
             default:
             break;
@@ -112,7 +112,7 @@ void MatrixSolver::display_order(){
     }*/
 }
 
-Cost MatrixSolver::call_solve(){
-    solve(n_vertex, 0, {}, network);
+cost_t MatrixSolver::call_solve(){
+    solve(n_vertex, 0, {}, m_network);
     return best_cost;
 }

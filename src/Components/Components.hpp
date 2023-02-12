@@ -11,7 +11,6 @@
 #include <fstream>
 #include <unordered_map>
 #include <limits>
-#include "../../tools/Sort/Sort.hpp"
 #include "../../tools/Display/Display.hpp"
 
 using namespace std;

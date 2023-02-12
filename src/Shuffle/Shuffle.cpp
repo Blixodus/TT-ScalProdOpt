@@ -62,11 +62,11 @@ void Shuffle::solve(int cr, int s){
  * @brief Computes a cost given an order of contraction to follow
  * 
  * @param state the list of edges to contract
- * @return Cost 
+ * @return cost_t 
  */
 void Shuffle::follow_order(Tab state){
     SousG sg = getSG();
-    Cost cost = 0;
+    cost_t cost = 0;
     bool still_up = true;
     for(int i : state){
         cost += contract(i, sg);
@@ -86,9 +86,9 @@ void Shuffle::follow_order(Tab state){
  * 
  * @param i 
  * @param sg a sub-graph
- * @return Cost 
+ * @return cost_t 
  */
-Cost Shuffle::contract(int i, SousG &sg){
+cost_t Shuffle::contract(int i, SousG &sg){
     int a = sg.rep(m_edge_list[i].first);
     int b = sg.rep(m_edge_list[i].second);
 
@@ -175,8 +175,8 @@ void Shuffle::display_order(){
     cout << best_order.back() << '\n';
 }
 
-void Shuffle::init(string file){
-    triscore.init(file);
+void Shuffle::init(Network& network){
+    triscore.init(network);
     m_adjacence_matrix.clear();
     m_edge_list.clear();
     R.clear();
@@ -184,7 +184,7 @@ void Shuffle::init(string file){
     //best_cost = -1;
     best_order.clear();
 
-    ifstream ifile(file);
+    ifstream ifile(network.m_filename);
     string line;
     int i, j, w;
     while(getline(ifile, line)){
@@ -193,7 +193,7 @@ void Shuffle::init(string file){
             case 'p':
                 n_vertex = atoi(&line[2]);
                 m_adjacence_matrix.resize(n_vertex*n_vertex, 1);
-                delta = min(max(refdelta, 0), 3*n_vertex/2 - 2);
+                dmax = min(max(refdmax, 0), 3*n_vertex/2 - 2);
                 R.resize(3*n_vertex/2 - 2, -1);
                 VB.resize(3*n_vertex/2 - 2, false);
             break;
@@ -215,11 +215,11 @@ void Shuffle::init(string file){
         m_adjacence_matrix[n_vertex*i + i] = 0;
     }
 
-    sort_edges(m_edge_list);
+    m_edge_list = network.edge_list;
 }
 
-Cost Shuffle::call_solve(){
-    solve(delta, 0);
+cost_t Shuffle::call_solve(){
+    solve(dmax, 0);
     /*for(int i : generate_order({1, 0, 6, 3, 4, 5, 2})){
         cout << i << '\n';
     }*/

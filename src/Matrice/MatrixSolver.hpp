@@ -1,6 +1,7 @@
 #ifndef MATRIXSOLVER_HPP
 #define MATRIXSOLVER_HPP
 #include "../Components/Components.hpp"
+#include "../Components/Network.hpp"
 #include "../Components/Algorithm.hpp"
 
 /**
@@ -9,21 +10,21 @@
  */
 
 //TODO: Remove this type, define it as a 1D vector, and rework the algorithm
-typedef vector<vector<int>> Network; 
+typedef vector<vector<int>> network_t; 
 
-Network contract(int i, int j, Network N);
-Cost contractionCost(int i, int j, Network N);
-void display(Network N);
+network_t contract(int i, int j, network_t N);
+cost_t contractionCost(int i, int j, network_t N);
+void display(network_t N);
 
 class MatrixSolver : public Algorithm{
     public:
-        Network network; //matrice d'adjacence
+        network_t m_network; //matrice d'adjacence
 
-        void solve(int n, Cost cost, vector<pair<int, int>> v, Network N);
+        void solve(int n, cost_t cost, vector<pair<int, int>> v, network_t N);
         void display_order();
         
-        void init(string file);
-        Cost call_solve();
+        void init(Network& network);
+        cost_t call_solve();
 };
 
 #endif

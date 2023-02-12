@@ -1,7 +1,10 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
-#include "Matrice/MatrixSolver.hpp"
-#include "TriScoreNaive/TriScoreN.hpp"
+// #include "Matrice/MatrixSolver.hpp"
+// #include "TriScoreNaive/TriScoreN.hpp"
+#include "../tools/Argparser/Argparser.hpp"
+#include "Components/Algorithm.hpp"
+#include "AllSplits/AllSplits.hpp"
 #include <signal.h>
 #include <chrono>
 #include <thread>
@@ -10,7 +13,12 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-using namespace chrono_literals;
+using namespace std::chrono_literals;
+
+//TODO: complete the list, + I will most likely need to use pointers to algorithm
+static std::map<std::string, Algorithm> name_class_map{
+    {"AllSplits", AllSplits()}//, {}, {}, {}, {}, {}, {}
+    };
 
 //csv file to send the results
 ofstream result_file("../results/results.csv");

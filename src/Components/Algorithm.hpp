@@ -39,10 +39,10 @@ class Algorithm{
     chrono::duration<double> time;
 
     //Maximum alloted time before timeout
-    std::chrono::minutes timeout_time;
+    std::chrono::minutes timeout_time = std::chrono::minutes(10);
 
     //Whether or not we should test the solution
-    bool to_test = true;
+    bool to_test = false;
 
     //We can deactivate the algorithm in the execution queue once it times out
     bool still_up = true;

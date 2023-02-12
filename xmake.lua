@@ -20,9 +20,13 @@ add_rules("mode.debug", "mode.release")
 --     set_kind("binary")
 --     add_files("src/OneSideDimByDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp")
 
-target("SplitsDimByDim")
+-- target("SplitsDimByDim")
+--     set_kind("binary")
+--     add_files("src/SplitsDimByDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/AllSplits/AllSplits.cpp")
+
+target("OptiTenseurs")
     set_kind("binary")
-    add_files("src/SplitsDimByDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/AllSplits/AllSplits.cpp")
+    add_files("src/Main.cpp", "src/**/*.cpp", "tools/Compute/Compute.cpp")
 --
 -- If you want to known more usage about xmake, please see https://xmake.io
 --
