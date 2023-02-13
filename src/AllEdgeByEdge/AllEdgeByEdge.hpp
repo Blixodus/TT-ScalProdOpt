@@ -43,6 +43,7 @@ class AllEdgeByEdge : public Algorithm{
     unordered_map<unsigned long long, cost_t> m_cost_memo;
 
     AllEdgeByEdge(){}
+    AllEdgeByEdge(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
     SouG getSG(){return SouG(m_state, m_adjacence_matrix, vector<int> (n_vertex, -1));}
     cost_t contract(int i, SouG& sg);
     void cheap_contract(int i, SouG& sg);

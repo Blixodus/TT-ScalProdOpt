@@ -33,6 +33,9 @@ class AllSplits : public Algorithm{
     //C : une map associant au code binaire de chaque état un cout
     //P : une map associant au code binaire de chaque état un ordre
 
+    AllSplits(){}
+    AllSplits(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
+
     //initialiseurs
     void init(Network& network);
     //void init(string file); //initialise G, A, et S (S est simplement la liste des sommets au départ)

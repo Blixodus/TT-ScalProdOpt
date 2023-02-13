@@ -39,6 +39,9 @@ class SplitsDBD : public Algorithm{
     //C : une map associant au code binaire de chaque état un cout
     //P : une map associant au code binaire de chaque état un ordre
 
+    SplitsDBD(){}
+    SplitsDBD(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
+
     //initialiseurs
     void init(Network& network); //initialise G, A, et state (state est simplement la liste des sommets au départ)
     cost_t solve(Tab state); //calcule le coût

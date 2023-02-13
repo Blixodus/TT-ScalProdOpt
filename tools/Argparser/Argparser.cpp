@@ -6,9 +6,8 @@ Argparser::Argparser(int argc, char** argv){
     for(int i = 1; i < argc; i++)
         arg_list.push_back(std::string(argv[i]));
 
-    parser.sort_entries();
-    parser.grab_algorithms();
-    parser.grab_instances();
+    sort_entries();
+    grab_algorithms();
 }
 
 /**
@@ -25,7 +24,7 @@ void Argparser::sort_entries(){
                     alg_entries_list.push_back(arg);
                 break;
                 case INSTANCES:
-                    file_entries_list.push_back(arg);
+                    file_entries_list.push_back(Network(arg));
                 break;
                 case OUTPUT:
                     if(!output_file.empty()){
@@ -89,19 +88,6 @@ void Argparser::grab_algorithms(){
 }
 
 /**
- * @brief grabs the instance entries and place them in a list of triplets
- * 
- */
-void Argparser::grab_instances(){
-    std::string sep(" ");
-
-    for(std::string entry : file_entries_list){
-        Splitter split(entry);
-        instance_list.push_back(split.all_token(sep));
-    }
-}
-
-/**
  * @brief returns a list of dictionary containing all the pairs [param_name, value]
  * with the values cast to the proper type. 
  * Values can be retrieved using std::any_cast<T>(map[param_name]). 
@@ -154,51 +140,4 @@ void display(std::vector<std::string> vs){
         std::cout << s << std::endl;
     }
     std::cout << "------" << std::endl;
-}
-
-int main(int argc, char** argv){
-    Argparser parser(argc, argv);
-
-    display(parser.alg_entries_list);
-    display(parser.file_entries_list);
-    display(std::vector<std::string>({parser.output_file}));
-
-    for(auto v1 : parser.alg_list){
-        for(auto pair : v1){
-            std::cout << pair.first << " " << pair.second << std::endl;
-        }
-        std::cout << "------" << std::endl;
-    }
-
-    for(auto a : parser.instance_list){
-        display(a);
-        std::cout << "----" << std::endl;
-    }
-
-    std::string a;
-    int b;
-    int c;
-    
-    a = parser.alg_list[0][0].second;
-    b = std::stoi(parser.alg_list[0][1].second);
-    c = std::stoi(parser.alg_list[0][2].second);
-
-    std::cout << a << " " << b << " " << c << std::endl;
-
-    std::map<std::string, std::any> M{{parser.alg_list[0][0].first, a}, 
-    {parser.alg_list[0][1].first, b},
-    {parser.alg_list[0][2].first, c}};
-
-    std::string d = std::any_cast<std::string>(M[parser.alg_list[0][0].first]);
-    int e = std::any_cast<int>(M[parser.alg_list[0][1].first]);
-    int f = std::any_cast<int>(M[parser.alg_list[0][2].first]);
-
-    std::cout << d << " " << e << " " << f << std::endl;
-
-    auto dic_list = parser.grab_dictionary_list();
-    std::string algo_name = std::any_cast<std::string>(dic_list[0]["main_alg"]);
-    int dmin = std::any_cast<int>(dic_list[0]["dmin"]);
-    int dmax = std::any_cast<int>(dic_list[0]["dmax"]);
-    
-    std::cout << algo_name << " " << dmin << " " << dmax << std::endl;
 }

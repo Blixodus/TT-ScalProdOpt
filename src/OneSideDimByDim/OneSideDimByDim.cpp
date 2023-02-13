@@ -231,7 +231,7 @@ void OneSideDBD::init(Network& network){
     best_order.clear();
     int kmax;
 
-    ifstream ifile(network.m_filename);
+    ifstream ifile("instances/" + network.m_filename);
     string line;
     int i, j, w;
     while(getline(ifile, line)){

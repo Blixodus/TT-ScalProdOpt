@@ -37,6 +37,9 @@ class Shuffle : public Algorithm{
     
     vector<bool> VB;
 
+    Shuffle(){}
+    Shuffle(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
+
     SousG getSG(){return SousG(m_adjacence_matrix, vector<int> (n_vertex, -1));}
     void solve(int cr, int s);
     void follow_order(Tab S);

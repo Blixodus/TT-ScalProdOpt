@@ -36,8 +36,8 @@ class GreedyEdgeSort : public Algorithm{
     //i.e. corr_list[v]==-1 or v's representant
     Tab m_corr_list;
 
-    //TODO: a constructor that takes a dictionary
-    GreedyEdgeSort(){};
+    GreedyEdgeSort(){}
+    GreedyEdgeSort(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
     
     cost_t solve();
     //met à jour la liste des score après suppression d'une arète

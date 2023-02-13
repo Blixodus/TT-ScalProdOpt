@@ -10,7 +10,7 @@
 #include "../GreedyEdgeSort/GreedyEdgeSort.hpp"
 
 //TODO: finish refactorisation, most notably of init(Network& network)
-
+//Correct segfault
 
 class ConvexSplits : public Algorithm{
     public:
@@ -25,6 +25,9 @@ class ConvexSplits : public Algorithm{
 
     //unordered_map<unsigned long long, cost_t> M; //map servant à mémoïser les coûts (TODO: renommer en C)
     unordered_map<unsigned long long, cost_t> m_cost_memo;
+
+    ConvexSplits(){}
+    ConvexSplits(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
     cost_t solve(int i1, int i2, int j1, int j2, CostTab ext_cost_tab);
     cost_t solve_vertical(int i1, int i2, int j1, int j2, unsigned long long key, CostTab ext_cost_tab, cost_t S_cost);

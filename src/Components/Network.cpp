@@ -39,13 +39,16 @@ void Network::sort_edges(){
  * @param file a file containing a network
  */
 Network::Network(std::string file){
-    m_filename=file;
+    m_filename= file;
 
-    ifstream ifile(file);
+    ifstream ifile("instances/" + file);
     if(!ifile){
-        std::cerr << "Could not open file : " << file << std::endl;
+        std::cerr << "Could not open file : " << file << " at Network initialization" << std::endl;
         exit(-1);
+    }else{
+        printf("Instantiating network : '%s'\n", file.data());
     }
+
     std::string line;
     int vertex1, vertex2, weight;
     while(getline(ifile, line)){
@@ -90,4 +93,7 @@ Network::Network(std::string file){
     }
 
     sort_edges();
+
+    printf("Dimension : %d\n", dimension);
+    printf("Density : %.1f\n\n", density);
 }

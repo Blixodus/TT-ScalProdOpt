@@ -4,7 +4,15 @@
 // #include "TriScoreNaive/TriScoreN.hpp"
 #include "../tools/Argparser/Argparser.hpp"
 #include "Components/Algorithm.hpp"
+#include "AllEdgeByEdge/AllEdgeByEdge.hpp"
 #include "AllSplits/AllSplits.hpp"
+#include "ConvexSplits/ConvexSplits.hpp"
+#include "GreedyEdgeSort/GreedyEdgeSort.hpp"
+#include "OneSideDimByDim/OneSideDimByDim.hpp"
+#include "Shuffle/Shuffle.hpp"
+#include "SplitsDimByDim/SplitsDimByDim.hpp"
+
+#include <algorithm>
 #include <signal.h>
 #include <chrono>
 #include <thread>
@@ -15,39 +23,22 @@
 
 using namespace std::chrono_literals;
 
-//TODO: complete the list, + I will most likely need to use pointers to algorithm
-static std::map<std::string, Algorithm> name_class_map{
-    {"AllSplits", AllSplits()}//, {}, {}, {}, {}, {}, {}
-    };
+//Enum and map to switch on the algorithms' name
+enum algorithm_e {ALLSPLITS, ALLEDGEBYEDGE, CONVEXSPLITS, GREEDYEDGESORT,
+ONESIDEDIMBYDIM, SHUFFLE, SPLITSDIMBYDIM};
+std::map<std::string, algorithm_e> algo_map {
+    {"AllSplits", ALLSPLITS}, {"AllEdgeByEdge", ALLEDGEBYEDGE},{"ConvexSplits", CONVEXSPLITS},
+    {"GreedyEdgeSort", GREEDYEDGESORT},{"OneSideDimByDim", ONESIDEDIMBYDIM},
+    {"Shuffle", SHUFFLE},{"SplitsDimByDim", SPLITSDIMBYDIM}
+};
 
 //csv file to send the results
-ofstream result_file("../results/results.csv");
-string separator(" "); //séparateur utilisé pour les csv
-string instance_file; //fichier d'instance
-vector<Algorithm*> algorithms; //liste des algos utilisés
-
+std::ofstream result_file;
+static std::vector<Algorithm*> main_algorithm_list; //liste des algos utilisés
+static std::vector<Network> main_network_list;
 void init_algos();
-// void add_separator();
 
-// template<class T>
-// void export_header(T& solver);
-
-// template<class T>
-// void export_results(T& solver);
-
-template<class T>
-void launch_exec(T& solver, int delta = -1);
-
-// void init_csv();
-
-// void get_size();
-
-// void export_display();
-
-// void export_order(Tab order);
-
-// void init_files();
-
-void execfile_on_all();
+void exec_all_on_file(Network& network);
+void exec_all_on_all();
 
 #endif

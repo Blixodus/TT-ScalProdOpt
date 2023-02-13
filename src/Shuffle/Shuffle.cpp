@@ -184,7 +184,7 @@ void Shuffle::init(Network& network){
     //best_cost = -1;
     best_order.clear();
 
-    ifstream ifile(network.m_filename);
+    ifstream ifile("instances/" + network.m_filename);
     string line;
     int i, j, w;
     while(getline(ifile, line)){

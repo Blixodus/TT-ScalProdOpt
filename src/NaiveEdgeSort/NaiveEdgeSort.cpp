@@ -1,6 +1,6 @@
-#include "TriScoreN.hpp"
+#include "NaiveEdgeSort.hpp"
 
-cost_t NTS::solve(){
+cost_t NaiveEdgeSort::solve(){
     best_cost = 0;
     //l'ordre R a été défini à l'initialisation
     for(auto& p : R){
@@ -15,7 +15,7 @@ cost_t NTS::solve(){
  * @param i 
  * @return cost_t 
  */
-cost_t NTS::contract(int i){
+cost_t NaiveEdgeSort::contract(int i){
     int a = C(E[i].first);
     int b = C(E[i].second);
 
@@ -49,7 +49,7 @@ cost_t NTS::contract(int i){
  * @param i 
  * @return int 
  */
-int NTS::C(int i){
+int NaiveEdgeSort::C(int i){
     if(V[i] == -1){
         return i;
     }else{
@@ -63,7 +63,7 @@ int NTS::C(int i){
  * @param i 
  * @return double 
  */
-double NTS::ratio(int i){
+double NaiveEdgeSort::ratio(int i){
     int a = E[i].first;
     int b = E[i].second;
     int res = 1;
@@ -79,21 +79,21 @@ double NTS::ratio(int i){
     return G[n_vertex*a + b]/(double) res;
 }
 
-void NTS::display_order(){
+void NaiveEdgeSort::display_order(){
     for(int i = 0; i < best_order.size()-1; i++){
         cout << best_order[i] << " - ";
     }
     cout << best_order.back() << '\n';
 }
 
-void NTS::init(Network& network){
+void NaiveEdgeSort::init(Network& network){
     G.clear();
     E.clear();
     R.clear();
     V.clear();
     best_order.clear();
 
-    ifstream ifile(network.m_filename);
+    ifstream ifile("instances/" + network.m_filename);
     string line;
     int i, j, w;
     while(getline(ifile, line)){
@@ -132,6 +132,6 @@ void NTS::init(Network& network){
     }
 }
 
-cost_t NTS::call_solve(){
+cost_t NaiveEdgeSort::call_solve(){
     return solve();
 }

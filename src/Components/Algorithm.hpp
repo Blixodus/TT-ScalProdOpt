@@ -8,6 +8,16 @@
 #include <map>
 #include <any>
 
+namespace alg{
+    enum alg_param_e {MAIN_ALG, DMIN, DMAX, SUB_ALG, START_SOL, TIME, TEST};
+    static std::map<std::string, alg_param_e> param_map {
+        {"main_alg", MAIN_ALG}, {"dmin", DMIN}, {"dmax", DMAX}, {"SUB_ALG", SUB_ALG},
+        {"sub_alg", START_SOL}, {"time", TIME}, {"test", TEST}
+    };
+}
+
+using namespace alg;
+
 /**
  * @brief general algorithm class
  * 
@@ -16,9 +26,12 @@ class Algorithm{
     public:
     // Minimum size of network the algorithm can handle, before delegating to sub_alg
     int refdmin=0;
+    // Minimum size of network the algorithm can handle, only for the current network
     int dmin=0;
     //Max size of sub-networks to be created by the main algorithm
     int refdmax=numeric_limits<dim_t>::max()-1;
+        
+    // Max size of sub-networks to be created by the main algorithm can handle
     int dmax=numeric_limits<dim_t>::max()-1;
     //(Only useful for some algorithms)
 
@@ -52,8 +65,9 @@ class Algorithm{
 
     virtual void init(string file) {};
     virtual void init(Network& network){};
-    //TODO: this should take a bunch of parameters (dmin, dmax, time etc...)
-    Algorithm(){};
+
+    Algorithm(){}
+    Algorithm(std::map<std::string, std::any> map);
     virtual cost_t call_solve() {return 0;};
     virtual void display_order() {};
 
@@ -89,6 +103,22 @@ void execfile(T& solver, Network& network){
 }
 
 /**
+ * @brief Execute an algorithm on a network without displaying to standard output
+ * 
+ * @tparam T 
+ * @param solver 
+ * @param network 
+ */
+template<class T>
+void execfile_no_display(T& solver, Network& network){
+    solver.init(network);
+    auto start = std::chrono::high_resolution_clock::now();
+    solver.best_cost = solver.call_solve();
+    auto end = std::chrono::high_resolution_clock::now();
+    solver.time = end-start;
+}
+
+/**
  * @brief Executes an algorithm on a network given as a filename
  * 
  * @tparam T 
@@ -96,13 +126,9 @@ void execfile(T& solver, Network& network){
  * @param file 
  */
 template<class T>
-void execfile(T& solver, std::string file){
-    std::string path = "instances/" + file;
-
-    //solver.init(path);
-    Network nw = Network(path);
-    execfile(solver, nw);
-    
+void execfile(T& solver, std::string file, bool DISPLAY=true){
+    Network nw = Network(file);
+    DISPLAY ? execfile(solver, nw) : execfile_no_display(solver, nw);
 }
 
 /**
@@ -114,7 +140,8 @@ void execfile(T& solver, std::string file){
  */
 template<class T>
 void execdir(T& solver, std::string dir){
-    std::string base = "instances/" + dir + "/";
+    std::string base = dir + "/";
+
     DIR* dp = NULL;
     struct dirent *file = NULL;
     dp = opendir(base.c_str());

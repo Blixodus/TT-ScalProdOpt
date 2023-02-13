@@ -337,57 +337,35 @@ void ConvexSplits::display_order(){
 }
 
 void ConvexSplits::init(Network& network){
-    CostTab tmp_cost_tab;
+    //network caracteristics
+    dim = network.dimension;
+    n_vertex = network.n_vertex;
+    
+    //tab storing external cost
     m_ext_cost_tab.clear();
-    m_cost_memo.clear();
-    m_weight_list.clear();
-    // m_edge_list.clear();
+    m_ext_cost_tab.resize(n_vertex+1, 1);
+
     m_edge_list = network.edge_list;
-    best_order.clear();
-    //get_approx_solution(bestCost, bestOrder, file);
-    best_cost = numeric_limits<short>::max() - 1; //je sais pas pourquoi passer autre chose qu'un short pose des soucis
-    m_cost_memo[0xFFFFFFFFFFFFFFFF] = best_cost;
-
-    ifstream ifile(network.m_filename);
-    string line;
-    int i, j, w;
-    while(getline(ifile, line)){
-        istringstream flux(&line[2]);
-        switch(line[0]){
-            case 'd':
-                dim = atoi(&line[2]);
-                n_vertex = 2*dim;
-                
-                if(dmax <= 0 || dmax > dim){
-                    dmax = dim;
-                }
-
-                //dmin = min(dmax, max(dmin, 0));
-                if(dmin <= 0){
-                    dmin=0;
-                }else if(dmin > dmax){
-                    dmin = dmax;
-                }
-                m_ext_cost_tab.resize(n_vertex+1, 1);
-                tmp_cost_tab.resize(n_vertex*n_vertex, 1);
-            break;
-            case 'e':
-                flux >> i >> j >> w;
-                // m_edge_list.push_back(make_pair(i,j));
-                tmp_cost_tab[n_vertex*i + j] = w;
-                //tmp_cost_tab[size*j + i] = w;
-            break;
-            default:
-            break;
-        }
-    }
-    // sort_edges(m_edge_list);
-    for(auto& p : m_edge_list){
-        m_weight_list.push_back(tmp_cost_tab[n_vertex*p.first + p.second]);
-    }
-    //petite manip pour éviter des segfault
+    //small manipulation to prevent out-of-bound access
     m_edge_list.push_back(make_pair(n_vertex, n_vertex));
-    m_weight_list.push_back(1);
+
+    m_cost_memo.clear();
+
+    //List of weights
+    m_weight_list.clear();
+    m_weight_list.resize(network.n_edge+1, 1);
+    for(int i = 0; i < network.n_edge; i++){
+        auto& [v1, v2] = m_edge_list[i];
+        m_weight_list[i] = network.adjacence_matrix[n_vertex*v1 + v2];
+    }
+
+    //a short because it needs to fit into the map, we could update it,
+    //it would require changing the encoding tho
+    best_cost = numeric_limits<short>::max() - 1;
+    best_order.clear();
+
+    //m_cost_memo[-1], a trash bin
+    m_cost_memo[0xFFFFFFFFFFFFFFFF] = best_cost;
 }
 
 /**

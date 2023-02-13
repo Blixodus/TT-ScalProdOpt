@@ -97,9 +97,9 @@ int GreedyEdgeSort::rep(int i){
  */
 void GreedyEdgeSort::display_order(){
     for(int i = 0; i < best_order.size()-1; i++){
-        cout << best_order[i] << " - ";
+        std::cout << best_order[i] << " - ";
     }
-    cout << best_order.back() << '\n';
+    std::cout << best_order.back() << std::endl;
 }
 
 // GreedyEdgeSort::GreedyEdgeSort(int rdmax, int rdmin) : Algorithm(rdmax, rdmin){

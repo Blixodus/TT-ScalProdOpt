@@ -192,7 +192,7 @@ void SplitsDBD::init(Network& network){
 
     best_cost = numeric_limits<cost_t>::max()-1;
 
-    ifstream ifile(network.m_filename);
+    ifstream ifile("instances/" + network.m_filename);
     string line;
     int i, j, w;
     while(getline(ifile, line)){

@@ -27,6 +27,9 @@ class OneSideDBD : public Algorithm{
     Tab Z; //size/2, donne la référence de R et S
     vector<pair<int, int>> O; //tableau stockant l'ensemble des pairs de contractions donnant des coûts minimum
 
+    OneSideDBD(){}
+    OneSideDBD(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
+
     cost_t solve();
 
     cost_t contract(int s, int i, int x, pair<int, int>& p);

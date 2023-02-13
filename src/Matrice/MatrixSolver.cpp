@@ -76,7 +76,7 @@ void MatrixSolver::init(Network& network){
         m_network[i].clear();
     }
     m_network.clear();
-    ifstream ifile(network.m_filename);
+    ifstream ifile("instances/" + network.m_filename);
     string line;
     int i, j, w;
     while(getline(ifile, line)){
