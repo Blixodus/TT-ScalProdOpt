@@ -176,6 +176,7 @@ void Shuffle::display_order(){
 }
 
 void Shuffle::init(Network& network){
+    set_limit_dim(network.n_edge);
     triscore.init(network);
     m_adjacence_matrix.clear();
     m_edge_list.clear();

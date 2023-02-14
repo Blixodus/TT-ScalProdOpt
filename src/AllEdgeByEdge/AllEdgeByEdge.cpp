@@ -177,6 +177,7 @@ void AllEdgeByEdge::get_order(unsigned long long key){
 }
 
 void AllEdgeByEdge::init(Network& network){
+    set_limit_dim(network.n_edge);
     dim = network.dimension;
     n_vertex = network.n_vertex;
 

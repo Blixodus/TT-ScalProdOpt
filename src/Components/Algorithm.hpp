@@ -24,6 +24,8 @@ using namespace alg;
  */
 class Algorithm{
     public:
+    std::string algo_name;
+
     // Minimum size of network the algorithm can handle, before delegating to sub_alg
     int refdmin=0;
     // Minimum size of network the algorithm can handle, only for the current network
@@ -72,6 +74,8 @@ class Algorithm{
     virtual void display_order() {};
 
     std::string best_order_as_string() const;
+
+    void set_limit_dim(int max);
 
     const int verify();
 };

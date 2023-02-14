@@ -20,6 +20,9 @@ class MatrixSolver : public Algorithm{
     public:
         network_t m_network; //matrice d'adjacence
 
+        MatrixSolver(){}
+        MatrixSolver(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
+
         void solve(int n, cost_t cost, vector<pair<int, int>> v, network_t N);
         void display_order();
         

@@ -87,6 +87,7 @@ void NaiveEdgeSort::display_order(){
 }
 
 void NaiveEdgeSort::init(Network& network){
+    set_limit_dim(network.n_edge);
     G.clear();
     E.clear();
     R.clear();

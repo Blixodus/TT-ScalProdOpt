@@ -154,6 +154,7 @@ void AllSplits::display_order(Tab state){//dégueulasse
 void AllSplits::display_order(){}
 
 void AllSplits::init(Network& network){
+    set_limit_dim(network.n_vertex);
     dim = network.dimension;
     n_vertex = network.n_vertex;
     m_adjacence_matrix.clear();

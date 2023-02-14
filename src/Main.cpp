@@ -41,6 +41,16 @@ void init_algos(std::vector<std::map<std::string, std::any>> dict_list){
     printf("\n");
 }
 
+void display_infos(Algorithm& solver){
+    std::cout << "Best cost : " << solver.best_cost << '\n';
+    if(!solver.best_order.empty()){
+        std::cout << "Best order : ";
+        solver.display_order();
+    }
+    std::cout << std::scientific << "Temps : " << solver.time.count()  << "s" << '\n';
+    std::cout << "--------------" << std::endl;
+}
+
 //TODO: remove delta from this code
 /**
  * @brief executes solver.execfile inside a thread, and stops it after the time limit is reached 
@@ -74,19 +84,14 @@ void launch_exec(T& solver, Network& network){
         if (status == std::cv_status::timeout) {
             pthread_cancel(tid);
             solver.best_cost = -1;
+            std::cout << "Timed out." << std::endl;
             exit(-1);
         }else{
             //Results export
-            //TODO:
+            export_entry(result_file, solver, network, csv_separator);
 
             //display
-            std::cout << "Best cost : " << solver.best_cost << '\n';
-            if(!solver.best_order.empty()){
-                std::cout << "Best order : ";
-                solver.display_order();
-            }
-            std::cout << std::scientific << "Temps : " << solver.time.count()  << "s" << '\n';
-            std::cout << "--------------" << std::endl;
+            display_infos(solver);
         }
         
         exit(0);
@@ -104,14 +109,9 @@ template<class T>
 void launch_untimed_exec(T& solver, Network& network){
     execfile_no_display(solver, network);
     //display
-    std::cout << "Best cost : " << solver.best_cost << '\n';
-    std::cout << "size : " << solver.best_order.size() << '\n';
-    if(!solver.best_order.empty()){
-        std::cout << "Best order : ";
-        solver.display_order();
-    }
-    std::cout << std::scientific << "Temps : " << solver.time.count()  << "s" << '\n';
-    std::cout << "--------------" << std::endl;
+    display_info(solver);
+
+    export_entry(result_file, solver, network, csv_separator);
 }
 
 /**
@@ -146,6 +146,11 @@ int main(int argc, char* argv[]){
     //gather the arguments into lists
     //a list of maps for the algorithms, and a list of list for files
     Argparser parser(argc, argv);
+
+    //open the output file if exists
+    if(!parser.output_file.empty()){
+        result_file = open_output("results/" + parser.output_file);
+    }
 
     //fills main_algorithm_list with algorithms instantiated using the dictionary_list
     init_algos(parser.grab_dictionary_list());

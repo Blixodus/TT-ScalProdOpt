@@ -107,7 +107,8 @@ void GreedyEdgeSort::display_order(){
 // }
 
 void GreedyEdgeSort::init(Network& network){
-    m_network = /*std::as_const()*/ &network;
+    set_limit_dim(network.n_edge);
+    //m_network = /*std::as_const()*/ &network;
     //param of the network
     dim = network.dimension;
     n_vertex = network.n_vertex;

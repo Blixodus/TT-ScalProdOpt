@@ -218,6 +218,7 @@ void OneSideDBD::get_order(int s, int k){
 }
 
 void OneSideDBD::init(Network& network){
+    set_limit_dim(network.dimension);
     dim = network.dimension;
     n_vertex = network.n_vertex;
 

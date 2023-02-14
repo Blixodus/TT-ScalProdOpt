@@ -180,6 +180,7 @@ void SplitsDBD::display_order(Tab state){
 void SplitsDBD::display_order(){}
 
 void SplitsDBD::init(Network& network){
+    set_limit_dim(network.dimension);
     dim = network.dimension;
     n_vertex = network.n_vertex;
 

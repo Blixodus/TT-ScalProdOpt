@@ -1,6 +1,5 @@
 #ifndef TRISCOREN_HPP
 #define TRISCOREN_HPP
-#include "../Components/Components.hpp"
 #include "../Components/Algorithm.hpp"
 
 /**
@@ -14,6 +13,9 @@ class NaiveEdgeSort : public Algorithm{
     Tab V;
     vector<pair<int, int>> E;
     vector<pair<int, double>> R;
+
+    NaiveEdgeSort(){}
+    NaiveEdgeSort(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
     cost_t solve();
     int C(int i);

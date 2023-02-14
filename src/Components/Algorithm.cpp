@@ -7,6 +7,7 @@ Algorithm::Algorithm(std::map<std::string, std::any> map){
         switch(param_name){
             case MAIN_ALG:
                 std::cout << "Instantiating : " << std::any_cast<std::string>(val) << std::endl;
+                algo_name = std::any_cast<std::string>(val);
                 break;
             case DMIN:
                 refdmin = std::any_cast<int>(val);
@@ -66,4 +67,16 @@ const int Algorithm::verify() {
         }
     }
     return 0;
+}
+
+/**
+ * @brief Limits dmin and dmax
+ * dmax is set to refdmax, or to a strictly positive value that is also smaller or equal to max 
+ * dmin is set to refdmin, or to a positive value smaller or equal to dmax
+ * 
+ * @param limit the limiting factor in the network, for the execution of the algorithm
+ */
+void Algorithm::set_limit_dim(int limit){
+    dmax = std::min(std::max(1, refdmax), limit);
+    dmin = std::min(std::max(1, refdmin), dmax);
 }

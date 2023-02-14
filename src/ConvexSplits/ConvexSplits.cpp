@@ -337,6 +337,7 @@ void ConvexSplits::display_order(){
 }
 
 void ConvexSplits::init(Network& network){
+    set_limit_dim(network.dimension);
     //network caracteristics
     dim = network.dimension;
     n_vertex = network.n_vertex;

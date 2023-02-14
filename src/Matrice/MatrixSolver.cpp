@@ -69,6 +69,7 @@ cost_t contractionCost(int i, int j, network_t N){
  * @param path a path to a textfile
  */
 void MatrixSolver::init(Network& network){
+    set_limit_dim(network.n_vertex);
     best_order.clear();
 
     best_cost = numeric_limits<cost_t>::max() - 1;

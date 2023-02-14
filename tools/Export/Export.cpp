@@ -1,5 +1,38 @@
 #include "Export.hpp"
 
+/**
+ * @brief Opens file to append
+ * 
+ * @param filename 
+ * @return std::FILE* the file in append mode
+ */
+std::ofstream  open_output(const std::string& filename){
+    bool exists_var = exists(filename);
+
+    std::ofstream ofile(filename, std::ofstream::app);
+
+    if(!exists_var){
+        generate_header(ofile);
+    }
+
+    return ofile;
+}
+
+/**
+ * @brief Tests if a file exist
+ * 
+ * @param filename 
+ * @return true if it exists
+ * @return false otherwise
+ */
+bool exists(const std::string& filename){
+    std::ifstream ifile(filename);
+    if(ifile){
+        return true;
+    }else{
+        return false;
+    }
+}
 
 /**
  * @brief Exports the field name in an ofstream
@@ -7,7 +40,7 @@
  * @param file the file
  * @param separator the separator to use
  */
-void generate_header(ofstream& file, const std::string separator=default_separator){
+void generate_header(std::ofstream& file, const std::string separator){
     for(std::string field : field_list){
         file << field << separator;
     }
@@ -23,19 +56,23 @@ void generate_header(ofstream& file, const std::string separator=default_separat
  * @param netw the network
  * @param separator the separator to use
  */
-void export_entry(ofstream& file, const Algorithm& alg, const Network& netw, const std::string separator=default_separator){
+void export_entry(std::ofstream& file, const Algorithm& alg, const Network& netw, const std::string separator=default_separator){
     
+    if(!file){return;}
+
     //TODO: grab the algorithm name
-    file << main_algorithm << separator
+    file << alg.algo_name << separator
     << alg.dmin << separator
     << alg.dmax << separator
-    << alg.starting_solution << separator
+    //TODO: not implemented yet
+    //<< alg.sub_alg << separator
+    //<< alg.starting_solution << separator
     << alg.time.count() << separator
     << alg.best_cost << separator
     //TODO: order << separator
     << netw.dimension << separator
     << netw.density << separator
-    << netw.filename << endl;
+    << netw.m_filename << endl;
 }
 
 /**

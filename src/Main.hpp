@@ -11,6 +11,7 @@
 #include "OneSideDimByDim/OneSideDimByDim.hpp"
 #include "Shuffle/Shuffle.hpp"
 #include "SplitsDimByDim/SplitsDimByDim.hpp"
+#include "../tools/Export/Export.hpp"
 
 #include <algorithm>
 #include <signal.h>
@@ -33,10 +34,13 @@ std::map<std::string, algorithm_e> algo_map {
 };
 
 //csv file to send the results
-std::ofstream result_file;
+static std::ofstream result_file;
+//separator
+static std::string csv_separator(";");
 static std::vector<Algorithm*> main_algorithm_list; //liste des algos utilisés
 static std::vector<Network> main_network_list;
 void init_algos();
+void display_infos(Algorithm& solver);
 
 void exec_all_on_file(Network& network);
 void exec_all_on_all();
