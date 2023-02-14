@@ -123,7 +123,7 @@ void exec_all_on_file(Network& network){
         Algorithm* algo = main_algorithm_list[i];
         if(algo->still_up){
             // algo->init(network);
-            printf("Algo. %d : '%s' :\n", i, network.m_filename.data());
+            printf("Algo. %d (%s) : '%s' :\n", i, algo->algo_name.data(), network.m_filename.data());
             launch_exec(*algo, network);
             // launch_untimed_exec(*algo, network);
         }
@@ -149,7 +149,7 @@ int main(int argc, char* argv[]){
 
     //open the output file if exists
     if(!parser.output_file.empty()){
-        result_file = open_output("results/" + parser.output_file);
+        result_file = open_output(parser.output_file);
     }
 
     //fills main_algorithm_list with algorithms instantiated using the dictionary_list

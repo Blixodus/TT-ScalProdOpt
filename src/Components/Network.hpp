@@ -2,6 +2,7 @@
 #define NETWORK_HPP
 #include "Components.hpp"
 #include <string>
+#include <filesystem>
 
 /**
  * @brief Network structure
@@ -35,6 +36,8 @@ struct Network{
 
     Network(std::string file);
     Network(){};
+
+    cost_t& operator [](int idx) {return adjacence_matrix[idx];}
     //Network(char* file){Network(std::string(file));};
     Network(char* file) : Network(std::string(file)) {}
     const void display(){std::cout << m_display << std::flush;}

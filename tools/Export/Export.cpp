@@ -7,12 +7,19 @@
  * @return std::FILE* the file in append mode
  */
 std::ofstream  open_output(const std::string& filename){
-    bool exists_var = exists(filename);
+    std::string file_path(filename);
+    std::ofstream ofile;
 
-    std::ofstream ofile(filename, std::ofstream::app);
+    if(!std::filesystem::path(filename).is_absolute()){
+        file_path = "results/" + filename;
+    }
+
+    bool exists_var = exists(file_path);
+
+    ofile = std::ofstream(file_path, std::ofstream::app);
 
     if(!exists_var){
-        generate_header(ofile);
+        create_header(ofile);
     }
 
     return ofile;
@@ -40,7 +47,7 @@ bool exists(const std::string& filename){
  * @param file the file
  * @param separator the separator to use
  */
-void generate_header(std::ofstream& file, const std::string separator){
+void create_header(std::ofstream& file, const std::string separator){
     for(std::string field : field_list){
         file << field << separator;
     }
@@ -67,8 +74,8 @@ void export_entry(std::ofstream& file, const Algorithm& alg, const Network& netw
     //TODO: not implemented yet
     //<< alg.sub_alg << separator
     //<< alg.starting_solution << separator
-    << alg.time.count() << separator
     << alg.best_cost << separator
+    << alg.time.count() << separator
     //TODO: order << separator
     << netw.dimension << separator
     << netw.density << separator

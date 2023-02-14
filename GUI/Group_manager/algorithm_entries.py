@@ -177,23 +177,20 @@ def verify_params(dict_list : list[dict[str:str]]):
         for param in ["dmin","dmax","time"]:
             if param_dict.get(param)!=None:
                 param_dict[param]=int(param_dict[param])
-        
-        entry_dmin = param_dict.get("dmin")
-        entry_dmax= param_dict.get("dmax")
+
+        #We currently authorize dmin and dmax to have "problematic" values
+        # entry_dmin = param_dict.get("dmin")
+        # entry_dmax= param_dict.get("dmax")
         #We check that dmin<=dmax unless dmax=0
-        if entry_dmin!=None and entry_dmax!=None and entry_dmin>entry_dmax!=0:
-            status=False
-            status_msg+="Dmin={0} > Dmax={1} in entry {3}".format(entry_dmin, entry_dmax,index)
+        # if entry_dmin!=None and entry_dmax!=None and entry_dmin>entry_dmax!=0:
+        #     status=False
+        #     status_msg+="Dmin={0} > Dmax={1} in entry {3}".format(entry_dmin, entry_dmax,index)
 
     return status, status_msg
 
 if __name__ == "__main__":
     root = ctk.CTk()
     root.geometry("500x350")
-    
-    #TODO: find the way to add a scrollbar
-    #scrollbar = ctk.CTkScrollbar(master=root)
-    #scrollbar.pack(side="Right", fill="y")
     
     algo_frame = Algo_list_frame(master=root)
 

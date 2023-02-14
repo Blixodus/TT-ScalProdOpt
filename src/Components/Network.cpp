@@ -41,7 +41,15 @@ void Network::sort_edges(){
 Network::Network(std::string file){
     m_filename= file;
 
-    ifstream ifile("instances/" + file);
+    std::ifstream ifile;
+
+    if(std::filesystem::path(file).is_absolute()){
+        ifile = std::ifstream(file);
+    }else{
+        ifile = std::ifstream("instances/" + file);
+    }
+
+    // std::ifstream ifile("instances/" + file);
     if(!ifile){
         std::cerr << "Could not open file : " << file << " at Network initialization" << std::endl;
         exit(-1);
@@ -69,9 +77,13 @@ Network::Network(std::string file){
             case 'e':
                 //grabing the edge
                 flux >> vertex1 >> vertex2 >> weight;
+                {
+                int v1 = min(vertex1, vertex2);
+                int v2 = max(vertex1, vertex2);
                 //adding the edge to the list
                 //edge_list.push_back(edge_t(vertex1, vertex2, weight));
-                edge_list.push_back(std::make_pair(vertex1, vertex2));
+                edge_list.push_back(std::make_pair(v1, v2));
+                }
 
                 //updating the adjacence matrix
                 adjacence_matrix[n_vertex*vertex1 + vertex2] = weight;

@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import sys
 import os
+import subprocess
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
@@ -40,7 +41,7 @@ class Group_manager_page(ctk.CTkFrame):
 
         self.pack(fill="both", expand=True)
 
-    def grab_arguments(self)->tuple[list[dict[str:str]], list[str], str]:
+    def grab_arguments(self)->tuple[list[dict[str:str]], str, str]:
         """
         Grabs all arguments relevant to the execution,
         from both the list of algorithm, and the list of instances
@@ -48,17 +49,43 @@ class Group_manager_page(ctk.CTkFrame):
         # print(self.algorithm_frame.grab_all_values())
         # print(self.instance_frame.grab_all_values())
         # print(self.export_file_name.get())
-        return self.algorithm_frame.grab_all_values(), self.instance_frame.grab_all_values(), self.export_file_name.get()
+        return self.algorithm_frame.grab_all_values(), self.instance_frame.grab_all_file_path(), self.export_file_name.get()
     
     def launch_execution(self):
-        algo_params, instance_list, export_file = self.grab_arguments()
-        status, status_message=algorithm_entries.verify_params(algo_params)
+        #the arguments are caught
+        list_algo_dict, files_param, export_file = self.grab_arguments()
+
+        status, status_message=algorithm_entries.verify_params(list_algo_dict)
         if not status:
             #TODO: print the message with a proper widget
             print(status_message)
         else:
-            print("yeee")
+            #formatting the parameters
+            algo_params = list_dict_to_proper_string(list_algo_dict)
+            args = "xmake run -w . OptiTenseurs -a {0} -f {1} -o {2}".format(algo_params, files_param, export_file)
+            print(algo_params)
+            print(files_param)
+            print(export_file)
+            print(args)
+            print("executing...")
             #TODO: execute the code
+            subprocess.call(args, shell=True)
+
+
+#formatting the parameters, im too lazy to find proper names
+def dict_to_proper_string(algo_dict : dict) -> str : 
+    algos_args=""
+    keys_list = list(algo_dict.keys())
+    val_list = list(algo_dict.values())
+    for i in range(len(algo_dict)):
+        algos_args += str(keys_list[i]) + " " + str(val_list[i]) + " "
+    return algos_args[:-1]
+
+def list_dict_to_proper_string(list_algo_dict : list[dict]) -> str :
+    string_algo_args =""
+    for i, _ in enumerate(list_algo_dict) :
+        string_algo_args += "\"" + dict_to_proper_string(list_algo_dict[i]) + "\" "
+    return string_algo_args
 
 
 if __name__=="__main__":

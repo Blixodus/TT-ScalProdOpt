@@ -17,10 +17,13 @@ class Instance_list_frame(Scrollable_frame):
         super().__init__(**kwargs)
         self.pack(padx=10, pady=10, fill="both", side="left", expand=True)
         
-    def grab_all_values(self):
-        """Iterates over the Instance_entry objects and returns their stored values"""
+    def grab_all_file_path(self) -> str :
+        """Iterates over the Instance_entry objects and returns their stored values as a single string"""
         entry_list = list(filter(lambda a: "Instance_entry" in str(type(a)), list(self.scrollable_frame.children.values())))
-        return [(entry.grab_values()) for entry in entry_list]
+        files_string = ""
+        for entry in entry_list:
+            files_string += entry.file_path + " "
+        return files_string #[(entry.file_path) for entry in entry_list]
 
 class Instance_entry(ctk.CTkFrame):
     """
@@ -69,10 +72,9 @@ class Instance_entry(ctk.CTkFrame):
 
     def grab_values(self):
         """
-        Grabs all the values stored in the entry
-        Note : we may only need the file_path
+        Grabs the file path from an entry
         """
-        return self.file_path, self.file_size, self.average_weight
+        return self.file_path #, self.file_size, self.average_weight
 
 def explore_files(frame : Scrollable_frame):
     """Opens a file explorer, multiple files can be selected at once"""
