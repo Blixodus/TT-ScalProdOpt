@@ -12,6 +12,7 @@ if __name__=="__main__":
     #dimensions of the root
     root.geometry("1500x1000")
     tab_list = Tab_list(master=root)
+    #TODO: Extra tabs are to be added here
     tab_list.set_tabs([("Group manager", Group_manager_page)])
     tab_list.pack(fill="both", expand=True)
 

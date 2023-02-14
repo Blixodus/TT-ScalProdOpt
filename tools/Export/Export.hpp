@@ -1,31 +1,22 @@
 #ifndef IMPORT_HPP
 #define IMPORT_HPP
 #include <fstream>
-#include "../src/Components.hpp"
+#include "../../src/Components/Algorithm.hpp"
 
-//TODO:
-struct Result_exporter{
-    //std::string result_path; //not very useful
-    std::string cost_path;
-    std::string time_path;
-    //must not authorize both files having no values ?
-    //parameter to determine whether or not we export to begin with
-};
+//default separator used in the csv file
+static std::string default_separator=";";
 
-/**
- * @brief exports results into the different files
- * 
- * @tparam T the solver's type
- * @param solver 
- */
-template<class T>
-void export_results(T& solver, ofstream result_file, ofstream cost_file, ofstream time_file){
-    result_file << "Best cost : " << solver.bestCost << '\n';
-    result_file << "Time : " << solver.time.count() << endl;
+//List of fields to put in the header (in this order)
+static std::vector<std::string> field_list = {"Algorithm", "Dmin", "Dmax", /*"Base solution",*/ "Cost", /* "Order",*/ "Time", "Dimension", "Density", "File"};
 
-    cost_file << solver.bestCost;
-    time_file << solver.time.count();
-    add_separator();
-}
+std::ofstream open_output(const std::string& filename);
+
+bool exists(const std::string& filename);
+
+void generate_header(std::ofstream& file, const std::string separator=default_separator);
+
+void export_entry(std::ofstream& file, const Algorithm& alg, const Network& netw, const std::string separator);
+
+std::string grab_order(const Algorithm& alg, const std::string separator);
 
 #endif

@@ -9,7 +9,7 @@ int main(int argc, char* argv[]){
             exit(-1);
             break;
         case 2:
-            display(argv[1]);
+            // display(argv[1]);
             execfile<MatrixSolver>(solver, argv[1]);
             break;
         case 3:

@@ -15,7 +15,7 @@ class Instance_list_frame(Scrollable_frame):
     """Frame holding all instance entries"""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.pack(padx=0, pady=10, fill="y", side="right")
+        self.pack(padx=10, pady=10, fill="both", side="left", expand=True)
         
     def grab_all_values(self):
         """Iterates over the Instance_entry objects and returns their stored values"""

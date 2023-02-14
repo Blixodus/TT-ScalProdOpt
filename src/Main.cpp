@@ -1,98 +1,74 @@
 #include "Main.hpp"
 
-/**
- * @brief Initializes the list of algorithm to use (TODO: use parameters to customize it upon execution)
- * 
- */
-void init_algos(){
-    algos.push_back(new MatrixSolver());
-    algos.push_back(new Split());
-    algos.push_back(new VSplit());
-    algos.push_back(new ESplit());
-    algos.push_back(new SideEx());
-    algos.push_back(new SimpleG());
-    algos.push_back(new TriScore());
-    algos.push_back(new TriScoreM());
-    algos.push_back(new NTS());
-}
-
-//TODO: From here
 
 /**
- * @brief adds 'separator' to cost_file and time_file
+ * @brief Instantiates every algorithm and stores them in main_algorithm_list
  * 
+ * @param dict_list a list generated using Argparser.grab_dictionnary_list()
  */
-void add_separator(){
-    cost_file << separator << flush;
-    time_file << separator << flush;
-}
-
-/**
- * @brief add default error values in cost_file and time_file
- * 
- */
-void add_error_values(){
-    cost_file << -1 << separator << flush;
-    time_file << 0.0 << separator << flush;
-}
-
-/**
- * @brief exports solver's name into result_file
- * 
- * @tparam T the solver's type
- * @param solver 
- */
-template<class T>
-void export_header(T& solver){
-    string class_name = typeid(solver).name();
-    do{
-        class_name.erase(class_name.begin());
-    }while(isdigit(class_name[0]));
-    cout << "--- "<< class_name <<" ---" << '\n';
-    result_file << "--- " << class_name << " ---" << '\n';
-    if(solver.delta != -1){
-        result_file << "Delta : " << solver.delta << '\n'; 
+void init_algos(std::vector<std::map<std::string, std::any>> dict_list){
+    //we iterate over the dictionaries
+    for(auto& dict : dict_list){
+        std::string algo_name = std::any_cast<std::string>(dict["main_alg"]);
+        //we instantiate the right algorithm based on its name
+        switch(algo_map[algo_name]){
+            case ALLSPLITS:
+                main_algorithm_list.push_back(new AllSplits(dict));
+                break;
+            case ALLEDGEBYEDGE:
+                main_algorithm_list.push_back(new AllEdgeByEdge(dict));
+                break;
+            case CONVEXSPLITS:
+                main_algorithm_list.push_back(new ConvexSplits(dict));
+                break;
+            case GREEDYEDGESORT:
+                main_algorithm_list.push_back(new GreedyEdgeSort(dict));
+                break;
+            case ONESIDEDIMBYDIM:
+                main_algorithm_list.push_back(new OneSideDBD(dict));
+                break;
+            case SHUFFLE:
+                main_algorithm_list.push_back(new Shuffle(dict));
+                break;
+            case SPLITSDIMBYDIM:
+                main_algorithm_list.push_back(new SplitsDBD(dict));
+                break;
+            default:
+                std::cerr << "Unknown algorithm '" << algo_name << "'" << std::endl;
+                break;
+        }
     }
+    printf("\n");
 }
 
-/**
- * @brief exports results into the different files
- * 
- * @tparam T the solver's type
- * @param solver 
- */
-template<class T>
-void export_results(T& solver){
-    result_file << "Best cost : " << solver.bestCost << '\n';
-    result_file << "Time : " << solver.time.count() << endl;
-
-    cost_file << solver.bestCost;
-    time_file << solver.time.count();
-    add_separator();
+void display_infos(Algorithm& solver){
+    std::cout << "Best cost : " << solver.best_cost << '\n';
+    if(!solver.best_order.empty()){
+        std::cout << "Best order : ";
+        solver.display_order();
+    }
+    std::cout << std::scientific << "Temps : " << solver.time.count()  << "s" << '\n';
+    std::cout << "--------------" << std::endl;
 }
 
+//TODO: remove delta from this code
 /**
  * @brief executes solver.execfile inside a thread, and stops it after the time limit is reached 
  * 
  * @tparam T 
- * @param solver 
- * @param delta affects the behaviour of some heuristics
+ * @param solver
  */
 template<class T>
-void launch_exec(T& solver, int delta){
+void launch_exec(T& solver, Network& network){
     int status;
     pid_t pid = fork();
     if(pid == 0){ //processus fils
         condition_variable cv;
         mutex mtx;
 
-        std::thread t1([&solver, &cv, &delta](){
-            solver->refdelta = delta;
-            export_header(*solver);
-            //Template défini dans components, permettant d'initialiser l'algorithme et de résoudre l'instance
-            execfile(*solver, instance_file);
-            //export des résultats
-            export_results(*solver);
+        //Thread that will carry the execution
+        std::thread t1([&solver, &cv, &network](){
+            execfile_no_display(solver, network);
             cv.notify_all();
         });
 
@@ -101,259 +77,88 @@ void launch_exec(T& solver, int delta){
 
         //un mutex lock le thread "principal" tant que l'autre n'a pas fini (ou jusqu'à la fin du délai)
         std::unique_lock<std::mutex> lock(mtx);
-        auto status = cv.wait_for(lock, WAIT_TIME);
+        //TODO: it might not work, as solver may not be initialized at this stage
+        auto status = cv.wait_for(lock, solver.timeout_time);
 
         // si timeout il y a, on tue le thread
         if (status == std::cv_status::timeout) {
             pthread_cancel(tid);
-            solver->bestCost = -1;
-            export_results(*solver);
+            solver.best_cost = -1;
+            std::cout << "Timed out." << std::endl;
             exit(-1);
+        }else{
+            //Results export
+            export_entry(result_file, solver, network, csv_separator);
+
+            //display
+            display_infos(solver);
         }
         
         exit(0);
 
     }else{ //processus parent
         wait(&status);
-        if(status!=0){ //si timeout
-            //l'algorithme ne sera plus jamais appelé
-            solver->still_up = false;
+        if(status!=0){ //if timeout
+            //the algorithm leaves the execution queue
+            solver.still_up = false;
+        }
+    }
+}
+
+template<class T>
+void launch_untimed_exec(T& solver, Network& network){
+    execfile_no_display(solver, network);
+    //display
+    display_info(solver);
+
+    export_entry(result_file, solver, network, csv_separator);
+}
+
+/**
+ * @brief Executes all algorithms on a single network
+ * 
+ */
+void exec_all_on_file(Network& network){
+    for(int i = 0; i < main_algorithm_list.size(); i++){ //auto& algo : main_algorithm_list){
+        Algorithm* algo = main_algorithm_list[i];
+        if(algo->still_up){
+            // algo->init(network);
+            printf("Algo. %d : '%s' :\n", i, network.m_filename.data());
+            launch_exec(*algo, network);
+            // launch_untimed_exec(*algo, network);
         }
     }
 }
 
 /**
- * @brief initializes .csv's header (TODO: creates the header based on the list of algorithm in use)
+ * @brief Executes all algorithms on all files
+ * Iterates over the algorithms, then over the files
  * 
  */
-void init_csv(){
-    /*size, Matrix, Split, VSplit, EdgeSplit, SideEx, SimpleG, TriScore, MTS, NTS*/
-    string header = "size" + separator + 
-    "Matrix" + separator + 
-    "Split" + separator + 
-    "VSplit" + separator + 
-    "EdgeSplit" + separator +
-    "SideEx" + separator + 
-    "SimpleG" + separator +
-    "TriScore" + separator +
-    "TriScoreMargin" + separator +
-    "TriScoreNaive"
-    + '\n';
-    cost_file << header;
-    time_file << header;
-}
-
-/**
- * @brief puts the size of instances into the .csv
- * 
- */
-void get_size(){
-    string path = "../instances/" + instance_file;
-    string filename(path);
-    string line;
-    ifstream input_file(filename);
-    if (!input_file.is_open()) {
-        cerr << "Could not open the file - '"
-             << filename << "'" << endl;
-        exit(-1);
-    }
-
-     while(getline(input_file, line)){
-        if(line.size() > 2){
-            if(line[0] == 'p'){
-                /*cost_file << inst_num;
-                time_file << inst_num;
-                add_separator();
-                inst_num++;*/
-                cost_file << &line[2];
-                time_file << &line[2];
-                add_separator();
-                break;
-            }
-        }
-     }
-
-}
-
-/**
- * @brief output the display into result_file
- * 
- */
-void export_display(){
-    string path = "../instances/" + instance_file;
-    string filename(path);
-    string line;
-    ifstream input_file(filename);
-    if (!input_file.is_open()) {
-        cerr << "Could not open the file - '"
-             << filename << "'" << endl;
-        exit(-1);
-    }
-
-    char mot[200];
-    int n = 0;
-    int nL = 0;
-    while(getline(input_file, line) && line[0] != 'e'){
-        if(line.size() > 2){
-            istringstream flux(&line[2]);
-            switch(line[0]){
-                case 'v':
-                   while(flux >> mot){
-                        if(mot[0] == '*'){
-                            char* padding;
-                            if(nL == 1){
-                                padding = "       ";
-                            }else{
-                                padding = "   ";
-                            }
-                            result_file << mot << "(" << n << ")" << padding;
-                            n++;
-                        }else{
-                            result_file << mot << "   ";
-                        }
-                    }
-                    nL++;
-                    result_file << '\n';
-                break;
-                case 'p':
-                    result_file << '\n' << "Sommets : " << &line[2] << '\n';
-                break;
-                default:
-                break;
-            }
-        }
-    }
-    result_file << endl;
-}
-
-/**
- * @brief exports a contraction order into result_file
- * 
- * @param O a vector<int> representing a series of edges
- */
-void export_order(Tab O){
-    result_file << "Best order : ";
-    for(int i : O){
-        result_file << i << " ";
-    }
-    result_file << '\n';
-}
-
-//TODO: To here, should not be in this file
-
-/**
- * @brief initializes various files
- * 
- */
-void init_files(){
-    result_file << instance_file << endl;
-    display(instance_file);
-    export_display();
-    get_size();
-}
-
-/**
- * @brief main method, executes every algorithm defined inside on instance_file
- * 
- */
-void execfile_on_all(){
-    init_files();
-    
-    for(auto algo = algos.begin(); algo != algos.end(); algo++){
-        if((*algo)->still_up){
-            launch_exec(*algo);
-        }else{
-            add_error_values();
-        }
-    }
-
-    cost_file << endl;
-    time_file << endl;
-    result_file << "----------" << endl << endl;
-}
-
-/**
- * @brief sorts every file in instance_dir
- * 
- * @return vector<string> 
- */
-vector<string> sort_files(){
-    vector<string> file_list;
-    string directory = "../instances/" + instance_dir + "/";
-    DIR* dp = NULL;
-    struct dirent *file = NULL;
-    dp = opendir(directory.c_str());
-    if(dp == NULL){
-        cerr << "Could not open directory : " << directory << '\n';
-        exit(-1);
-    }
-    file = readdir(dp);
-    
-    while(file != NULL){
-        if(file->d_name[0] != '.'){
-            //instance_file = directory + file->d_name;
-            //execfile_on_all();
-            file_list.push_back(directory + file->d_name);
-        }
-        file = readdir(dp);
-    }
-    closedir(dp);
-    //un sort pour ordonner les instances (marche que si elles contiennent un indice)
-    sort(file_list.begin(), file_list.end(), [](const string& x, const string& y){
-            return x.length() < y.length() || (x.length() == y.length() && x < y);
-        });
-    return file_list;
-}
-
-/**
- * @brief iterates through every instances in instance_dir
- * 
- */
-void execdir(){
-    for(auto& n : sort_files()){
-        instance_file = n;
-        execfile_on_all();
+void exec_all_on_all(){
+    //iteration over the networks
+    for(auto& network : main_network_list){
+        exec_all_on_file(network);
     }
 }
 
 int main(int argc, char* argv[]){
-    switch (argc){
-    case 1:
-        cout << "Missing argument : instance file" << '\n';
-        cout << "Use 'h' to get infos" << '\n';
-        return -1;
-        break;
-    case 2:
-        if(argv[1] == string("h")){
-            cout << "d directory : executes all solvers on every instance of the directory" << '\n';
-            cout << "v file : displays the graph represented by this instance" << '\n';
-            cout << "vd directory : displays all instances in the directory" << '\n';
-            cout << "filename : execute all the algorithms on this instance" << '\n';
-            cout << "Best costs marked with '*' are the optimal costs calculated using greedy algorithms" << '\n';
-            cout << "The root directory's name is 'instances'" << '\n';
-        }else{
-            instance_file = argv[1];
-            init_algos();
-            init_csv();
-            execfile_on_all();
-        }
-        break;
-    case 3:
-        if(argv[1] == string("d")){
-            instance_dir = argv[2];
-            init_algos();
-            init_csv();
-            execdir();
-        }else if(argv[1] == string("vd")){
-            display_dir(argv[2]);
-        }else if(argv[1] == string("v")){
-            display(argv[2]);
-        }
+    //gather the arguments into lists
+    //a list of maps for the algorithms, and a list of list for files
+    Argparser parser(argc, argv);
 
-        break;
-    default:
-        cout << "Error : check arguments list" << endl;
-        break;
+    //open the output file if exists
+    if(!parser.output_file.empty()){
+        result_file = open_output("results/" + parser.output_file);
     }
-    return 0;
+
+    //fills main_algorithm_list with algorithms instantiated using the dictionary_list
+    init_algos(parser.grab_dictionary_list());
+
+    //sorted list of entries, from smallest to biggest
+    main_network_list = parser.file_entries_list;
+    std::sort(main_network_list.begin(), main_network_list.end(), 
+    [](Network n1, Network n2){return n1.dimension < n2.dimension;});
+
+    exec_all_on_all();
 }

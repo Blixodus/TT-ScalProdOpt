@@ -1,6 +1,6 @@
 EXACT_ALGO=["AllSplits"]
 
-SEMI_EXACT_ALGO=["EdgeByEdge", "ConvexSplits"]
+SEMI_EXACT_ALGO=["AllEdgeByEdge", "ConvexSplits"]
 
 HEURISTICS=["GreedyEdgeSort", "1SideDimbyDim"]
 
@@ -13,7 +13,7 @@ NONE=dict({"main_alg":MANDATORY, "dmin":NULL, "dmax":NULL, "sub_alg":NULL, "star
 
 ALLSPLITS=dict({"main_alg":MANDATORY, "dmin":OPTIONAL, "dmax":OPTIONAL, "sub_alg":OPTIONAL, "start_sol":OPTIONAL, "time":OPTIONAL, "test":OPTIONAL})
 
-EDGEBYEDGE=dict({"main_alg":MANDATORY, "dmin":NULL, "dmax":NULL, "sub_alg":NULL, "start_sol":OPTIONAL, "time":OPTIONAL, "test":OPTIONAL})
+ALLEDGEBYEDGE=dict({"main_alg":MANDATORY, "dmin":NULL, "dmax":NULL, "sub_alg":NULL, "start_sol":OPTIONAL, "time":OPTIONAL, "test":OPTIONAL})
 
 CONVEXSPLITS=dict({"main_alg":MANDATORY, "dmin":OPTIONAL, "dmax":OPTIONAL, "sub_alg":OPTIONAL, "start_sol":OPTIONAL, "time":OPTIONAL, "test":OPTIONAL})
 
@@ -25,4 +25,4 @@ ONESIDEDIMBYDIM=dict({"main_alg":MANDATORY, "dmin":NULL, "dmax":OPTIONAL, "sub_a
 
 SPLITSDIMBYDIM=dict({"main_alg":MANDATORY, "dmin":OPTIONAL, "dmax":OPTIONAL, "sub_alg":OPTIONAL, "start_sol":OPTIONAL, "time":OPTIONAL, "test":OPTIONAL})
 
-ALGORITHMS=dict({"None":NONE, "AllSplits":ALLSPLITS, "EdgeByEdge":EDGEBYEDGE, "ConvexSplits":CONVEXSPLITS, "GreedyEdgeSort":GREEDYEDGESORT, "Shuffle":SHUFFLE, "OneSideDimByDim":ONESIDEDIMBYDIM, "SplitsDimByDim":SPLITSDIMBYDIM})
+ALGORITHMS=dict({"None":NONE, "AllSplits":ALLSPLITS, "AllEdgeByEdge":ALLEDGEBYEDGE, "ConvexSplits":CONVEXSPLITS, "GreedyEdgeSort":GREEDYEDGESORT, "Shuffle":SHUFFLE, "OneSideDimByDim":ONESIDEDIMBYDIM, "SplitsDimByDim":SPLITSDIMBYDIM})

@@ -11,14 +11,16 @@
 
 using namespace std;
 
+//base path for generated files
 string path = "../instances/";
 
-void init_instance(int n ,int min, int max, string dir );
-void init_multiple(int n, int min, int max, int amount, string dir);
+void init_gaussian(int dim, int N, int Rmin, int Rmax, float Rnoise, string dir);
+void init_instance(int dim ,int min, int max, string dir );
+void init_multiple(int dim, int min, int max, int amount, string dir);
 
 int amount = 1; //nombre d'instance
 
-int size = 6; //nombre de sommet
+int dim = 3; //nombre de sommet
 
 int m = 1; //poids minimum
 
