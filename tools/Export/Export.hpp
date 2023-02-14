@@ -1,6 +1,7 @@
 #ifndef IMPORT_HPP
 #define IMPORT_HPP
 #include <fstream>
+#include <filesystem>
 #include "../../src/Components/Algorithm.hpp"
 
 //default separator used in the csv file
@@ -13,7 +14,7 @@ std::ofstream open_output(const std::string& filename);
 
 bool exists(const std::string& filename);
 
-void generate_header(std::ofstream& file, const std::string separator=default_separator);
+void create_header(std::ofstream& file, const std::string separator=default_separator);
 
 void export_entry(std::ofstream& file, const Algorithm& alg, const Network& netw, const std::string separator);
 

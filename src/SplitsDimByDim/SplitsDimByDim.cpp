@@ -191,39 +191,41 @@ void SplitsDBD::init(Network& network){
     m_order_map1.clear();
     m_order_map2.clear();
 
+    m_state.resize(dim);
+    m_adjacence_matrix.resize(n_vertex*(n_vertex+1), 1);
+    
+    for(const auto& [v1, v2] : network.edge_list){
+        weight_t w = network[n_vertex*v1 + v2];
+        m_adjacence_matrix[n_vertex*v1 + v2] = w;
+        m_adjacence_matrix[n_vertex*v2 + v1] = w;
+
+        m_adjacence_matrix[n_vertex*n_vertex + v1] *= w;
+        m_adjacence_matrix[n_vertex*n_vertex + v2] *= w;
+    }
+    
+    m_ext_cost_tab.resize(n_vertex*n_vertex, 1);
+
     best_cost = numeric_limits<cost_t>::max()-1;
 
-    ifstream ifile("instances/" + network.m_filename);
-    string line;
-    int i, j, w;
-    while(getline(ifile, line)){
-        istringstream flux(&line[2]);
-        switch(line[0]){
-            case 'd':
-                dmax = min(3, n_vertex/2);
-                if(refdmax > 0){
-                    dmax = min(dmax, refdmax);
-                }
-                m_state.resize(dim);
-                m_adjacence_matrix.resize(n_vertex*(n_vertex+1), 1);
-                m_ext_cost_tab.resize(n_vertex*n_vertex, 1);
-                /*m_cost_memo.resize(pow(2, size/2), -1);
-                m_order_map1.resize(pow(2, size/2), -1);
-                m_order_map2.resize(pow(2,size/2), -1);*/
-            break;
-            case 'e':
-                flux >> i >> j >> w;
-                m_adjacence_matrix[n_vertex*i + j] = w;
-                m_adjacence_matrix[n_vertex*j + i] = w;
-                m_adjacence_matrix[n_vertex*n_vertex + i] *= w;
-                m_adjacence_matrix[n_vertex*n_vertex + j] *= w;
-            break;
-            default:
-            break;
-        }
-    }
+    // ifstream ifile("instances/" + network.m_filename);
+    // string line;
+    // int i, j, w;
+    // while(getline(ifile, line)){
+    //     istringstream flux(&line[2]);
+    //     switch(line[0]){
+    //         case 'e':
+    //             flux >> i >> j >> w;
+    //             m_adjacence_matrix[n_vertex*i + j] = w;
+    //             m_adjacence_matrix[n_vertex*j + i] = w;
+    //             m_adjacence_matrix[n_vertex*n_vertex + i] *= w;
+    //             m_adjacence_matrix[n_vertex*n_vertex + j] *= w;
+    //         break;
+    //         default:
+    //         break;
+    //     }
+    // }
 
-    for(int i = 0; i < n_vertex/2; i ++){
+    for(int i = 0; i < dim; i ++){
         m_state[i] = i;
     }
 

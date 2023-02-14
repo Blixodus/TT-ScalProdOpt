@@ -3,7 +3,7 @@
 cost_t OneSideDBD::solve(){
     pair<int, int> p;
     //nombre max d'arêtes centrales accumulées
-    int kmax = 2*dmax + 1;
+    int kmax = 2*dmax + 1; //commenting this might break everything, we'll see
     //passage de l'état s, à s+1
     for(int s = 0; s < n_vertex/2-1; s++){
         int N = m_adjacence_matrix[n_vertex*s + s+n_vertex/2]; //arête centrale à multiplier
@@ -230,42 +230,48 @@ void OneSideDBD::init(Network& network){
     O.clear();
     Z.clear();
     best_order.clear();
-    int kmax;
+    // int kmax = 2*dmax+1;
 
-    ifstream ifile("instances/" + network.m_filename);
-    string line;
-    int i, j, w;
-    while(getline(ifile, line)){
-        istringstream flux(&line[2]);
-        switch(line[0]){
-            case 'd':
-                if(refdmax <= 0){ //on pourrait mettre une inégalité stricte, celà impliquerait qu'on s'interdit de garder l'arête centrale, mais nécessiterait de modifier la boucle principal
-                    dmax = n_vertex/2; //pk tu casses
-                }else{
-                    dmax = min(refdmax, n_vertex/2);
-                }
-                kmax = 2*dmax+1;
-                m_adjacence_matrix.resize(n_vertex*(n_vertex+1), 1);
-                m_ext_cost_tab.resize(n_vertex, 1);
-                P.resize(n_vertex, -1);
-                C.resize(min(2*(n_vertex/2)-1, kmax), 0); //tableau des coûts
-                T.resize(min(2*(n_vertex/2)-1, kmax), 1); //tableau des arêtes centrales
-                O.resize(n_vertex*n_vertex/4, {-1, -1});
-                Z.resize(n_vertex/2, -1);
-            break;
-            case 'e':
-                flux >> i >> j >> w;
-                m_adjacence_matrix[n_vertex*i + j] = w;
-                m_adjacence_matrix[n_vertex*j + i] = w;
-                m_adjacence_matrix[n_vertex*n_vertex + i] *= w;
-                m_adjacence_matrix[n_vertex*n_vertex + j] *= w;
-                m_ext_cost_tab[i] *= w;
-                m_ext_cost_tab[j] *= w;
-            break;
-            default:
-            break;
-        }
+    C.resize(min(2*(n_vertex/2)-1, 2*dmax+1), 0); //tableau des coûts
+    T.resize(min(2*(n_vertex/2)-1, 2*dmax+1), 1); //tableau des arêtes centrales
+    m_adjacence_matrix.resize(n_vertex*(n_vertex+1), 1);
+    m_ext_cost_tab.resize(n_vertex, 1);
+    P.resize(n_vertex, -1);
+    O.resize(n_vertex*n_vertex/4, {-1, -1});
+    Z.resize(n_vertex/2, -1);
+
+    for(const auto& [v1, v2] : network.edge_list){
+        weight_t w = network[n_vertex*v1 + v2];
+
+        m_ext_cost_tab[v1] *= w;
+        m_ext_cost_tab[v2] *= w;
+
+        m_adjacence_matrix[n_vertex*v1 + v2] = w;
+        m_adjacence_matrix[n_vertex*v2 + v1] = w;
+
+        m_adjacence_matrix[n_vertex*n_vertex + v1] *= w;
+        m_adjacence_matrix[n_vertex*n_vertex + v2] *= w;
     }
+
+    // ifstream ifile("instances/" + network.m_filename);
+    // string line;
+    // int i, j, w;
+    // while(getline(ifile, line)){
+    //     istringstream flux(&line[2]);
+    //     switch(line[0]){
+    //         case 'e':
+    //             flux >> i >> j >> w;
+    //             m_adjacence_matrix[n_vertex*i + j] = w;
+    //             m_adjacence_matrix[n_vertex*j + i] = w;
+    //             m_adjacence_matrix[n_vertex*n_vertex + i] *= w;
+    //             m_adjacence_matrix[n_vertex*n_vertex + j] *= w;
+    //             m_ext_cost_tab[i] *= w;
+    //             m_ext_cost_tab[j] *= w;
+    //         break;
+    //         default:
+    //         break;
+    //     }
+    // }
 }
 
 cost_t OneSideDBD::call_solve(){

@@ -22,10 +22,10 @@ Algorithm::Algorithm(std::map<std::string, std::any> map){
                 std::cout << "Starting solution not implemented yet" << std::endl;
                 break;
             case TIME:
-                timeout_time = std::any_cast<std::chrono::minutes>(val);
+                timeout_time = std::chrono::minutes(std::any_cast<int>(val));
                 break;
             case TEST:
-                to_test = std::any_cast<bool>(val);
+                to_test = std::any_cast<int>(val);//std::any_cast<bool>(val);
                 break;
             default:
                 std::cout << "Unknown parameter : '" << key << "'" << std::endl;
