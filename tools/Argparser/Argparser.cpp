@@ -127,6 +127,7 @@ void cast_proper(std::map<std::string, std::any>& map, std::string key, std::str
             break;
         case MAIN_ALG:
         case SUB_ALG:
+        case START_SOL:
             map[key] = val;
             break;
         default:

@@ -1,23 +1,4 @@
 #include "Network.hpp"
-/**
- * @brief Sorts edge_list given the order right->left, up->down
- * 
- */
-/*void Network::sort_edges(){
-    // int size = (2*edge_list.size() + 4)/3; //dimension
-    
-    sort(edge_list.begin(), edge_list.end(), [dimension](edge_t e1, edge_t e2){
-        if(e1.m_edge.first < e2.m_edge.first && e1.m_edge.second < e2.m_edge.second){
-            return true;
-        }else{
-            if(e1.m_edge.first < dimension && e2.m_edge.first < dimension){
-                return e1.m_edge.second < e2.m_edge.second;
-            }else{
-                return e1.m_edge.first < dimension && e2.m_edge.first >=dimension;
-            }
-        }
-    });
-}*/
 
 void Network::sort_edges(){
     sort(edge_list.begin(), edge_list.end(), [this](std::pair<vertexID_t, vertexID_t> e1, std::pair<vertexID_t, vertexID_t> e2){
