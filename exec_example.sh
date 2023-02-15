@@ -1,0 +1,1 @@
+xmake run -w . OptiTenseurs -a "main_alg GreedyEdgeSort" "main_alg ConvexSplits dmax 3" "main_alg AllSplits" "main_alg AllEdgeByEdge" -f "test/test0.txt" "test/test1.txt" "test/test2.txt"  -o "results.csv"
