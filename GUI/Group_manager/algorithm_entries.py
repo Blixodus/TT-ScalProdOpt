@@ -19,7 +19,7 @@ class Algo_list_frame(Scrollable_frame):
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.pack(padx=10, pady=10, fill="both", side="left", expand=True) #TODO: hardcode the parameters
+        self.pack(padx=10, pady=10, fill="x", side="left", expand=True) #TODO: hardcode the parameters
 
     def grab_all_values(self)->list[dict[str:str]]:
         """Grabs all the parameters stored in all the algorithm entries"""
@@ -41,7 +41,7 @@ class Algo_entry(ctk.CTkFrame):
         Algo_entry constructor
         Adds an empty entry (main algorithm = "None")
         """
-        super().__init__(master=master.scrollable_frame, height=20)
+        super().__init__(master=master.scrollable_frame, height=20, width = 800)
 
         #algo option menu
         main_alg_menu = ctk.CTkOptionMenu(master=self, values=list(ALGORITHMS.keys()), command=self.update_entry)
@@ -77,7 +77,7 @@ class Algo_entry(ctk.CTkFrame):
         close_button = ctk.CTkButton(master=self, text="x", command=lambda:self.destroy(), width=30, height=30)
         close_button.pack(side="left")
 
-        self.pack(padx=5, pady=5) #TODO: hardcode the parameters
+        self.pack(padx=5, pady=5, fill="both", expand=True) #TODO: hardcode the parameters
 
         #A dict storing the elements here, so they are easily accessible
         self.param_list=dict({"main_alg":main_alg_menu, "dmin":dmin_entry, "dmax":dmax_entry, "sub_alg":sub_alg_menu, "start_sol":start_sol_menu, "time":time_entry, "test":test_box})
@@ -165,13 +165,13 @@ def verify_params(dict_list : list[dict[str:str]]):
 
         #if sub_alg is None, then the main algorithm has to solve the problem entirely, hence dmin=0
         if param_dict.get("dmin") == '' or (param_dict.get("sub_alg")=="None" and not param_dict.get("main_alg")=="Shuffle"):
-            param_dict["dmin"]=0
+            param_dict["dmin"]=1
 
         if param_dict.get("dmax")=='':
-            param_dict["dmax"]=0
+            param_dict["dmax"]=-1
 
         if param_dict.get("time")=='':
-            param_dict["time"]=5
+            param_dict["time"]=10
     
         #We cast str of numerical values to int
         for param in ["dmin","dmax","time"]:

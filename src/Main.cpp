@@ -10,6 +10,7 @@ void init_algos(std::vector<std::map<std::string, std::any>> dict_list){
     //we iterate over the dictionaries
     for(auto& dict : dict_list){
         std::string algo_name = std::any_cast<std::string>(dict["main_alg"]);
+        std::cout << "Instantiating : " << algo_name << std::endl;
         //we instantiate the right algorithm based on its name
         switch(algo_map[algo_name]){
             case ALLSPLITS:
@@ -37,6 +38,7 @@ void init_algos(std::vector<std::map<std::string, std::any>> dict_list){
                 std::cerr << "Unknown algorithm '" << algo_name << "'" << std::endl;
                 break;
         }
+        printf("\n");
     }
     printf("\n");
 }

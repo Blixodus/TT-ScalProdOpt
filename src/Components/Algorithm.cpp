@@ -6,7 +6,6 @@ Algorithm::Algorithm(std::map<std::string, std::any> map){
         alg_param_e param_name = param_map[key];
         switch(param_name){
             case MAIN_ALG:
-                std::cout << "Instantiating : " << std::any_cast<std::string>(val) << std::endl;
                 algo_name = std::any_cast<std::string>(val);
                 break;
             case DMIN:
@@ -56,6 +55,7 @@ const int Algorithm::verify() {
     if(to_test)
     {
         cost_t true_cost = compute_order(*m_network, best_order);
+
         if(best_cost == true_cost)
         {
             printf("Check passed.\n");
@@ -77,6 +77,6 @@ const int Algorithm::verify() {
  * @param limit the limiting factor in the network, for the execution of the algorithm
  */
 void Algorithm::set_limit_dim(int limit){
-    dmax = std::min(std::max(1, refdmax), limit);
+    dmax = (refdmax <= 0) ? limit : std::min(std::max(1, refdmax), limit);
     dmin = std::min(std::max(1, refdmin), dmax);
 }

@@ -18,26 +18,43 @@ class Group_manager_page(ctk.CTkFrame):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        top_side = ctk.CTkFrame(master=self)
+
+        left_hand_side = ctk.CTkFrame(master=top_side)
+
         #frame holding the algorithm entries
-        self.algorithm_frame = algorithm_entries.Algo_list_frame(master=self, width=800)
+        self.algorithm_frame = algorithm_entries.Algo_list_frame(master=left_hand_side)#(master=self)
+        self.algorithm_frame.pack(side="top", fill="both", expand=True)
 
         #button for adding entries
-        add_entry_button = ctk.CTkButton(master=self, text="+", command=lambda:algorithm_entries.Algo_entry(self.algorithm_frame))
-        add_entry_button.pack(padx = 10, pady=10, side="left")
+        #add_entry_button = ctk.CTkButton(master=self, text="Add algorithm", command=lambda:algorithm_entries.Algo_entry(self.algorithm_frame))
+        add_entry_button = ctk.CTkButton(master=left_hand_side, text="Add algorithm", command=lambda:algorithm_entries.Algo_entry(self.algorithm_frame))        
+        add_entry_button.pack(padx = 10, pady=10, side="bottom")
+
+        left_hand_side.pack(side="left", fill="both", expand=True)
+
+
+        right_hand_side = ctk.CTkFrame(master=top_side)
 
         #frame holding the instance entries
-        self.instance_frame = instance_list.Instance_list_frame(master=self)
+        self.instance_frame = instance_list.Instance_list_frame(master=right_hand_side)#(master=self)
+        self.instance_frame.pack(side="top", fill="both", expand=True)
         #button for adding an instance file
-        explore = ctk.CTkButton(master=self, text="Explore", command=lambda:instance_list.explore_files(self.instance_frame))
-        explore.pack(padx=10, pady=10, side="left")
+        explore = ctk.CTkButton(master=right_hand_side, text="Explore", command=lambda:instance_list.explore_files(self.instance_frame))#(master=self, text="Explore", command=lambda:instance_list.explore_files(self.instance_frame))
+        explore.pack(padx=10, pady=10, side="bottom")
+
+        right_hand_side.pack(side="left", fill="both", expand=True)
+
+        top_side.pack(side="top", fill="both", expand=True)
 
         #TODO: add an export functionality
         #It would be great to have a "select or create" dialog
-        self.export_file_name = ctk.CTkEntry(master=self, placeholder_text="File path")
-        self.export_file_name.pack(side="left")
+        self.export_file_name = ctk.CTkEntry(master=self, placeholder_text="Output file")
+        self.export_file_name.pack(side="left", padx=300)
 
         launch=ctk.CTkButton(master=self, text="GO!", command=self.launch_execution)
-        launch.pack(side="bottom")
+        launch.pack(side="right")
+
 
         self.pack(fill="both", expand=True)
 
@@ -52,6 +69,7 @@ class Group_manager_page(ctk.CTkFrame):
         return self.algorithm_frame.grab_all_values(), self.instance_frame.grab_all_file_path(), self.export_file_name.get()
     
     def launch_execution(self):
+        """Launch the execution of OptiTenseurs on the selected parameters"""
         #the arguments are caught
         list_algo_dict, files_param, export_file = self.grab_arguments()
 

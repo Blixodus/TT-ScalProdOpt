@@ -12,6 +12,7 @@ class Scrollable_frame(ctk.CTkFrame):
         canvas = ctk.CTkCanvas(self)
         scrollbar = ctk.CTkScrollbar(self, orientation="vertical", command=canvas.yview)
         self.scrollable_frame = ctk.CTkFrame(canvas)
+        self.scrollable_frame.pack(fill="both", expand=True)
 
         self.scrollable_frame.bind(
             "<Configure>",

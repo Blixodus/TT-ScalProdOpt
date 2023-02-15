@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import os
 import sys
+from pathlib import Path
 
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -15,7 +16,7 @@ class Instance_list_frame(Scrollable_frame):
     """Frame holding all instance entries"""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.pack(padx=10, pady=10, fill="both", side="left", expand=True)
+        self.pack(padx=10, pady=10, side="top")
         
     def grab_all_file_path(self) -> str :
         """Iterates over the Instance_entry objects and returns their stored values as a single string"""
@@ -31,7 +32,7 @@ class Instance_entry(ctk.CTkFrame):
     Contains a constructor that sets up all the component
     Removal is directly handled by a sub-element
     file_path : the path to the instance file
-    file_size : the number of nodes in the file
+    file_size : the number of dimensions of the network
     average_weight : the average weight of the edges
     """
     def __init__(self, filename : str, **kwargs):
@@ -81,7 +82,16 @@ def explore_files(frame : Scrollable_frame):
     #TODO: we need to be careful with the initial directory, it's 100% gonna break something
     #print(os.getcwd()) #gives the current directory
     #TODO: put a proper filetypes parameter
-    filenames = ctk.filedialog.askopenfilenames(initialdir="../instances", title="Select a file or directory") 
+    abs_list_curr_dir = Path(os.getcwd()).parts
+    abs_path_instances = ""
+    for dir in abs_list_curr_dir:
+        if(dir in {"GUI", "results", "instances", "plot"}):
+            break
+        abs_path_instances += dir + "/"
+
+    abs_path_instances += "instances/"
+
+    filenames = ctk.filedialog.askopenfilenames(initialdir=abs_path_instances, title="Select a file or directory") 
 
     #each selected file adds an entry to the list of instances
     for file in filenames:
