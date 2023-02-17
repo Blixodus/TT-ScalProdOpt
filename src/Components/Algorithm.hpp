@@ -14,6 +14,8 @@ namespace alg{
         {"main_alg", MAIN_ALG}, {"dmin", DMIN}, {"dmax", DMAX}, {"sub_alg", SUB_ALG},
         {"start_sol", START_SOL}, {"time", TIME}, {"test", TEST}
     };
+
+    
 }
 
 using namespace alg;
