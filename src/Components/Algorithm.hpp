@@ -11,12 +11,15 @@
 namespace alg{
     enum alg_param_e {MAIN_ALG, DMIN, DMAX, SUB_ALG, START_SOL, TIME, TEST};
     static std::map<std::string, alg_param_e> param_map {
-        {"main_alg", MAIN_ALG}, {"dmin", DMIN}, {"dmax", DMAX}, {"SUB_ALG", SUB_ALG},
-        {"sub_alg", START_SOL}, {"time", TIME}, {"test", TEST}
+        {"main_alg", MAIN_ALG}, {"dmin", DMIN}, {"dmax", DMAX}, {"sub_alg", SUB_ALG},
+        {"start_sol", START_SOL}, {"time", TIME}, {"test", TEST}
     };
 }
 
 using namespace alg;
+
+template<class T>
+void execution_workflow(T& solver, Network& network);
 
 /**
  * @brief general algorithm class
@@ -44,6 +47,12 @@ class Algorithm{
     //Size of the network in number of vertices
     int n_vertex;
 
+    //Secondary algorithm
+    Algorithm* sub_alg = nullptr;
+
+    //Starting solution
+    Algorithm* start_sol = nullptr;
+
     //The current best cost
     cost_t best_cost=numeric_limits<cost_t>::max()-1;
 
@@ -51,7 +60,7 @@ class Algorithm{
     Tab best_order;
 
     //Final time
-    chrono::duration<double> time;
+    chrono::duration<double> time = std::chrono::duration<double>(0);
 
     //Maximum alloted time before timeout
     std::chrono::minutes timeout_time = std::chrono::minutes(10);
@@ -70,15 +79,27 @@ class Algorithm{
 
     Algorithm(){}
     Algorithm(std::map<std::string, std::any> map);
+
+    
     virtual cost_t call_solve() {return 0;};
     virtual void display_order() {};
 
     std::string best_order_as_string() const;
 
     void set_limit_dim(int max);
+    void set_network(Network& network){m_network = &network;}
+    void set_start_sol(Network& network);
+    
 
     const int verify();
 };
+
+template<class T>
+void execution_workflow(T& solver, Network& network){
+    solver.init(network);
+    solver.set_network(network);
+    solver.set_start_sol(network);
+}
 
 /**
  * @brief Executes an algorithm on a network
@@ -89,14 +110,20 @@ class Algorithm{
  */
 template<class T>
 void execfile(T& solver, Network& network){
-    solver.init(network);
+    execution_workflow(solver, network);
+
     if(solver.dmax > -1){
         std::cout << "Delta : " << solver.dmax << '\n';
     }
     auto start = std::chrono::high_resolution_clock::now();
     solver.best_cost = solver.call_solve();
     auto end = std::chrono::high_resolution_clock::now();
-    solver.time = end-start;
+    solver.time += end-start;
+    
+    if(solver.to_test){
+        solver.verify();
+    }
+
     std::cout << "Best cost : " << solver.best_cost << '\n';
     if(!solver.best_order.empty()){
         std::cout << "Best order : ";
@@ -115,11 +142,16 @@ void execfile(T& solver, Network& network){
  */
 template<class T>
 void execfile_no_display(T& solver, Network& network){
-    solver.init(network);
+    execution_workflow(solver, network);
+
     auto start = std::chrono::high_resolution_clock::now();
     solver.best_cost = solver.call_solve();
     auto end = std::chrono::high_resolution_clock::now();
-    solver.time = end-start;
+    solver.time += end-start;
+
+    if(solver.to_test){
+        solver.verify();
+    }
 }
 
 /**

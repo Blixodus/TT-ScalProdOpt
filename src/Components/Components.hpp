@@ -11,9 +11,19 @@
 #include <fstream>
 #include <unordered_map>
 #include <limits>
+#include <map>
 #include "../../tools/Display/Display.hpp"
 
 using namespace std;
+
+//Enum and map to switch on the algorithms' name
+enum algorithm_e {ALLSPLITS, ALLEDGEBYEDGE, CONVEXSPLITS, GREEDYEDGESORT,
+ONESIDEDIMBYDIM, SHUFFLE, SPLITSDIMBYDIM};
+static std::map<std::string, algorithm_e> ALGO_MAP {
+    {"AllSplits", ALLSPLITS}, {"AllEdgeByEdge", ALLEDGEBYEDGE},{"ConvexSplits", CONVEXSPLITS},
+    {"GreedyEdgeSort", GREEDYEDGESORT},{"OneSideDimByDim", ONESIDEDIMBYDIM},
+    {"Shuffle", SHUFFLE},{"SplitsDimByDim", SPLITSDIMBYDIM}
+};
 
 //Type to encode vertices
 typedef int vertexID_t;

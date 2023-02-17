@@ -136,7 +136,6 @@ void GreedyEdgeSort::init(Network& network){
 
 cost_t GreedyEdgeSort::call_solve(){
     solve();
-    verify();
     return best_cost;
 }
 

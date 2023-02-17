@@ -202,7 +202,5 @@ void AllEdgeByEdge::init(Network& network){
 cost_t AllEdgeByEdge::call_solve(){
     cost_t c = solve(sgref);
     get_order(get_key(m_state));
-    //TODO: something crashes here, not sure why
-    //verify();
     return c;
 }

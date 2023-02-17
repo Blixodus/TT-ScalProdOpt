@@ -15,10 +15,10 @@ Algorithm::Algorithm(std::map<std::string, std::any> map){
                 refdmax = std::any_cast<int>(val);
                 break;
             case SUB_ALG:
-                std::cout << "Sub alg not implemented yet" << std::endl;
+                //initialization is handled in Main.cpp
                 break;
             case START_SOL:
-                std::cout << "Starting solution not implemented yet" << std::endl;
+                //initialization is handled in Main.cpp
                 break;
             case TIME:
                 timeout_time = std::chrono::minutes(std::any_cast<int>(val));
@@ -79,4 +79,18 @@ const int Algorithm::verify() {
 void Algorithm::set_limit_dim(int limit){
     dmax = (refdmax <= 0) ? limit : std::min(std::max(1, refdmax), limit);
     dmin = std::min(std::max(1, refdmin), dmax);
+}
+
+/**
+ * @brief Initializes the starting solution
+ * 
+ * @param network 
+ */
+void Algorithm::set_start_sol(Network& network){
+    if(start_sol != nullptr){
+        execfile_no_display(*start_sol, network);
+        best_cost = start_sol->best_cost;
+        best_order = start_sol->best_order;
+        time += start_sol->time;
+    }
 }
