@@ -1,3 +1,4 @@
+Algorithm;Dmin;Dmax;Cost;Time;Dimension;Density;File
 GreedyEdgeSort;1;4;82;7.126e-06;2;4.75;test/test0.txt
 OneSideDimByDim;1;2;82;3.548e-06;2;4.75;test/test0.txt
 SplitsDimByDim;1;2;82;0.000374107;2;4.75;test/test0.txt

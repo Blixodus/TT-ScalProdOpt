@@ -41,6 +41,7 @@ void init_algos(std::vector<std::map<std::string, std::any>> dict_list){
  */
 Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
     std::string algo_name(std::any_cast<std::string>(dictionary["main_alg"]));
+    if(ALGO_MAP.find(algo_name) == ALGO_MAP.end()){return nullptr;}
     switch(ALGO_MAP[algo_name]){
         case ALLSPLITS:
             return new AllSplits(dictionary);
