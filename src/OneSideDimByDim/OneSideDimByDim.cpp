@@ -252,26 +252,6 @@ void OneSideDBD::init(Network& network){
         m_adjacence_matrix[n_vertex*n_vertex + v1] *= w;
         m_adjacence_matrix[n_vertex*n_vertex + v2] *= w;
     }
-
-    // ifstream ifile("instances/" + network.m_filename);
-    // string line;
-    // int i, j, w;
-    // while(getline(ifile, line)){
-    //     istringstream flux(&line[2]);
-    //     switch(line[0]){
-    //         case 'e':
-    //             flux >> i >> j >> w;
-    //             m_adjacence_matrix[n_vertex*i + j] = w;
-    //             m_adjacence_matrix[n_vertex*j + i] = w;
-    //             m_adjacence_matrix[n_vertex*n_vertex + i] *= w;
-    //             m_adjacence_matrix[n_vertex*n_vertex + j] *= w;
-    //             m_ext_cost_tab[i] *= w;
-    //             m_ext_cost_tab[j] *= w;
-    //         break;
-    //         default:
-    //         break;
-    //     }
-    // }
 }
 
 cost_t OneSideDBD::call_solve(){

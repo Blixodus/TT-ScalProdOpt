@@ -24,15 +24,6 @@
 
 using namespace std::chrono_literals;
 
-//Enum and map to switch on the algorithms' name
-enum algorithm_e {ALLSPLITS, ALLEDGEBYEDGE, CONVEXSPLITS, GREEDYEDGESORT,
-ONESIDEDIMBYDIM, SHUFFLE, SPLITSDIMBYDIM};
-std::map<std::string, algorithm_e> algo_map {
-    {"AllSplits", ALLSPLITS}, {"AllEdgeByEdge", ALLEDGEBYEDGE},{"ConvexSplits", CONVEXSPLITS},
-    {"GreedyEdgeSort", GREEDYEDGESORT},{"OneSideDimByDim", ONESIDEDIMBYDIM},
-    {"Shuffle", SHUFFLE},{"SplitsDimByDim", SPLITSDIMBYDIM}
-};
-
 //csv file to send the results
 static std::ofstream result_file;
 //separator
@@ -40,6 +31,10 @@ static std::string csv_separator(";");
 static std::vector<Algorithm*> main_algorithm_list; //liste des algos utilisés
 static std::vector<Network> main_network_list;
 void init_algos();
+
+Algorithm* instantiate(std::map<std::string, std::any>& dictionary);
+Algorithm* instantiate(const std::string& algorithm_name);
+
 void display_infos(Algorithm& solver);
 
 void exec_all_on_file(Network& network);

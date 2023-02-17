@@ -12,35 +12,73 @@ void init_algos(std::vector<std::map<std::string, std::any>> dict_list){
         std::string algo_name = std::any_cast<std::string>(dict["main_alg"]);
         std::cout << "Instantiating : " << algo_name << std::endl;
         //we instantiate the right algorithm based on its name
-        switch(algo_map[algo_name]){
-            case ALLSPLITS:
-                main_algorithm_list.push_back(new AllSplits(dict));
-                break;
-            case ALLEDGEBYEDGE:
-                main_algorithm_list.push_back(new AllEdgeByEdge(dict));
-                break;
-            case CONVEXSPLITS:
-                main_algorithm_list.push_back(new ConvexSplits(dict));
-                break;
-            case GREEDYEDGESORT:
-                main_algorithm_list.push_back(new GreedyEdgeSort(dict));
-                break;
-            case ONESIDEDIMBYDIM:
-                main_algorithm_list.push_back(new OneSideDBD(dict));
-                break;
-            case SHUFFLE:
-                main_algorithm_list.push_back(new Shuffle(dict));
-                break;
-            case SPLITSDIMBYDIM:
-                main_algorithm_list.push_back(new SplitsDBD(dict));
-                break;
-            default:
-                std::cerr << "Unknown algorithm '" << algo_name << "'" << std::endl;
-                break;
+        Algorithm* new_alg = instantiate(dict);
+        
+        //verify that the algorithm exists
+        if(new_alg != nullptr){
+            main_algorithm_list.emplace_back(new_alg);
+
+            //initialization of sub_alg
+            if(dict.find("sub_alg") != dict.end()){
+                new_alg->sub_alg = instantiate(std::any_cast<std::string>(dict["sub_alg"]));
+            }
+
+            //initialization of start_sol
+            if(dict.find("start_sol") != dict.end()){
+                new_alg->start_sol = instantiate(std::any_cast<std::string>(dict["start_sol"]));
+            }
         }
         printf("\n");
     }
     printf("\n");
+}
+
+/**
+ * @brief Instantiates a new Algorithm based on a parameter dictionary
+ * 
+ * @param dictionary 
+ * @return Algorithm* 
+ */
+Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
+    std::string algo_name(std::any_cast<std::string>(dictionary["main_alg"]));
+    switch(ALGO_MAP[algo_name]){
+        case ALLSPLITS:
+            return new AllSplits(dictionary);
+            break;
+        case ALLEDGEBYEDGE:
+            return new AllEdgeByEdge(dictionary);
+            break;
+        case CONVEXSPLITS:
+            return new ConvexSplits(dictionary);
+            break;
+        case GREEDYEDGESORT:
+            return new GreedyEdgeSort(dictionary);
+            break;
+        case ONESIDEDIMBYDIM:
+            return new OneSideDBD(dictionary);
+            break;
+        case SHUFFLE:
+            return new Shuffle(dictionary);
+            break;
+        case SPLITSDIMBYDIM:
+            return new SplitsDBD(dictionary);
+            break;
+        default:
+            std::cerr << "Unknown algorithm '" << algo_name << "'" << std::endl;
+            return nullptr;
+            break;
+    }
+}
+
+/**
+ * @brief Instantiates a new Algorithm based on a name
+ * 
+ * @param algorithm_name 
+ * @return Algorithm* 
+ */
+Algorithm* instantiate(const std::string& algorithm_name){
+    std::map<std::string, std::any> buff_dict({{"main_alg", algorithm_name}});
+    return instantiate(buff_dict);
 }
 
 void display_infos(Algorithm& solver){
@@ -53,7 +91,6 @@ void display_infos(Algorithm& solver){
     std::cout << "--------------" << std::endl;
 }
 
-//TODO: remove delta from this code
 /**
  * @brief executes solver.execfile inside a thread, and stops it after the time limit is reached 
  * 
