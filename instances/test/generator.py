@@ -24,7 +24,7 @@ def generate_instance(file, size, f_rank1, f_rank2, f_dims, rounded):
     for i in range(size-1):
         file.write(" {} *{}".format(size+i, rank2[i+1]))
     file.write(" {}\n".format(2*size-1))
-    file.write("d={}\n".format(size*2))
+    file.write("d {}\n".format(size*2))
     for i in range(size-1):
         file.write("e {} {} {}\n".format(i, i+1, rank1[i+1]))
     for i in range(size):
