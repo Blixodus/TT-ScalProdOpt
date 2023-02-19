@@ -54,6 +54,8 @@ The keys are :
 
 An example of a valid command can be found in exec_example.sh.
 
+Alternatively, you can use the GUI to select the parameters and execute the code. You can also use it to generate the execution command and copy it to your clipboard.
+
 # Networks
 Networks are text files located in the 'instances' directory. They can be read by the programs in order to be solved.
 They are formatted in the following way :  
@@ -75,46 +77,52 @@ We note "explicit edges" the edges of the network, and "implicit edges" the edge
     * Description : Solves every possible splits (over the vertices) of the network
     * Complexity : 2^4D
 
-* ### AllEdgeByEdge 
+2. ### AllEdgeByEdge 
     * Type : theoretically exact (need proof), iterative (edges)
     * Description : Solves every contraction order of the network
     * Complexity : 
     * Remark : Unlike AllSplits which consider every splits possible, this algorithm only considers the explicit edges.
 
-* ### ConvexSplits
+3. ### ConvexSplits
     * Type : heuristic (close to exact), dynamic programming
     * Description : Solves every possible convex splits (over the vertices) of the network
     * Complexity : 
     * dmax : Limits how many edges can be crossed when splitting
     * Remark : By virtue of being unable to generate concave sub-problem, this algorithm is not exact. However it is unlikely to find a network where the optimal solution would require a concave decomposition. Determining the best and worst network-structure for this algorithm could be interesting.
 
-* ### GreedyEdgeSort
+4. ### GreedyEdgeSort
     * Type : greedy, iterative (edges)
     * Description : Solves a single contraction order, sorts the edges by weight^2/contraction_cost (descending order), re-computed at each iteration.
-    * Complexity : D
+    * Complexity : D*log(D!)
     * Remark : This algorithm attempts to minimize the overall weight of the network, while not skyrocketting the final cost. This strategy is both cheap and consistently good, which makes its solution a good starting point for any algorithm. Additionaly, a thorough analysis of the network could provide information that would allow more constraint to be added in order to approach the optimal solution.
 
-* ### OneSideDimByDim
+5. ### OneSideDimByDim
     * Type : heuristic, iterative (edges + dimensions)
     * Description : Explores the solutions by going from one side of the network to the other. Contracts 2 edges in {upper, central, lower} per dimension.
     * Complexity : 
     * dmax : The amount of central edges that can be accumulated
     * Remark : Each dimension is composed of 3 edges, two lateral and one central. Once 2 edges have been contracted on that dimension, the remaining edge fuses with the next central edge. Hence why it is interesting to limit how many central edges can fuse together.
 
-* ### SplitsDimByDim :
+6. ### SplitsDimByDim :
     * Type : heuristic, iterative (dimensions) + dynamic programming
     * Description : Iterates over d in [1, dmax], then splits the network in 2 sub-networks of dimensions d and D-d.
     * Complexity : 
     * dmax : 
 
 # GUI
-In order to ease the execution of many algorithms with different parameters on many files, a basic Graphical User Interface is provided.
-The GUI provides the ability to add algorithm entries, tweak the parameters, add network files, and select an output file.
-It is recommanded to have python 3.* installed to use the GUI.
-You can launch the gui by executing OptiGUI, or by directly using python3 GUI/main.py
+In order to ease the execution of many algorithms with different parameters on many files, a basic Graphical User Interface is provided.  
+It is recommanded to have python 3.* installed to use the GUI.  
+
+## Launching
+You can launch the gui by executing OptiGUI, or by directly using python3 GUI/main.py.
+
+## Functionalities
+The GUI provides the ability to add algorithm entries, tweak the parameters, add network files, select an output file, copy the execution command to clipboard, and launch the execution.  
+It will only display the parameters available/relevant for the selected algorithms.  
+Currently, launching the execution directly from the interface will lock it, hence why it may be interesting to copy the command and execute it separately.
 
 # Results
-If [output_file] is specified, the resulting file contains for each algorithm used, their parameters, the resulting cost, the time to solve, and the network and its caracteristics. Algorithms that timed-out are omitted.
-If the output file does not exist prior to the execution, it will be created by the program. If it already exists, the new results will be added at the end of the file.
-The default delimiter is ';' and cannot easily be modified yet.
+If [output_file] is specified, the resulting file contains for each algorithm used, their parameters, the resulting cost, the time to solve, and the network and its caracteristics. Algorithms that timed-out are omitted.  
+If the output file does not exist prior to the execution, it will be created by the program. If it already exists, the new results will be added at the end of the file.  
+The default delimiter is ';' and cannot easily be modified yet.  
 An example of output file is provided in the 'results/' directory.
