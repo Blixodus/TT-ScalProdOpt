@@ -15,13 +15,19 @@
 class SouG{
     public:
     //The edges remaining
-    Tab m_state;
-    Tab m_adjacence_matrix;
-    Tab m_corr_list;
+    //Tab m_state;
+    vector_edgeID_t m_state;
 
-    int rep(int i);
+    // Tab m_adjacence_matrix;
+    matrix_weight_t m_adjacence_matrix;
+
+    //Tab m_corr_list;
+    vector_vertexID_t m_corr_list;
+
+    vertexID_t rep(vertexID_t i);
     SouG(){}
-    SouG(Tab state, Tab adjacence_matrix, Tab corr_list) : m_state(state), m_adjacence_matrix(adjacence_matrix), m_corr_list(corr_list) {}
+    // SouG(Tab state, Tab adjacence_matrix, Tab corr_list) : m_state(state), m_adjacence_matrix(adjacence_matrix), m_corr_list(corr_list) {}
+    SouG(vector_vertexID_t state, matrix_weight_t adjacence_matrix, vector_vertexID_t corr_list) : m_state(state), m_adjacence_matrix(adjacence_matrix), m_corr_list(corr_list) {}
     //void set(Tab edge_list, Tab AM, Tab V){this->S = S; this->adjacence_matrix = AM; this->V = V;};
 };
 
@@ -29,15 +35,17 @@ class AllEdgeByEdge : public Algorithm{
     public:
     SouG sgref; //structure avec son propre graphe qu'on peut modifier librement
     // vector<pair<int, int>> E; //liste des arêtes (fixe)
-    std::vector<std::pair<int, int>> m_edge_list;
+    std::vector<std::pair<vertexID_t, vertexID_t>> m_edge_list;
     //Tab G; //size*(size+1)
-    Tab m_adjacence_matrix;
+    //Tab m_adjacence_matrix;
+    matrix_weight_t m_adjacence_matrix;
 
     //Tab S; //les indices des arêtes
-    Tab m_state;
+    //Tab m_state;
+    vector_edgeID_t m_state;
 
     //unordered_map<unsigned long long, int> O;
-    unordered_map<unsigned long long, int> m_order_map;
+    unordered_map<unsigned long long, edgeID_t> m_order_map;
 
     //unordered_map<unsigned long long, Cost> C;
     unordered_map<unsigned long long, cost_t> m_cost_memo;
@@ -45,9 +53,9 @@ class AllEdgeByEdge : public Algorithm{
     AllEdgeByEdge(){}
     AllEdgeByEdge(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
     
-    SouG getSG(){return SouG(m_state, m_adjacence_matrix, vector<int> (n_vertex, -1));}
-    cost_t contract(int i, SouG& sg);
-    void cheap_contract(int i, SouG& sg);
+    SouG getSG(){return SouG(m_state, m_adjacence_matrix, vector<vertexID_t> (n_vertex, -1));}
+    cost_t contract(edgeID_t i, SouG& sg);
+    void cheap_contract(edgeID_t i, SouG& sg);
 
     cost_t solve(SouG& sg);
 

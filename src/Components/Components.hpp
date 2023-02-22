@@ -25,21 +25,30 @@ static std::map<std::string, algorithm_e> ALGO_MAP {
     {"Shuffle", SHUFFLE},{"SplitsDimByDim", SPLITSDIMBYDIM}
 };
 
-//Type to encode vertices
-typedef int vertexID_t;
-//Type to encode edges
-typedef int edgeID_t;
-//Type to encode weights
-typedef int weight_t;
-
-//Type for costs
-typedef int cost_t;
 //Type for network dimensions
-typedef int dim_t;
+using dim_t = int ;
+
+//Type to encode vertices
+using vertexID_t = dim_t;
+//Type to encode edges
+using edgeID_t = dim_t;
+
+//Type to encode weights
+using weight_t = int;
+//Type for costs
+using cost_t = int;
+
+//Type for vector of weight
+using matrix_weight_t = std::vector<weight_t> ;
+using vector_weight_t = std::vector<weight_t> ;
 //Type for vector of cost
-typedef vector<cost_t> CostTab;
+using matrix_cost_t = std::vector<cost_t> ;
+using vector_cost_t = std::vector<cost_t> ;
+using CostTab = vector<cost_t> ;
 //Type for vector of integer
-typedef vector<int> Tab;
+using Tab = std::vector<int> ;
+using vector_edgeID_t = std::vector<edgeID_t> ;
+using vector_vertexID_t = std::vector<vertexID_t> ;
 
 //Type for edges
 struct edge_t{

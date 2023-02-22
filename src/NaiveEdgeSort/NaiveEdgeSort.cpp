@@ -49,7 +49,7 @@ cost_t NaiveEdgeSort::contract(int i){
  * @param i 
  * @return int 
  */
-int NaiveEdgeSort::C(int i){
+vertexID_t NaiveEdgeSort::C(int i){
     if(V[i] == -1){
         return i;
     }else{

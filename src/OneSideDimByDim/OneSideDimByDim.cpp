@@ -1,63 +1,63 @@
 #include "OneSideDimByDim.hpp"
 
 cost_t OneSideDBD::solve(){
-    pair<int, int> p;
+    std::pair<int, int> p;
     //nombre max d'arêtes centrales accumulées
     int kmax = 2*dmax + 1; //commenting this might break everything, we'll see
     //passage de l'état s, à s+1
     for(int s = 0; s < n_vertex/2-1; s++){
-        int N = m_adjacence_matrix[n_vertex*s + s+n_vertex/2]; //arête centrale à multiplier
-        int ofs = 2*s; //offset dans le tableau T
-        int ofsc = (s+1)*(s+1)-1; //offset dans le tableau C
+        weight_t N = m_adjacence_matrix[n_vertex*s + s+n_vertex/2]; //arête centrale à multiplier
+        int ofs = 2*s; //offset dans le tableau m_central_cost
+        int ofsc = (s+1)*(s+1)-1; //offset dans le tableau m_cost_to_reach
         for(int k = min(2*(s+1), kmax); k >= 2; k--){
             //pour chaque produits de Nk, on calcule le coût de garder l'arête
-            T[k] = T[k-2]*N;
+            m_central_weight[k] = m_central_weight[k-2]*N;
 
             //coût de contracter les 2 autres arêtes (dans le meilleur ordre possible)
-            C[k] = C[k-2] + contract(s, k, 2, p);
+            m_cost_to_reach[k] = m_cost_to_reach[k-2] + contract(s, k, 2, p);
 
             //stockage de l'ordre ayant donné le coût le plus faible
-            O[ofsc + k] = p;
+            m_order_by_dim[ofsc + k] = p;
 
-            //coût de garder l'arête du haut, sachant que l'arête centrale est de poids T[k] et a coûté C[k-2]
-            int Rs = C[k-2] + contract(s, k, 0, p);
+            //coût de garder l'arête du haut, sachant que l'arête centrale est de poids m_central_weight[k] et a coûté m_cost_to_reach[k-2]
+            cost_t Rs = m_cost_to_reach[k-2] + contract(s, k, 0, p);
 
             //si cette valeur d'arête centrale offre les meilleurs contractions pour les arêtes latérale, on le garde en mémoire
-            if((Rs < P[ofs] || P[ofs] == -1) && Rs > 0){
+            if((Rs < m_ref_cost[ofs] || m_ref_cost[ofs] == -1) && Rs > 0){
                 //Rs = minimum de (coût d'arrivée + coût de sortie) pour R à l'état s
-                //P[ofs] stock le meilleur coût Rs obtenu pour l'instant
-                P[ofs] = Rs;
+                //m_ref_cost[ofs] stock le meilleur coût Rs obtenu pour l'instant
+                m_ref_cost[ofs] = Rs;
                 //on stock l'arête centrale donnant le meilleur coût pour R et Q à l'état s 
-                Z[s] = k;
+                m_central_ref[s] = k;
                 //on stock l'ordre (la paire d'arête) dans lequel on a contracté
-                O[ofsc] = p;
+                m_order_by_dim[ofsc] = p;
 
                 //l'arête centrale donnant le meilleur coût pour R est aussi celle donnant le meilleur coût pour Q
-                int Qs = C[k-2] + contract(s, k, 1, p);
-                P[ofs+1] = Qs;
-                O[ofsc + 1] = p; 
+                cost_t Qs = m_cost_to_reach[k-2] + contract(s, k, 1, p);
+                m_ref_cost[ofs+1] = Qs;
+                m_order_by_dim[ofsc + 1] = p; 
             }
         }
         //on ajoute les 2 nouvelles arêtes latérale
-        T[0] = m_adjacence_matrix[n_vertex*s + s+1];
-        T[1] = m_adjacence_matrix[n_vertex*(s+n_vertex/2) + s+1+n_vertex/2];
+        m_central_weight[0] = m_adjacence_matrix[n_vertex*s + s+1];
+        m_central_weight[1] = m_adjacence_matrix[n_vertex*(s+n_vertex/2) + s+1+n_vertex/2];
 
         //on range le meilleur coût pour R et Q
-        C[0] = P[ofs];
-        C[1] = P[ofs+1];
+        m_cost_to_reach[0] = m_ref_cost[ofs];
+        m_cost_to_reach[1] = m_ref_cost[ofs+1];
     }
 
     //gestion de la dernière étape, on récupère directement le résultat
     int s = n_vertex/2-1;
-    int N = m_adjacence_matrix[n_vertex*s + s+n_vertex/2];
-    int cost = INT32_MAX;
+    weight_t N = m_adjacence_matrix[n_vertex*s + s+n_vertex/2];
+    cost_t cost = std::numeric_limits<cost_t>::max();//INT32_MAX;
 
     for(int k = 0; k <= min(2*s, kmax); k++){
-        int ck = C[k] + T[k]*N;
+        cost_t ck = m_cost_to_reach[k] + m_central_weight[k]*N;
         if(ck < cost && ck > 0){
             cost = ck;
             //donne le k de l'avant-dernier état qui mène à l'optimum, afin de le récupérer facilement
-            Z[s] = k;
+            m_central_ref[s] = k;
         }
     }
     return cost; 
@@ -67,9 +67,9 @@ cost_t OneSideDBD::solve(){
  * @brief computes the contraction cost
  * 
  * @param s the state we are currently at
- * @param k the index in T of the tensor t we consider as the central edge
- * @param x the contraction
- * @param p a buffer that stores the exact order of contraction
+ * @param k the index in m_central_weight of the tensor t we consider as the central edge
+ * @param x the contraction in {0, 1, 2}
+ * @param p a buffer that stores the exact order of contraction in {0, 1, 2}^2
  * @return cost_t 
  */
 cost_t OneSideDBD::contract(int s, int k, int x, pair<int, int>& p){
@@ -95,10 +95,10 @@ cost_t OneSideDBD::contract(int s, int k, int x, pair<int, int>& p){
         //on garde l'arête du dessus (R)
         case 0:
             //Q puis N
-            r12 = m_ext_cost_tab[s+1+n_vertex/2]*T[k] + m_ext_cost_tab[s]*m_ext_cost_tab[s+1+n_vertex/2]/costQ;
+            r12 = m_ext_cost_tab[s+1+n_vertex/2]*m_central_weight[k] + m_ext_cost_tab[s]*m_ext_cost_tab[s+1+n_vertex/2]/costQ;
 
             //N puis Q
-            r21 = costR*costQ*T[k] + costR*m_ext_cost_tab[s+1+n_vertex/2];
+            r21 = costR*costQ*m_central_weight[k] + costR*m_ext_cost_tab[s+1+n_vertex/2];
             if(r12 < r21){
                 cost = r12;
                 p = make_pair(1, 2);
@@ -109,8 +109,8 @@ cost_t OneSideDBD::contract(int s, int k, int x, pair<int, int>& p){
             break;
         //cas arête du dessous (Q)
         case 1:
-            r02 = m_ext_cost_tab[s+1]*T[k] + m_ext_cost_tab[s+n_vertex/2]*m_ext_cost_tab[s+1]/costR;
-            r20 = costQ*(costR*T[k] + m_ext_cost_tab[s+1]);
+            r02 = m_ext_cost_tab[s+1]*m_central_weight[k] + m_ext_cost_tab[s+n_vertex/2]*m_ext_cost_tab[s+1]/costR;
+            r20 = costQ*(costR*m_central_weight[k] + m_ext_cost_tab[s+1]);
             if(r02 < r20){
                 cost = r02;
                 p = make_pair(0, 2);
@@ -121,7 +121,7 @@ cost_t OneSideDBD::contract(int s, int k, int x, pair<int, int>& p){
             break;
         //cas arête centrale
         case 2:
-            cost = T[k]*(m_ext_cost_tab[s+1] + m_ext_cost_tab[s+1+n_vertex/2]);
+            cost = m_central_weight[k]*(m_ext_cost_tab[s+1] + m_ext_cost_tab[s+1+n_vertex/2]);
             p = make_pair(0, 1);
             break;
         default:
@@ -136,12 +136,12 @@ cost_t OneSideDBD::contract(int s, int k, int x, pair<int, int>& p){
 /**
  * @brief computes m_ext_cost_tab, the outer weights of each tensor in a given state
  * 
- * @param k the index int T of the tensor t we just calc'ed
+ * @param k the index in m_central_weight of the tensor t we just calculated
  * @param s the state we are currently at
  */
 void OneSideDBD::compute_ect(int s, int k){
-    m_ext_cost_tab[s] = m_adjacence_matrix[n_vertex*s + s+1]*T[k];
-    m_ext_cost_tab[s+n_vertex/2] = m_adjacence_matrix[n_vertex*(s+n_vertex/2) + s+1+n_vertex/2]*T[k];
+    m_ext_cost_tab[s] = m_adjacence_matrix[n_vertex*s + s+1]*m_central_weight[k];
+    m_ext_cost_tab[s+n_vertex/2] = m_adjacence_matrix[n_vertex*(s+n_vertex/2) + s+1+n_vertex/2]*m_central_weight[k];
 }
 
 /**
@@ -166,9 +166,9 @@ void OneSideDBD::display_order(int s, int k){
         if(k > 1){
             display_order(s-1, k-2);
         }else{
-            display_order(s-1, Z[s]-2);
+            display_order(s-1, m_central_ref[s]-2);
         }
-        cout << "|" << O.at(ofs + k).first << " - " << O.at(ofs + k).second << "|";
+        cout << "|" << m_order_by_dim.at(ofs + k).first << " - " << m_order_by_dim.at(ofs + k).second << "|";
     }
 }
 
@@ -185,10 +185,10 @@ void OneSideDBD::get_order(int s, int k){
         if(k > 1){
             get_order(s-1, k-2);
         }else{
-            get_order(s-1, Z[s]-2);
+            get_order(s-1, m_central_ref[s]-2);
         }
-        int e1 = O[ofs + k].first;
-        int e2 = O[ofs + k].second;
+        int e1 = m_order_by_dim[ofs + k].first;
+        int e2 = m_order_by_dim[ofs + k].second;
 
         switch(e1){
             case 0:
@@ -213,7 +213,7 @@ void OneSideDBD::get_order(int s, int k){
                 best_order.push_back(n_vertex-1 + s);
             break;
         }
-        //cout << "|" << O.at(ofs + k).first << " - " << O.at(ofs + k).second << "|";
+        //cout << "|" << m_order_by_dim.at(ofs + k).first << " - " << m_order_by_dim.at(ofs + k).second << "|";
     }
 }
 
@@ -224,21 +224,21 @@ void OneSideDBD::init(Network& network){
 
     m_adjacence_matrix.clear();
     m_ext_cost_tab.clear();
-    P.clear();
-    C.clear();
-    T.clear();
-    O.clear();
-    Z.clear();
+    m_ref_cost.clear();
+    m_cost_to_reach.clear();
+    m_central_weight.clear();
+    m_order_by_dim.clear();
+    m_central_ref.clear();
     best_order.clear();
     // int kmax = 2*dmax+1;
 
-    C.resize(min(2*(n_vertex/2)-1, 2*dmax+1), 0); //tableau des coûts
-    T.resize(min(2*(n_vertex/2)-1, 2*dmax+1), 1); //tableau des arêtes centrales
+    m_cost_to_reach.resize(min(2*(n_vertex/2)-1, 2*dmax+1), 0); //tableau des coûts
+    m_central_weight.resize(min(2*(n_vertex/2)-1, 2*dmax+1), 1); //tableau des arêtes centrales
     m_adjacence_matrix.resize(n_vertex*(n_vertex+1), 1);
     m_ext_cost_tab.resize(n_vertex, 1);
-    P.resize(n_vertex, -1);
-    O.resize(n_vertex*n_vertex/4, {-1, -1});
-    Z.resize(n_vertex/2, -1);
+    m_ref_cost.resize(n_vertex, -1);
+    m_order_by_dim.resize(n_vertex*n_vertex/4, {-1, -1});
+    m_central_ref.resize(n_vertex/2, -1);
 
     for(const auto& [v1, v2] : network.edge_list){
         weight_t w = network[n_vertex*v1 + v2];
@@ -256,7 +256,7 @@ void OneSideDBD::init(Network& network){
 
 cost_t OneSideDBD::call_solve(){
     cost_t c = solve();
-    get_order(n_vertex/2-2, Z[n_vertex/2-1]);
+    get_order(n_vertex/2-2, m_central_ref[n_vertex/2-1]);
     best_order.push_back(n_vertex-2);
     return c;
 }

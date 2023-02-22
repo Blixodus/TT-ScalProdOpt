@@ -2,7 +2,7 @@
 
 cost_t AllEdgeByEdge::solve(SouG& sg){
     //encodage de l'ensemble d'arête
-    int key = get_key(sg.m_state);
+    unsigned long long key = get_key(sg.m_state);
     //copie du sous-graphe d'entrée pour pouvoir le modifier
     SouG sgref = sg; 
 
@@ -10,7 +10,7 @@ cost_t AllEdgeByEdge::solve(SouG& sg){
     if(sg.m_state.size() > 1 && m_cost_memo.find(key) == m_cost_memo.end()){
         m_cost_memo[key] = best_cost+1;
 
-        for(int i = 0; i < sgref.m_state.size(); i++){
+        for(edgeID_t i = 0; i < sgref.m_state.size(); i++){
             //on copie la copie, et on laisse l'arête en cours de côté
             SouG sg2 = sgref;
             sg2.m_state.erase(sg2.m_state.begin() + i);
@@ -36,7 +36,7 @@ cost_t AllEdgeByEdge::solve(SouG& sg){
         //cas où m_cost_memo[key] est déjà calculé, on a quand même besoin de connaître l'état du graphe suite aux contractions
         //on connait l'ensemble des arêtes qui ont été contractées : sg.m_state
         //on peut bruteforce les m_state.size() contractions, puisqu'on a déjà le meilleur coût on se fiche de l'ordre
-        for(int i : sg.m_state){
+        for(edgeID_t i : sg.m_state){
             cheap_contract(i, sg);
         }
     }
@@ -51,16 +51,16 @@ cost_t AllEdgeByEdge::solve(SouG& sg){
  * @param sg the sub-graph
  * @return cost_t 
  */
-cost_t AllEdgeByEdge::contract(int i, SouG& sg){
+cost_t AllEdgeByEdge::contract(edgeID_t i, SouG& sg){
     //on va chercher les sommets avec lesquels l'arête i est réellement en contact dans le graphe
-    int a = sg.rep(m_edge_list[i].first);
-    int b = sg.rep(m_edge_list[i].second);
+    vertexID_t a = sg.rep(m_edge_list[i].first);
+    vertexID_t b = sg.rep(m_edge_list[i].second);
 
     if(a != b){
         //calcul du coût
-        int res = sg.m_adjacence_matrix[n_vertex*b + a];
+        cost_t res = sg.m_adjacence_matrix[n_vertex*b + a];
 
-        for(int j = 0; j < n_vertex; j++){
+        for(vertexID_t j = 0; j < n_vertex; j++){
             if(b != j){
                 res *= max(1, sg.m_adjacence_matrix[n_vertex*a + j]);
             }
@@ -71,7 +71,7 @@ cost_t AllEdgeByEdge::contract(int i, SouG& sg){
         }
 
         //mise à jour de m_adjacence_matrix
-        for(int j = 0; j < n_vertex; j++){
+        for(vertexID_t j = 0; j < n_vertex; j++){
             sg.m_adjacence_matrix[n_vertex*a + j] *= sg.m_adjacence_matrix[n_vertex*b + j];
             sg.m_adjacence_matrix[n_vertex*b + j] = 0;
             sg.m_adjacence_matrix[n_vertex*j + b] = 0;

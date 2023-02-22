@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pandas as pd
 from pathlib import Path
+import numpy as np
+from collections import Counter
 import sys
 import os
 
@@ -31,14 +33,14 @@ class Plot_frame(ctk.CTkFrame) :
 
         self.plot = FigureCanvasTkAgg(master=self) #= self.display_plot(data1)
         self.current_dataframe=()
-        self.current_goal="cost"
+        self.current_goal="Cost"
 
         #a list of checkboxes, one for each algorithm present in the dataset
         self.algo_checkboxes = Checkbox_array(master=self)
         self.algo_checkboxes.pack()
 
         #a choice between time and cost
-        self.selected_data_menu = ctk.CTkOptionMenu(master=self, values=["cost", "time"], command=self.goal_update)
+        self.selected_data_menu = ctk.CTkOptionMenu(master=self, values=["Cost", "Time"], command=self.goal_update)
         self.selected_data_menu.pack()
 
         #a button to save as image
@@ -61,25 +63,78 @@ class Plot_frame(ctk.CTkFrame) :
     def display_plot(self):
         self.plot.get_tk_widget().destroy()
         # dataset = pd.DataFrame(dataset)
-        figure = plt.Figure(figsize=(6,5), dpi=100)
+        figure = plt.Figure(figsize=(10,8), dpi=60)#(figsize=(15,12), dpi=100)
         ax = figure.add_subplot(111)
         self.plot = FigureCanvasTkAgg(figure, self)
         self.plot.get_tk_widget().pack()
-        df = self.dataframe[['Dimension', 'Cost']]
-        # print(df)
+
+        scale = 'log'
+        df = self.current_dataframe
         
-        df.plot(kind='line', legend=True, ax=ax)
+        ax.set_xlabel("Dimension", size=14)
+        ax.set_xticks(np.arange(0, df["Dimension"].max()+1, 1), fontsize=12)
+
+        ax.set_ylabel("Performances", size=14)
+        #ax.set_yticks(fontsize=12)
+        ax.set_yscale(scale)
+        ax.set_title("Performances per algorithm depending on instance size", size = 16)
+        
+        legend = []
+
+        #plt.savefig("images/" + in_col + '.png', bbox_inches='tight')
+        
+        #pour chaque colonne
+        algo_list = np.unique(df["Algorithm"])
+
+        for algorithm in algo_list:
+            filtered_df = df[df["Algorithm"] == algorithm] 
+            #on récupère la bonne colonne et la taille des instances
+            filtered_df = filtered_df[["Algorithm", "Dimension", self.current_goal]]
+            
+            #on récupère le nombre d'instance de chaque taille 
+            amount = [0]*(filtered_df["Dimension"].max()+1)
+
+            for index in (filtered_df["Dimension"]).to_numpy():
+                amount[index]+=1
+            
+            #liste de tailles
+            x=(filtered_df["Dimension"]).to_numpy()
+            #liste de résultats correspondant
+            y=(filtered_df[self.current_goal]).to_numpy()
+            
+            avgy=[0]*len(amount)
+            #on commence par faire la somme des résultats pour chaque taille
+            for i in range(len(x)):
+                avgy[x[i]] += y[i]
+            
+            #puis on divise pour obtenir la moyenne des résultats pour chaque taille
+            for i in range(len(avgy)):
+                avgy[i] /= max(amount[i], 1)
+                
+            #on supprime à nouveau les valeurs invalides
+            # avgy = [val for val in avgy if val > 0]
+            #on supprime les doublons
+            uniquex = np.unique(x)
+            
+            ax.plot(uniquex, avgy)
+            legend.append(algo_list)
+            
+        #on plot
+        ax.legend(legend)
+        
+        ax.plot(kind='line', legend=True, ax=ax)
 
     def goal_update(self, label):
         self.current_goal=label
+        self.display_plot()
 
     def update_dataset_selection(self, file):
         if file=="None":
             self.plot.get_tk_widget().destroy()
             self.algo_checkboxes.update_checkbox_list([])
             return
-        self.dataframe = pd.read_csv(file, sep=";", header=0)
-        algorithm_list = list(set(self.dataframe["Algorithm"]))
+        self.current_dataframe = pd.read_csv(file, sep=";", header=0)
+        algorithm_list = list(set(self.current_dataframe["Algorithm"]))
         self.algo_checkboxes.update_checkbox_list(algorithm_list)
         
         self.display_plot()

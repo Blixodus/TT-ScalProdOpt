@@ -10,27 +10,29 @@
 
 class AllSplits : public Algorithm{
     public:
-    //CostTab G; //la matrice d'adjacence + 1 colonne donnant le poids sortant de chaque sommet
-    CostTab m_adjacence_matrix;
+    //size : n_vertex(n_vertex + 1)
+    //An adjacence matrix, + 1 column that stores the base external cost associated with each vertex
+    //i.e. m_ext_cost_tab[n_vertex]
+    matrix_weight_t m_adjacence_matrix;
 
     //Tab S; //un état (ensemble de sommets)
-    Tab m_state;
+    //Tab m_state;
+    vector_vertexID_t m_state;
 
-    //CostTab A; //un tableau donnant pour chaque taille d'état le poids sortant des sommets
-    CostTab m_ext_cost_tab;
+    //size : n_vertex*n_vertex
+    //The leaving-weights of a vertex in a specific state, for the n_vertex states of a recursive dive
+    matrix_weight_t m_ext_cost_tab;
     
-    //unordered_map<unsigned long long, cost_t> C; //la liste des coûts obtenus
+    //Map binding the binary key of a state to a cost
     std::unordered_map<unsigned long long, cost_t> m_cost_map;
 
     //unordered_map<unsigned long long, int> P1; //la liste des ordres S1
-    unordered_map<unsigned long long, int> m_order_map_1;
+    std::unordered_map<unsigned long long, int> m_order_map_1;
 
-    unordered_map<unsigned long long, int> m_order_map_2; //la liste des ordres S2
+    std::unordered_map<unsigned long long, int> m_order_map_2; //la liste des ordres S2
 
-    //A : Un tableau de taille n*n, le poids des arrêtes sortantes de chaque sommet, pour les n états S d'un "plongeon"
     //G : un tableau de taille n+1*n, la matrice d'adjacence + la colonne A de départ. M[i][j] = G[i*size+j]
     //S : Une liste de sommet, les sommets sélectionné pour cet état
-    //C : une map associant au code binaire de chaque état un cout
     //P : une map associant au code binaire de chaque état un ordre
 
     AllSplits(){}
@@ -40,22 +42,22 @@ class AllSplits : public Algorithm{
     void init(Network& network);
     //void init(string file); //initialise G, A, et S (S est simplement la liste des sommets au départ)
     cost_t call_solve();
-    cost_t solve(Tab state); //calcule le coût
+    cost_t solve(vector_vertexID_t state); //calcule le coût
 
     //Renvoie m_ext_cost_list mis à jour pour le state actuel
-    Tab compute_ecl(Tab state);
+    Tab compute_ecl(vector_vertexID_t state);
 
     //renvoie le coût associé aux arètes liant directement state1 et state2 (les arêtes non sortantes)
-    cost_t cut(Tab state1, Tab state2);
+    cost_t cut(vector_vertexID_t state1, vector_vertexID_t state2);
     //renvoie le coût sortant de state
-    cost_t produit_sortant(Tab state, Tab ext_cost_list);
+    cost_t produit_sortant(vector_vertexID_t state, matrix_weight_t ext_cost_list);
 
     //converti un ensemble de sommets en un entier pouvant être stocké dans une map
-    unsigned long long convert(Tab state);
+    unsigned long long convert(vector_vertexID_t state);
     //converti une clé en l'ensemble de sommets correspondant
-    Tab recover(unsigned long long key);
+    vector_vertexID_t recover(unsigned long long key);
 
-    void display_order(Tab state);
+    void display_order(vector_vertexID_t state);
     void display_order();
 };
 
