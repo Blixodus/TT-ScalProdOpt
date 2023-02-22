@@ -375,7 +375,7 @@ void ConvexSplits::init(Network& network){
     //TODO: as expected this breaks if the cost goes beyond
     //It also breaks the result if we use int
     //what
-    best_cost = numeric_limits<int>::max()- 3;
+    best_cost = numeric_limits<cost_t>::max()- 3;
     best_order.clear();
 
     //m_cost_memo[-1], a trash bin
