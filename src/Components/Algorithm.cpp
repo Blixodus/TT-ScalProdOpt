@@ -62,7 +62,8 @@ const int Algorithm::verify() {
         }
         else
         {
-            printf("Found %d while true value is %d for order (%s)\n", best_cost, true_cost, best_order_as_string().data());
+            std::cout << "Found " << best_cost << " while true value is " << true_cost << " for order (" << best_order_as_string() << ")" << std::endl;
+            // printf("Found %d while true value is %d for order (%s)\n", best_cost, true_cost, best_order_as_string().data());
             return 1;
         }
     }

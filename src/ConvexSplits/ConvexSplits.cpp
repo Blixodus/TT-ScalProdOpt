@@ -1,6 +1,6 @@
 #include "ConvexSplits.hpp"
 
-cost_t ConvexSplits::solve(int i1, int i2, int j1, int j2, CostTab ext_cost_tab){
+cost_t ConvexSplits::solve(int i1, int i2, int j1, int j2, vector_cost_t const& ext_cost_tab){
     unsigned long long key = convert(i1, i2, j1, j2);
     if(m_cost_memo.find(key) == m_cost_memo.end()){
         //TODO: stocker ext_cost de ext_cost_tab dans AS[S.size()] ou quelque chose comme ça, de sorte que solve_diag et solve_vert puissent y accéder
@@ -9,12 +9,18 @@ cost_t ConvexSplits::solve(int i1, int i2, int j1, int j2, CostTab ext_cost_tab)
         //affiche(i1, i2, j1, j2);
         //affiche_A(ext_cost_tab);
         //valeur par défaut, facilite les comparaisons
-        m_cost_memo[key] = best_cost+1;
+        //TODO:
+        m_cost_memo[key] = best_cost;
         //coupes diagonales
         solve_diag(i1, i2, j1, j2, key, ext_cost_tab, S_cost);
+
         //coupes verticales
         solve_vertical(i1, i2, j1, j2,key, ext_cost_tab, S_cost);
+
+        // printf("State %d %d %d %d\n", i1, i2, j1, j2);
+        // printf("Computed cost : %d\n", m_cost_memo[key]);
     }
+
     return m_cost_memo[key];
 }
 
@@ -30,14 +36,14 @@ cost_t ConvexSplits::solve(int i1, int i2, int j1, int j2, CostTab ext_cost_tab)
  * @param S_cost the outer-cost of the shape
  * @return cost_t 
  */
-cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long long key, CostTab ext_cost_tab, cost_t S_cost){
+cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long long key, vector_weight_t const& ext_cost_tab, cost_t S_cost){
     //les blocs sont un peu difficiles à gérer, mais n'ont pas de découpe illégale en soit
     //il faut borner le sous-bloc pour éviter de couper les branches
     //les branches sont à gérer à part, elles ne doivent être coupées que verticalement
     int start = max(i1, j1); //le côté gauche du sous-bloc
     int end = min(i2, j2); //le côté droit du sous-bloc
 
-    int ignored = m_edge_list.size()-1;
+    //int ignored = m_edge_list.size()-1; //TODO: if that's a constant why is it here ???
     //size <-> size
     //ext_cost_tab[size] = 1
     //m_weight_list[m_edge_list.size()-1] = 1
@@ -45,7 +51,7 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
     //on itère sur les arêtes centrales du sous-bloc
     //Si la forme est une ligne, on aura start > end et cette boucle sera passée 
     for(int ofsy = start; ofsy <= end; ofsy++){
-        CostTab ect_copy (ext_cost_tab);
+        vector_weight_t ect_copy (ext_cost_tab);
         //on multiplie de manière permanente le poids des extrémités de ofs (même fonctionnement que pour y_cost)
         //on multiplie de manière temporaire le poids des extrémités de start et de end (qu'on reset après chaque solve)
         //x = en haut
@@ -83,7 +89,10 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
 
         //variable dans laquelle on va accumuler le produit des arêtes centrales
         cost_t y_cost = 1;
-        //on itère à nouveau sur les arêtes centrales, en se limitant aux DELTA-1 suivantes
+        //on itère à nouveau sur les arêtes centrales, en se limitant aux dmax suivantes
+        //TODO: It appears that in extremely rare cases, for a very specific value of dmax, the algorithm will break.
+        //ex : dmax = 6, 11 for instance_30_random
+        //I tested every other one and nothing happened...
         for(int ofs = ofsy; (ofs-ofsy+1 <= dmax) && ofs <= end; ofs ++){
             
             //extrémités dépendantes de ofs
@@ -130,7 +139,7 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
             {//première coupe : '/'
                 //coût de séparation
                 cost_t cut = start_z_cost * y_cost * end_x_cost;
-                cost_t total = cut * S_cost;
+                unsigned long total = cut * S_cost;
                 //on défini de nouvelles bornes i1, i2, j1, j2
                 {//partie gauche
                     //on met à jour les poids sortant, si les coupures sont illégales, leur coût est à 1 -> pas de modification
@@ -142,8 +151,9 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
                     total += solve(ula1, ula2, ulb1, ulb2, ect_copy);
                 }
             
+                //TODO: potential break-point
                 //on ne rentre que si le coût jusqu'à présent est inférieur au meilleur coût trouvé pour cet ensemble
-                if(total < m_cost_memo[key])
+                if(total < m_cost_memo[key] && total > 0)
                 {//partie droite 
                     total += solve(ura1, ura2, urb1, urb2, ect_copy);
                     if(total < m_cost_memo[key] && total > 0){
@@ -161,7 +171,7 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
             {//deuxième coupe : '\'
             //coût de séparation
             cost_t cut = start_x_cost * y_cost * end_z_cost;
-            cost_t total = cut * S_cost;
+            unsigned long total = cut * S_cost;
             //on défini de nouvelles bornes i1, i2, j1, j2
                 {//partie gauche
                     ect_copy.at(m_edge_list.at(cx).first) *= start_x_cost;
@@ -172,8 +182,9 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
                     total += solve(dla1, dla2, dlb1, dlb2, ect_copy);
                 }
 
+                //TODO: potential break-point
                 //on ne rentre que si le coût jusqu'à présent est inférieur au meilleur coût trouvé pour cet ensemble
-                if(total < m_cost_memo[key])
+                if(total < m_cost_memo[key] && total > 0)
                 {//partie droite
                     total += solve(dra1, dra2, drb1, drb2, ect_copy);
 
@@ -199,11 +210,11 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
  * @param S_cost the outer-cost of the shape
  * @return cost_t 
  */
-cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned long long key, CostTab ext_cost_tab, cost_t S_cost){
+cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned long long key, vector_weight_t ext_cost_tab, cost_t S_cost){
     int start = min(i1, j1);
     //Si on a plus d'1 sommet
     if((start >= 0) || i1!=i2 || j1!=j2){
-        int ignored = m_edge_list.size()-1;
+        // int ignored = m_edge_list.size()-1;
         //cout << i1 << " " << i2 << " " << j1 << " " << j2 << '\n';
         for(int i = start; i < max(i2, j2); i++){
             //il ne faut pas couper (multiplier par le coût) des arêtes inutiles dans le cas des branches
@@ -213,7 +224,8 @@ cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned lon
             //arête du bas
             int z = ignored;
 
-            cost_t cut = 1UL;
+            //TODO:
+            cost_t cut = 1;//1UL; ??
 
             //cas on ne dépasse pas de la ligne i1 i2
             if(i >= i1 && i < i2){
@@ -231,7 +243,7 @@ cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned lon
                 ext_cost_tab.at(m_edge_list.at(z).second) *= m_weight_list.at(z);
             }
 
-            cost_t total = cut * S_cost;
+            unsigned long total = cut * S_cost;
 
             {//partie gauche
                 int a1=i1, a2=min(i, i2), b1=j1, b2=min(i, j2);
@@ -249,6 +261,7 @@ cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned lon
                     b2 = -1;
                 }
 
+                //TODO: this can return numeric_limits
                 total += solve(a1, a2, b1, b2, ext_cost_tab);
                 
             }
@@ -270,6 +283,7 @@ cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned lon
                 total += solve(a1, a2, b1, b2, ext_cost_tab);
             }
 
+            //TODO: potential break-point
             if(total < m_cost_memo[key] && total > 0){
                 m_cost_memo[key] = total;
             }
@@ -296,7 +310,7 @@ cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned lon
  * @param ext_cost_tab 
  * @param s out
  */
-void ConvexSplits::ext_cost(int i1, int i2, int j1, int j2, CostTab ext_cost_tab, cost_t& s){
+void ConvexSplits::ext_cost(int i1, int i2, int j1, int j2, vector_weight_t const& ext_cost_tab, cost_t& s){
     s = 1;
     if(i1 >= 0){
         for(int i = i1; i <= i2; i++){
@@ -341,10 +355,6 @@ void ConvexSplits::init(Network& network){
     //network caracteristics
     dim = network.dimension;
     n_vertex = network.n_vertex;
-    
-    //tab storing external cost
-    m_ext_cost_tab.clear();
-    m_ext_cost_tab.resize(n_vertex+1, 1);
 
     m_edge_list = network.edge_list;
     //small manipulation to prevent out-of-bound access
@@ -355,14 +365,17 @@ void ConvexSplits::init(Network& network){
     //List of weights
     m_weight_list.clear();
     m_weight_list.resize(network.n_edge+1, 1);
-    for(int i = 0; i < network.n_edge; i++){
+    for(edgeID_t i = 0; i < network.n_edge; i++){
         auto& [v1, v2] = m_edge_list[i];
         m_weight_list[i] = network.adjacence_matrix[n_vertex*v1 + v2];
     }
 
     //a short because it needs to fit into the map, we could update it,
     //it would require changing the encoding tho
-    best_cost = numeric_limits<short>::max() - 1;
+    //TODO: as expected this breaks if the cost goes beyond
+    //It also breaks the result if we use int
+    //what
+    best_cost = numeric_limits<cost_t>::max()- 3;
     best_order.clear();
 
     //m_cost_memo[-1], a trash bin

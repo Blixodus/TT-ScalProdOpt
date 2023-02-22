@@ -9,16 +9,20 @@
 
 class NaiveEdgeSort : public Algorithm{
     public:
-    Tab G;
-    Tab V;
-    vector<pair<int, int>> E;
-    vector<pair<int, double>> R;
+    //Tab G;
+    matrix_weight_t G;
+    //Tab V;
+    vector_vertexID_t V;
+    //vector<pair<int, int>> E;
+    std::vector<pair<vertexID_t, vertexID_t>> E;
+    //vector<pair<int, double>> R;
+    std::vector<pair<edgeID_t, double>> R;
 
     NaiveEdgeSort(){}
     NaiveEdgeSort(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
     cost_t solve();
-    int C(int i);
+    vertexID_t C(int i);
     cost_t contract(int i);
     double ratio(int i);
 

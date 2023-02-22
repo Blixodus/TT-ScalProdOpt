@@ -11,8 +11,8 @@ cost_t GreedyEdgeSort::solve(){
     while(!m_sorted_scores.empty()){
         best_order.push_back(m_sorted_scores.front().first);
         //les vraies extrémités de l'arête
-        int i = rep(m_edge_list[m_sorted_scores.front().first].first);
-        int k = rep(m_edge_list[m_sorted_scores.front().first].second);
+        vertexID_t i = rep(m_edge_list[m_sorted_scores.front().first].first);
+        vertexID_t k = rep(m_edge_list[m_sorted_scores.front().first].second);
         if(i != k){
             //ajoute le coût de contraction de R.front à cost
             best_cost += ext_cost(i, k)*m_adjacence_matrix[n_vertex*i + k];
@@ -33,11 +33,11 @@ cost_t GreedyEdgeSort::solve(){
  */
 void GreedyEdgeSort::updateRatio(){
     for(auto& p : m_sorted_scores){
-        int i = rep(m_edge_list[p.first].first);
-        int k = rep(m_edge_list[p.first].second);
+        vertexID_t i = rep(m_edge_list[p.first].first);
+        vertexID_t k = rep(m_edge_list[p.first].second);
         p.second = m_adjacence_matrix[n_vertex*i + k]/(float) ext_cost(i, k);
     }
-    sort(m_sorted_scores.begin(), m_sorted_scores.end(), [](pair<int, double> a, pair<int, double> b){return a.second > b.second;});
+    sort(m_sorted_scores.begin(), m_sorted_scores.end(), [](pair<edgeID_t, double> a, pair<edgeID_t, double> b){return a.second > b.second;});
 }
 
 /**
@@ -47,9 +47,9 @@ void GreedyEdgeSort::updateRatio(){
  * @param k a vertex
  * @return cost_t 
  */
-cost_t GreedyEdgeSort::ext_cost(int i, int k){
-    int res = 1;
-    for(int j = 0; j < n_vertex; j++){
+cost_t GreedyEdgeSort::ext_cost(vertexID_t i, vertexID_t k){
+    cost_t res = 1;
+    for(vertexID_t j = 0; j < n_vertex; j++){
         if(k != j){
             res *= max(1, m_adjacence_matrix[n_vertex*i + j]);
         }
@@ -67,8 +67,8 @@ cost_t GreedyEdgeSort::ext_cost(int i, int k){
  * @param i a vertex
  * @param k a vertex
  */
-void GreedyEdgeSort::contract(int i, int k){
-    for(int j = 0; j < n_vertex; j++){
+void GreedyEdgeSort::contract(vertexID_t i, vertexID_t k){
+    for(vertexID_t j = 0; j < n_vertex; j++){
         m_adjacence_matrix[n_vertex*i + j] *= m_adjacence_matrix[n_vertex*k + j];
         m_adjacence_matrix[n_vertex*k + j] = 0;
         m_adjacence_matrix[n_vertex*j + k] = 0;
@@ -80,10 +80,10 @@ void GreedyEdgeSort::contract(int i, int k){
 /**
  * @brief returns i's representant
  * 
- * @param i 
+ * @param i a vertex
  * @return int 
  */
-int GreedyEdgeSort::rep(int i){
+vertexID_t GreedyEdgeSort::rep(vertexID_t i){
     if(m_corr_list[i] == -1){
         return i;
     }else{
@@ -96,7 +96,7 @@ int GreedyEdgeSort::rep(int i){
  * 
  */
 void GreedyEdgeSort::display_order(){
-    for(int i = 0; i < best_order.size()-1; i++){
+    for(edgeID_t i = 0; i < best_order.size()-1; i++){
         std::cout << best_order[i] << " - ";
     }
     std::cout << best_order.back() << std::endl;
@@ -131,18 +131,10 @@ void GreedyEdgeSort::init(Network& network){
     }
 
     //sort by descending order
-    sort(m_sorted_scores.begin(), m_sorted_scores.end(), [](pair<int, double> a, pair<int, double> b){return a.second > b.second;});
+    sort(m_sorted_scores.begin(), m_sorted_scores.end(), [](pair<edgeID_t, double> a, pair<edgeID_t, double> b){return a.second > b.second;});
 }
 
 cost_t GreedyEdgeSort::call_solve(){
     solve();
     return best_cost;
-}
-
-void get_approx_solution(int& cost, Tab& order, Network& network){
-    GreedyEdgeSort solver;
-    solver.init(network);
-    solver.solve();
-    cost = solver.best_cost;
-    order = solver.best_order;
 }
