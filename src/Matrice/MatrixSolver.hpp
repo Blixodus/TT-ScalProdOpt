@@ -23,7 +23,7 @@ class MatrixSolver : public Algorithm{
         MatrixSolver(){}
         MatrixSolver(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
-        void solve(int n, cost_t cost, vector<pair<int, int>> v, network_t N);
+        void solve(int n, cost_t cost, std::vector<pair<int, int>> v, network_t N);
         void display_order();
         
         void init(Network& network);

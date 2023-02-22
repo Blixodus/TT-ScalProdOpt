@@ -32,22 +32,22 @@ class Algorithm{
     std::string algo_name;
 
     // Minimum size of network the algorithm can handle, before delegating to sub_alg
-    int refdmin=0;
+    dim_t refdmin=0;
     // Minimum size of network the algorithm can handle, only for the current network
-    int dmin=0;
+    dim_t dmin=0;
     //Max size of sub-networks to be created by the main algorithm
-    int refdmax=numeric_limits<dim_t>::max()-1;
+    dim_t refdmax=numeric_limits<dim_t>::max()-1;
         
     // Max size of sub-networks to be created by the main algorithm can handle
-    int dmax=numeric_limits<dim_t>::max()-1;
+    dim_t dmax=numeric_limits<dim_t>::max()-1;
     //(Only useful for some algorithms)
 
     //Size of the network in number of dimensions
-    int dim;
+    dim_t dim;
     //taille de l'instance en nombre de sommets
     //int size;
     //Size of the network in number of vertices
-    int n_vertex;
+    vertexID_t n_vertex;
 
     //Secondary algorithm
     Algorithm* sub_alg = nullptr;
@@ -59,7 +59,7 @@ class Algorithm{
     cost_t best_cost=numeric_limits<cost_t>::max()-1;
 
     //The current best order
-    Tab best_order;
+    vector_edgeID_t best_order;
 
     //Final time
     chrono::duration<double> time = std::chrono::duration<double>(0);
@@ -88,7 +88,7 @@ class Algorithm{
 
     std::string best_order_as_string() const;
 
-    void set_limit_dim(int max);
+    void set_limit_dim(dim_t max);
     void set_network(Network& network){m_network = &network;}
     void set_start_sol(Network& network);
     

@@ -6,7 +6,7 @@
  * @param state The tensors in this state
  * @return int the best cost for S
  */
-cost_t AllSplits::solve(Tab state){
+cost_t AllSplits::solve(vector_vertexID_t state){
     //encodage de l'ensemble de sommets
     unsigned long long key = convert(state);
 
@@ -23,15 +23,15 @@ cost_t AllSplits::solve(Tab state){
         //pour toutes les séparations de state
         do{
             //on déplace la "barre" où on fait la coupure state1/state2 dans state
-            for(int i = 0; i < state.size() - 1; i++){
+            for(vertexID_t i = 0; i < state.size() - 1; i++){
                 state1.clear();
                 state2.clear();
                 //on attribue les sommets de state1
-                for(int k = 0; k <= i; k++){
+                for(vertexID_t k = 0; k <= i; k++){
                     state1.push_back(state[k]);
                 }
                 //on attribue les sommets de state2
-                for(int k = i+1; k < state.size(); k++){
+                for(vertexID_t k = i+1; k < state.size(); k++){
                     state2.push_back(state[k]);
                 }
                 cost = solve(state1);
@@ -58,9 +58,9 @@ cost_t AllSplits::solve(Tab state){
  * @return Tab an updated copy of m_ext_cost_tab
  */
 Tab AllSplits::compute_ecl(Tab state){
-    for(int i : state){
+    for(vertexID_t i : state){
         m_ext_cost_tab[n_vertex*(state.size()-1)+i] = m_adjacence_matrix[n_vertex*n_vertex + i];
-        for(int k : state){
+        for(vertexID_t k : state){
             //TODO: only place with a division I reckon
             // std::cout << "enter" << std::endl;
             m_ext_cost_tab[n_vertex*(state.size()-1)+i] /= m_adjacence_matrix[n_vertex*i + k];
@@ -77,10 +77,10 @@ Tab AllSplits::compute_ecl(Tab state){
  * @param state2 a state
  * @return int 
  */
-cost_t AllSplits::cut(Tab state1, Tab state2){
+cost_t AllSplits::cut(vector_vertexID_t state1, vector_vertexID_t state2){
     cost_t res = 1;
-    for(int i : state1){
-        for(int j : state2){
+    for(vertexID_t i : state1){
+        for(vertexID_t j : state2){
             res *= m_adjacence_matrix[n_vertex*i + j];
         }
     }
@@ -94,9 +94,9 @@ cost_t AllSplits::cut(Tab state1, Tab state2){
  * @param ext_cost_tab The external-weights of all tensors for each states
  * @return int 
  */
-cost_t AllSplits::produit_sortant(Tab state, Tab ext_cost_tab){
+cost_t AllSplits::produit_sortant(vector_vertexID_t state, vector_vertexID_t ext_cost_tab){
     cost_t res = 1;
-    for(int i : state){
+    for(vertexID_t i : state){
         res *= ext_cost_tab[n_vertex*(state.size()-1) + i];
     }
     return res;
@@ -122,10 +122,10 @@ unsigned long long AllSplits::convert(Tab state){
  * @param key a code generated from a state using convert(state)
  * @return Tab 
  */
-Tab AllSplits::recover(unsigned long long key){
+vector_vertexID_t AllSplits::recover(unsigned long long key){
     Tab res;
-    for(int i = n_vertex; i >= 0; i--){
-        int p = pow(2, i);
+    for(vertexID_t i = n_vertex; i >= 0; i--){
+        unsigned long p = pow(2, i);
         if(key >= p){
             res.push_back(i);
             key -= p;
@@ -134,7 +134,7 @@ Tab AllSplits::recover(unsigned long long key){
     return res;
 }
 
-void AllSplits::display_order(Tab state){//dégueulasse
+void AllSplits::display_order(vector_vertexID_t state){//dégueulasse
     if(state.size() > 1){
         int key = convert(state);
         display_order(recover(m_order_map_1[key]));
@@ -173,7 +173,7 @@ void AllSplits::init(Network& network){
     //m_order_map_2.resize(pow(2,size), -1);
 
     for(auto e : network.edge_list){
-        int w = network.adjacence_matrix[n_vertex*e.first + e.second];
+        weight_t w = network.adjacence_matrix[n_vertex*e.first + e.second];
         m_adjacence_matrix[n_vertex*e.first + e.second] = w;
         m_adjacence_matrix[n_vertex*e.second + e.first] = w;
 
@@ -182,7 +182,7 @@ void AllSplits::init(Network& network){
         m_adjacence_matrix[n_vertex*n_vertex + e.second] *= w;
     }
 
-    for(int k = 0; k < n_vertex; k ++){
+    for(vertexID_t k = 0; k < n_vertex; k ++){
         m_state[k] = k;
     }
 }
