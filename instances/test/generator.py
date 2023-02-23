@@ -13,7 +13,15 @@ def generate_instance(file, size, f_rank1, f_rank2, f_dims, rounded):
         for i in range(size-1):
             rank1[-i-2] = min(rank1[-i-2], rank1[-i-1]*dims[i])
             rank2[-i-2] = min(rank2[-i-2], rank2[-i-1]*dims[i])
+    # Compute naive approach cost
+    cost_naive_1 = dims[0] * rank1[1] * rank2[1]
+    cost_naive_2 = dims[0] * rank1[1] * rank2[1]
+    for i in range(1, size):
+        cost_naive_1 = cost_naive_1 + rank2[i] * rank1[i] * dims[i] * rank1[i+1] + dims[i] * rank2[i] * rank1[i+1] * rank2[i+1]
+        cost_naive_2 = cost_naive_2 + rank1[i] * rank2[i] * dims[i] * rank2[i+1] + dims[i] * rank1[i] * rank2[i+1] * rank1[i+1]
     # Print TT product
+    file.write("c Naive cost : {}\n".format(cost_naive_1))
+    file.write("c Naive cost : {}\n".format(cost_naive_2))
     file.write("v")
     for i in range(size-1):
         file.write("\t{}\t*{}".format(i, rank1[i+1]))
@@ -39,10 +47,7 @@ random_2_20 = lambda x : rng.integers(low=2, high=21)
 
 def cos_like(length):
     centre = int(length/2)
-    def lam(x):
-        return 5+(1+np.cos(x*2*np.pi/length+np.pi))*(95/2) + rng.integers(low=-(centre-abs(x-centre))-1, high=centre-abs(x-centre)+1)
-    return lam
-    #return lambda x : 5+(1+np.cos(x*2*np.pi/length+np.pi))*(95/2) + rng.integers(low=-(centre-abs(x-centre)), high=centre-abs(x-centre))
+    return lambda x : 5+(1+np.cos(x*2*np.pi/length+np.pi))*(95/2) + rng.integers(low=-(centre-abs(x-centre))-1, high=centre-abs(x-centre)+1)
 
 for inst in range(10, 41, 10):
     file = open("instance_"+str(inst)+"_random.txt", "w")
@@ -51,3 +56,7 @@ for inst in range(10, 41, 10):
     file = open("instance_"+str(inst)+"_cos_like.txt", "w")
     generate_instance(file, inst, cos_like(inst), cos_like(inst), random_2_20, True)
     file.close()
+
+file = open("instance_5_random.txt", "w")
+generate_instance(file, 5, random_1_20, random_1_20, random_2_20, True)
+file.close()
