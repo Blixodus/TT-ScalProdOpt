@@ -64,7 +64,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t state){
  * @param state The tensors in this state
  * @return vector_vertexID_t an updated copy of m_ext_cost_tab
  */
-CostTab SplitsDBD::compute_ect(vector_vertexID_t state){
+vector_weight_t SplitsDBD::compute_ect(vector_vertexID_t state){
     for(int i : state){
         //poids sortant de i dans l'ensemble de taille state.size() = m_adjacence_matrix[ofs + i] / le poids des liaisons avec des sommets dans state
         m_ext_cost_tab[n_vertex*(state.size()-1) + i] = m_adjacence_matrix[n_vertex*n_vertex + i];

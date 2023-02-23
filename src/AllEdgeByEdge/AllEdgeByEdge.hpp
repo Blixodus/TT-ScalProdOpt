@@ -59,7 +59,7 @@ class AllEdgeByEdge : public Algorithm{
 
     cost_t solve(SouG& sg);
 
-    unsigned long long get_key(Tab state);
+    unsigned long long get_key(vector_edgeID_t state);
 
     void display_order(unsigned long long key);
     void display_order();

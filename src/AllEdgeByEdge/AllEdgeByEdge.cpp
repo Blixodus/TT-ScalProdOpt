@@ -127,7 +127,7 @@ int SouG::rep(int i){
  * @param state an edge list
  * @return int 
  */
-unsigned long long AllEdgeByEdge::get_key(Tab state){
+unsigned long long AllEdgeByEdge::get_key(vector_edgeID_t state){
     unsigned long long res = 0;
     for(int i : state){
         res += pow(2, i);

@@ -45,7 +45,7 @@ class AllSplits : public Algorithm{
     cost_t solve(vector_vertexID_t state); //calcule le coût
 
     //Renvoie m_ext_cost_list mis à jour pour le state actuel
-    Tab compute_ecl(vector_vertexID_t state);
+    vector_vertexID_t compute_ecl(vector_vertexID_t state);
 
     //renvoie le coût associé aux arètes liant directement state1 et state2 (les arêtes non sortantes)
     cost_t cut(vector_vertexID_t state1, vector_vertexID_t state2);

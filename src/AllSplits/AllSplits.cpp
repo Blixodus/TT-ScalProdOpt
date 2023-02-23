@@ -15,8 +15,8 @@ cost_t AllSplits::solve(vector_vertexID_t state){
         m_cost_map[key] = best_cost+1;
         cost_t cost;
         
-        Tab state1;
-        Tab state2;
+        vector_vertexID_t state1;
+        vector_vertexID_t state2;
 
         cost_t cout_sortant = produit_sortant(state, compute_ecl(state));
         
@@ -55,9 +55,9 @@ cost_t AllSplits::solve(vector_vertexID_t state){
  * @brief computes the state.size()-1'th column of m_ext_cost_tab
  * 
  * @param state The vertices in this state
- * @return Tab an updated copy of m_ext_cost_tab
+ * @return matrix_weight_t an updated copy of m_ext_cost_tab
  */
-Tab AllSplits::compute_ecl(Tab state){
+matrix_weight_t AllSplits::compute_ecl(vector_vertexID_t state){
     for(vertexID_t i : state){
         m_ext_cost_tab[n_vertex*(state.size()-1)+i] = m_adjacence_matrix[n_vertex*n_vertex + i];
         for(vertexID_t k : state){
@@ -108,7 +108,7 @@ cost_t AllSplits::produit_sortant(vector_vertexID_t state, vector_vertexID_t ext
  * @param state The tensors in this state
  * @return int 
  */
-unsigned long long AllSplits::convert(Tab state){
+unsigned long long AllSplits::convert(vector_vertexID_t state){
     unsigned long long res = 0;
     for(int i : state){
         res += pow(2, i);
@@ -120,10 +120,10 @@ unsigned long long AllSplits::convert(Tab state){
  * @brief converts a key into a set of tensors
  * 
  * @param key a code generated from a state using convert(state)
- * @return Tab 
+ * @return vector_vertexID_t
  */
 vector_vertexID_t AllSplits::recover(unsigned long long key){
-    Tab res;
+    vector_vertexID_t res;
     for(vertexID_t i = n_vertex; i >= 0; i--){
         unsigned long p = pow(2, i);
         if(key >= p){

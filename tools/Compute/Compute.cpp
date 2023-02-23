@@ -54,7 +54,7 @@ void import_calc_file(string& calc_file){
  * @param order_list a list of edge
  * @return cost_t 
  */
-cost_t compute_order(std::string& filename, Tab& order_list){
+cost_t compute_order(std::string& filename, vector_edgeID_t& order_list){
     Network network(filename);
     compute_order(network, order_list);
 }
@@ -66,7 +66,7 @@ cost_t compute_order(std::string& filename, Tab& order_list){
  * @param order_list a list of edge
  * @return cost_t 
  */
-cost_t compute_order(Network& network, Tab& order_list){
+cost_t compute_order(Network& network, vector_edgeID_t& order_list){
 
     if(order_list.size() > network.n_edge){
         std::cout << "[WARNING] Too many edges given, skipping order" << std::endl;
@@ -76,7 +76,7 @@ cost_t compute_order(Network& network, Tab& order_list){
     Cost_cpt c_cpt(network, order_list);
 
     cost_t cost = 0;
-    for(int i : order_list){
+    for(edgeID_t i : order_list){
         cost += c_cpt.contract(i);
     }
     return cost;
@@ -89,13 +89,13 @@ cost_t compute_order(Network& network, Tab& order_list){
  * @param edge the edge to contract
  * @return cost_t 
  */
-cost_t Cost_cpt::contract(int edge){
-    int e1 = rep(m_edge_list[edge].first);
-    int e2 = rep(m_edge_list[edge].second);
+cost_t Cost_cpt::contract(edgeID_t edge){
+    vertexID_t e1 = rep(m_edge_list[edge].first);
+    vertexID_t e2 = rep(m_edge_list[edge].second);
 
     if(e1 != e2){
-        int res = m_adjacence_matrix[n_vertex*e1 + e2];
-        for(int j = 0; j < n_vertex; j++){
+        cost_t res = m_adjacence_matrix[n_vertex*e1 + e2];
+        for(vertexID_t j = 0; j < n_vertex; j++){
             if(e1 != j){
                 res *= max(1, m_adjacence_matrix[n_vertex*e2 + j]);
             }
@@ -104,7 +104,7 @@ cost_t Cost_cpt::contract(int edge){
             }
         }
 
-        for(int j = 0; j < n_vertex; j++){
+        for(vertexID_t j = 0; j < n_vertex; j++){
             m_adjacence_matrix[n_vertex*e1 + j] *= m_adjacence_matrix[n_vertex*e2 + j];
             m_adjacence_matrix[n_vertex*e2 + j] = 0;
             m_adjacence_matrix[n_vertex*j + e2] = 0;
@@ -122,7 +122,7 @@ cost_t Cost_cpt::contract(int edge){
  * 
  * @param vertex 
  */
-int Cost_cpt::rep(int vertex){
+vertexID_t Cost_cpt::rep(vertexID_t vertex){
     while(m_corr_list[vertex] != -1){
         vertex = m_corr_list[vertex];
     }

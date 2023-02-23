@@ -45,7 +45,7 @@ void Shuffle::solve(int cr, int s){
             }
         }
     }else{
-        Tab R_copy (R);
+        vector_edgeID_t R_copy (R);
         for(int i = s; i < m_edge_list.size(); i++){
             if(R_copy[i] != -1){
                 break;
@@ -64,11 +64,11 @@ void Shuffle::solve(int cr, int s){
  * @param state the list of edges to contract
  * @return cost_t 
  */
-void Shuffle::follow_order(Tab state){
+void Shuffle::follow_order(vector_edgeID_t state){
     SousG sg = getSG();
     cost_t cost = 0;
     bool still_up = true;
-    for(int i : state){
+    for(edgeID_t i : state){
         cost += contract(i, sg);
         if(cost >= best_cost /*&& best_cost != -1*/){
             still_up = false;
@@ -88,13 +88,13 @@ void Shuffle::follow_order(Tab state){
  * @param sg a sub-graph
  * @return cost_t 
  */
-cost_t Shuffle::contract(int i, SousG &sg){
-    int a = sg.rep(m_edge_list[i].first);
-    int b = sg.rep(m_edge_list[i].second);
+cost_t Shuffle::contract(edgeID_t i, SousG &sg){
+    vertexID_t a = sg.rep(m_edge_list[i].first);
+    vertexID_t b = sg.rep(m_edge_list[i].second);
 
     if(a != b){
-        int res = sg.m_adjacence_matrix[n_vertex*a + b];
-        for(int j = 0; j < n_vertex; j++){
+        cost_t res = sg.m_adjacence_matrix[n_vertex*a + b];
+        for(vertexID_t j = 0; j < n_vertex; j++){
             if(a != j){
                 res *= max(1, sg.m_adjacence_matrix[n_vertex*b + j]);
             }
@@ -103,7 +103,7 @@ cost_t Shuffle::contract(int i, SousG &sg){
             }
         }
 
-        for(int j = 0; j < n_vertex; j++){
+        for(vertexID_t j = 0; j < n_vertex; j++){
             sg.m_adjacence_matrix[n_vertex*a + j] *= sg.m_adjacence_matrix[n_vertex*b + j];
             sg.m_adjacence_matrix[n_vertex*b + j] = 0;
             sg.m_adjacence_matrix[n_vertex*j + b] = 0;
@@ -122,7 +122,7 @@ cost_t Shuffle::contract(int i, SousG &sg){
  * @param i 
  * @return int 
  */
-int SousG::rep(int i){
+vertexID_t SousG::rep(vertexID_t i){
     while(m_corr_list[i] != -1){
         i = m_corr_list[i];
     }
@@ -137,10 +137,10 @@ bool Shuffle::is_still_in(int s){
 /**
  * @brief returns a vector containing all the edges remaining to be placed
  * 
- * @return Tab 
+ * @return vector_edgeID_t
  */
-Tab Shuffle::still_in(){
-    Tab res;
+vector_edgeID_t Shuffle::still_in(){
+    vector_edgeID_t res;
     for(int i = 0; i < VB.size(); i++){
         if(!VB[i]){
             res.push_back(i);
@@ -149,8 +149,8 @@ Tab Shuffle::still_in(){
     return res;
 }
 
-bool Shuffle::place_to_default(Tab& R){
-    for(int i : still_in()){
+bool Shuffle::place_to_default(vector_edgeID_t& R){
+    for(edgeID_t i : still_in()){
         if(R[i] == -1){
             R[i] = i;
         }else{
@@ -160,9 +160,9 @@ bool Shuffle::place_to_default(Tab& R){
     return true;
 }
 
-Tab Shuffle::generate_order(Tab R){
-    Tab res;
-    for(int i : R){
+vector_edgeID_t Shuffle::generate_order(vector_edgeID_t R){
+    vector_edgeID_t res;
+    for(edgeID_t i : R){
         res.push_back(triscore.best_order[i]);
     }
     return res;
