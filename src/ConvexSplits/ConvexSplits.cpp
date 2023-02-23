@@ -388,5 +388,5 @@ void ConvexSplits::init(Network& network){
  * @return cost_t 
  */
 cost_t ConvexSplits::call_solve(){
-    return solve(0, dim-1, 0, dim-1, CostTab (n_vertex+1, 1));
+    return solve(0, dim-1, 0, dim-1, vector_cost_t (n_vertex+1, 1));
 }

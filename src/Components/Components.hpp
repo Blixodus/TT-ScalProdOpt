@@ -44,9 +44,9 @@ using vector_weight_t = std::vector<weight_t> ;
 //Type for vector of cost
 using matrix_cost_t = std::vector<cost_t> ;
 using vector_cost_t = std::vector<cost_t> ;
-using CostTab = vector<cost_t> ;
+// using CostTab = vector<cost_t> ;
 //Type for vector of integer
-using Tab = std::vector<int> ;
+// using Tab = std::vector<int> ;
 using vector_edgeID_t = std::vector<edgeID_t> ;
 using vector_vertexID_t = std::vector<vertexID_t> ;
 
@@ -59,51 +59,5 @@ struct edge_t{
     edge_t(vertexID_t v1, vertexID_t v2, weight_t weight=0) : m_edge(std::make_pair(v1, v2)), m_weight(weight) {}
     edge_t(std::pair<int, int> edge, weight_t weight=0) : m_edge(edge), m_weight(weight) {}
 };
-
-//TODO: make an algorithm function out of that
-// template<class T>
-// void execfile(T& solver, string file){
-//     string path = "../instances/" + file;
-
-//     solver.init(path);
-//     if(solver.dmax > -1){
-//         std::cout << "Delta : " << solver.dmax << '\n';
-//     }
-//     auto start = std::chrono::high_resolution_clock::now();
-//     solver.best_cost = solver.call_solve();
-//     auto end = std::chrono::high_resolution_clock::now();
-//     solver.time = end-start;
-//     std::cout << "Best cost : " << solver.best_cost << '\n';
-//     if(!solver.best_order.empty()){
-//         std::cout << "Best order : ";
-//         solver.display_order();
-//     }
-//     std::cout << std::scientific << "Temps : " << solver.time.count()  << "s" << '\n';
-//     std::cout << "--------------" << std::endl;
-// }
-
-// template<class T>
-// void execdir(T solver, string dir){
-//     string base = "../instances/" + dir + "/";
-//     DIR* dp = NULL;
-//     struct dirent *file = NULL;
-//     dp = opendir(base.c_str());
-//     if(dp == NULL){
-//         cerr << "Could not open directory : " << base << '\n';
-//         exit(-1);
-//     }
-//     file = readdir(dp);
-    
-//     while(file != NULL){
-//         if(file->d_name[0] != '.'){
-//             string path = base + file->d_name;
-//             display(path);
-//             execfile<T>(solver, path);
-//         }
-//         file = readdir(dp);
-//     }
-//     closedir(dp);
-// }
-
 
 #endif

@@ -14,13 +14,13 @@
 
 class SousG{
     public:
-    Tab m_state;
-    Tab m_adjacence_matrix;
-    Tab m_corr_list;
+    vector_edgeID_t m_state;
+    matrix_weight_t m_adjacence_matrix;
+    vector_vertexID_t m_corr_list;
 
-    int rep(int i);
-    SousG(Tab am, Tab corr_list) : m_adjacence_matrix(am), m_corr_list(corr_list){}
-    SousG(Tab state, Tab am, Tab corr_list) : m_state(state), m_adjacence_matrix(am), m_corr_list(corr_list) {}
+    vertexID_t rep(vertexID_t i);
+    SousG(matrix_weight_t am, vector_vertexID_t corr_list) : m_adjacence_matrix(am), m_corr_list(corr_list){}
+    SousG(vector_edgeID_t state, matrix_weight_t am, vector_vertexID_t corr_list) : m_state(state), m_adjacence_matrix(am), m_corr_list(corr_list) {}
 };
 
 class Shuffle : public Algorithm{
@@ -28,26 +28,26 @@ class Shuffle : public Algorithm{
     GreedyEdgeSort triscore;
 
     //vector<pair<int, int>> E; //liste d'arêtes
-    std::vector<std::pair<int, int>> m_edge_list;
+    std::vector<std::pair<edgeID_t, edgeID_t>> m_edge_list;
 
     //Tab G; //matrice d'djacence
-    Tab m_adjacence_matrix;
+    matrix_weight_t m_adjacence_matrix;
 
-    Tab R; //liste d'indice des arêtes de E : R[0] = 2 signifie que la première arête considérée sera l'arête E[2]
+    vector_edgeID_t R; //liste d'indice des arêtes de E : R[0] = 2 signifie que la première arête considérée sera l'arête E[2]
     
-    vector<bool> VB;
+    std::vector<bool> VB;
 
     Shuffle(){}
     Shuffle(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
     SousG getSG(){return SousG(m_adjacence_matrix, vector<int> (n_vertex, -1));}
     void solve(int cr, int s);
-    void follow_order(Tab S);
-    cost_t contract(int i, SousG& sg);
+    void follow_order(vector_edgeID_t S);
+    cost_t contract(edgeID_t i, SousG& sg);
     bool is_still_in(int s);
-    Tab still_in();
-    bool place_to_default(Tab& R);
-    Tab generate_order(Tab R);
+    vector_edgeID_t still_in();
+    bool place_to_default(vector_edgeID_t& R);
+    vector_edgeID_t generate_order(vector_edgeID_t R);
 
     void display_order();
 

@@ -19,7 +19,7 @@ struct Network{
     vertexID_t n_vertex;
 
     //Adjacence matrix
-    Tab adjacence_matrix;
+    matrix_weight_t adjacence_matrix;
 
     //Edge list
     //std::vector<edge_t> edge_list;
