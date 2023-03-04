@@ -62,11 +62,11 @@ cost_t AllEdgeByEdge::contract(edgeID_t i, SouG& sg){
 
         for(vertexID_t j = 0; j < n_vertex; j++){
             if(b != j){
-                res *= max(1, sg.m_adjacence_matrix[n_vertex*a + j]);
+                res *= max((weight_t) 1, sg.m_adjacence_matrix[n_vertex*a + j]);
             }
 
             if(a != j){
-                res *= max(1, sg.m_adjacence_matrix[n_vertex*b + j]);
+                res *= max((weight_t) 1, sg.m_adjacence_matrix[n_vertex*b + j]);
             }
         }
 
@@ -127,7 +127,7 @@ int SouG::rep(int i){
  * @param state an edge list
  * @return int 
  */
-unsigned long long AllEdgeByEdge::get_key(vector_edgeID_t state){
+unsigned long long AllEdgeByEdge::get_key(vector_edgeID_t const& state){
     unsigned long long res = 0;
     for(int i : state){
         res += pow(2, i);

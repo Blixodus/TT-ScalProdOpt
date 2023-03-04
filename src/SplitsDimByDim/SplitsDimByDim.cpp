@@ -6,7 +6,7 @@
  * @param state The dimensions in this state
  * @return int the best cost for state
  */
-cost_t SplitsDBD::solve(vector_vertexID_t state){
+cost_t SplitsDBD::solve(vector_vertexID_t const& state){
     //encodage de l'ensemble de sommets
     unsigned long long key = convert(state);
 
@@ -38,7 +38,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t state){
             }
             //on résoud state1 de manière exacte, on découpe state2 (le reste du TT)
             cost = m_exact_solver.solve(state1);
-            if(!state2.empty() /*> 0*/){ //what
+            if(!state2.empty()){ //what
                 //There was a random '+' here ???
                 cost += solve(state2) + cout_sortant*cut(state1, state2);
             } 
@@ -64,7 +64,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t state){
  * @param state The tensors in this state
  * @return vector_vertexID_t an updated copy of m_ext_cost_tab
  */
-vector_weight_t SplitsDBD::compute_ect(vector_vertexID_t state){
+vector_weight_t SplitsDBD::compute_ect(vector_vertexID_t const& state){
     for(int i : state){
         //poids sortant de i dans l'ensemble de taille state.size() = m_adjacence_matrix[ofs + i] / le poids des liaisons avec des sommets dans state
         m_ext_cost_tab[n_vertex*(state.size()-1) + i] = m_adjacence_matrix[n_vertex*n_vertex + i];
@@ -87,7 +87,7 @@ vector_weight_t SplitsDBD::compute_ect(vector_vertexID_t state){
  * @param state2 a state
  * @return int 
  */
-cost_t SplitsDBD::cut(vector_vertexID_t state1, vector_vertexID_t state2){
+cost_t SplitsDBD::cut(vector_vertexID_t const& state1, vector_vertexID_t const& state2){
     cost_t res = 1;
     for(int i : state1){
         for(int j : state2){
@@ -105,7 +105,7 @@ cost_t SplitsDBD::cut(vector_vertexID_t state1, vector_vertexID_t state2){
  * @param ext_cost_tab The external-weight of all tensors for each states
  * @return int 
  */
-cost_t SplitsDBD::produit_sortant(vector_vertexID_t state, vector_vertexID_t ext_cost_tab){
+cost_t SplitsDBD::produit_sortant(vector_vertexID_t const& state, matrix_weight_t const& ext_cost_tab){
     cost_t res = 1;
     for(int i : state){
         res *= ext_cost_tab[n_vertex*(state.size()-1) + i];
@@ -120,7 +120,7 @@ cost_t SplitsDBD::produit_sortant(vector_vertexID_t state, vector_vertexID_t ext
  * @param state The tensors in this state
  * @return int 
  */
-long int SplitsDBD::convert(vector_vertexID_t state){
+long int SplitsDBD::convert(vector_vertexID_t const& state){
     int res = 0;
     for(int i : state){
         if(i < n_vertex/2){
@@ -149,7 +149,7 @@ vector_vertexID_t SplitsDBD::recover(unsigned long long key){
     return res;
 }
 
-vector_vertexID_t SplitsDBD::recover_full(vector_vertexID_t state){
+vector_vertexID_t SplitsDBD::recover_full(vector_vertexID_t const& state){
     vector_vertexID_t res;
     for(vertexID_t i : state){
         res.push_back(i);
@@ -158,7 +158,7 @@ vector_vertexID_t SplitsDBD::recover_full(vector_vertexID_t state){
     return res;
 }
 
-void SplitsDBD::display_order(vector_vertexID_t state){
+void SplitsDBD::display_order(vector_vertexID_t const& state){
     if(state.size() >= 1){
         long int key = convert(state);
         if(key != -1){
@@ -199,7 +199,7 @@ void SplitsDBD::init(Network& network){
     m_adjacence_matrix.resize(n_vertex*(n_vertex+1), 1);
     
     for(const auto& [v1, v2] : network.edge_list){
-        weight_t w = network[n_vertex*v1 + v2];
+        weight_t w = network.adjacence_matrix[n_vertex*v1 + v2];
         m_adjacence_matrix[n_vertex*v1 + v2] = w;
         m_adjacence_matrix[n_vertex*v2 + v1] = w;
 

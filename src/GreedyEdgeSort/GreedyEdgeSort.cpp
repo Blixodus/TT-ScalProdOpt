@@ -51,10 +51,10 @@ cost_t GreedyEdgeSort::ext_cost(vertexID_t i, vertexID_t k){
     cost_t res = 1;
     for(vertexID_t j = 0; j < n_vertex; j++){
         if(k != j){
-            res *= max(1, m_adjacence_matrix[n_vertex*i + j]);
+            res *= max((weight_t) 1, m_adjacence_matrix[n_vertex*i + j]);
         }
         if(i != j){ 
-            res *= max(1, m_adjacence_matrix[n_vertex*k + j]);
+            res *= max((weight_t) 1, m_adjacence_matrix[n_vertex*k + j]);
         }
     }
 

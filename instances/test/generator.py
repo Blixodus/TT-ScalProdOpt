@@ -32,7 +32,7 @@ def generate_instance(file, size, f_rank1, f_rank2, f_dims, rounded):
     for i in range(size-1):
         file.write("\t{}\t*{}".format(size+i, rank2[i+1]))
     file.write("\t{}\n".format(2*size-1))
-    file.write("d {}\n".format(size*2))
+    file.write("d {}\n".format(size))
     for i in range(size-1):
         file.write("e {} {} {}\n".format(i, i+1, rank1[i+1]))
     for i in range(size):
@@ -40,23 +40,26 @@ def generate_instance(file, size, f_rank1, f_rank2, f_dims, rounded):
     for i in range(size-1):
         file.write("e {} {} {}\n".format(size+i, size+i+1, rank2[i+1]))
 
-
-rng = np.random.default_rng(seed=1000)
-random_1_20 = lambda x : rng.integers(low=1, high=21)
-random_2_20 = lambda x : rng.integers(low=2, high=21)
-
 def cos_like(length):
     centre = int(length/2)
     return lambda x : 5+(1+np.cos(x*2*np.pi/length+np.pi))*(95/2) + rng.integers(low=-(centre-abs(x-centre))-1, high=centre-abs(x-centre)+1)
 
-for inst in range(10, 41, 10):
-    file = open("instance_"+str(inst)+"_random.txt", "w")
-    generate_instance(file, inst, random_1_20, random_1_20, random_2_20, True)
-    file.close()
-    file = open("instance_"+str(inst)+"_cos_like.txt", "w")
-    generate_instance(file, inst, cos_like(inst), cos_like(inst), random_2_20, True)
-    file.close()
 
-file = open("instance_5_random.txt", "w")
-generate_instance(file, 5, random_1_20, random_1_20, random_2_20, True)
-file.close()
+
+# file = open("instance_5_random.txt", "w")
+# generate_instance(file, 5, random_1_20, random_1_20, random_2_20, True)
+# file.close()
+
+if __name__ == "__main__":
+    rng = np.random.default_rng(seed=1000)
+    random_1_20 = lambda x : rng.integers(low=1, high=21)
+    random_2_20 = lambda x : rng.integers(low=2, high=21)
+
+    for amount in range(5):
+        for inst in {5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 70}:
+            # file = open("instance_"+str(inst)+"_random.txt", "w")
+            # generate_instance(file, inst, random_1_20, random_1_20, random_2_20, True)
+            # file.close()
+            file = open("trial_cos_like/instance_{}_{}_cos_like.txt".format(inst, amount), "w")
+            generate_instance(file, inst, cos_like(inst), cos_like(inst), random_2_20, True)
+            file.close()

@@ -97,10 +97,10 @@ cost_t Cost_cpt::contract(edgeID_t edge){
         cost_t res = m_adjacence_matrix[n_vertex*e1 + e2];
         for(vertexID_t j = 0; j < n_vertex; j++){
             if(e1 != j){
-                res *= max(1, m_adjacence_matrix[n_vertex*e2 + j]);
+                res *= max((weight_t) 1, m_adjacence_matrix[n_vertex*e2 + j]);
             }
             if(e2 != j){ 
-                res *= max(1, m_adjacence_matrix[n_vertex*e1 + j]);
+                res *= max((weight_t) 1, m_adjacence_matrix[n_vertex*e1 + j]);
             }
         }
 
