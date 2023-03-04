@@ -241,7 +241,7 @@ void OneSideDBD::init(Network& network){
     m_central_ref.resize(n_vertex/2, -1);
 
     for(const auto& [v1, v2] : network.edge_list){
-        weight_t w = network[n_vertex*v1 + v2];
+        weight_t w = network.adjacence_matrix[n_vertex*v1 + v2];
 
         m_ext_cost_tab[v1] *= w;
         m_ext_cost_tab[v2] *= w;

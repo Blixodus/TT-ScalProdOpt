@@ -96,10 +96,10 @@ cost_t Shuffle::contract(edgeID_t i, SousG &sg){
         cost_t res = sg.m_adjacence_matrix[n_vertex*a + b];
         for(vertexID_t j = 0; j < n_vertex; j++){
             if(a != j){
-                res *= max(1, sg.m_adjacence_matrix[n_vertex*b + j]);
+                res *= max((weight_t) 1, sg.m_adjacence_matrix[n_vertex*b + j]);
             }
             if(b != j){ 
-                res *= max(1, sg.m_adjacence_matrix[n_vertex*a + j]);
+                res *= max((weight_t) 1, sg.m_adjacence_matrix[n_vertex*a + j]);
             }
         }
 

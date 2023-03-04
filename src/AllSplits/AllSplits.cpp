@@ -6,7 +6,7 @@
  * @param state The tensors in this state
  * @return int the best cost for S
  */
-cost_t AllSplits::solve(vector_vertexID_t state){
+cost_t AllSplits::solve(vector_vertexID_t& state){
     //encodage de l'ensemble de sommets
     unsigned long long key = convert(state);
 
@@ -57,7 +57,7 @@ cost_t AllSplits::solve(vector_vertexID_t state){
  * @param state The vertices in this state
  * @return matrix_weight_t an updated copy of m_ext_cost_tab
  */
-matrix_weight_t AllSplits::compute_ecl(vector_vertexID_t state){
+matrix_weight_t AllSplits::compute_ecl(vector_vertexID_t const& state){
     for(vertexID_t i : state){
         m_ext_cost_tab[n_vertex*(state.size()-1)+i] = m_adjacence_matrix[n_vertex*n_vertex + i];
         for(vertexID_t k : state){
@@ -77,7 +77,7 @@ matrix_weight_t AllSplits::compute_ecl(vector_vertexID_t state){
  * @param state2 a state
  * @return int 
  */
-cost_t AllSplits::cut(vector_vertexID_t state1, vector_vertexID_t state2){
+cost_t AllSplits::cut(vector_vertexID_t const& state1, vector_vertexID_t const& state2){
     cost_t res = 1;
     for(vertexID_t i : state1){
         for(vertexID_t j : state2){
@@ -94,7 +94,7 @@ cost_t AllSplits::cut(vector_vertexID_t state1, vector_vertexID_t state2){
  * @param ext_cost_tab The external-weights of all tensors for each states
  * @return int 
  */
-cost_t AllSplits::produit_sortant(vector_vertexID_t state, vector_vertexID_t ext_cost_tab){
+cost_t AllSplits::produit_sortant(vector_vertexID_t const& state, matrix_cost_t const& ext_cost_tab){
     cost_t res = 1;
     for(vertexID_t i : state){
         res *= ext_cost_tab[n_vertex*(state.size()-1) + i];
@@ -108,7 +108,7 @@ cost_t AllSplits::produit_sortant(vector_vertexID_t state, vector_vertexID_t ext
  * @param state The tensors in this state
  * @return int 
  */
-unsigned long long AllSplits::convert(vector_vertexID_t state){
+unsigned long long AllSplits::convert(vector_vertexID_t const& state){
     unsigned long long res = 0;
     for(int i : state){
         res += pow(2, i);
@@ -134,7 +134,7 @@ vector_vertexID_t AllSplits::recover(unsigned long long key){
     return res;
 }
 
-void AllSplits::display_order(vector_vertexID_t state){//dégueulasse
+void AllSplits::display_order(vector_vertexID_t const& state){//dégueulasse
     if(state.size() > 1){
         int key = convert(state);
         display_order(recover(m_order_map_1[key]));

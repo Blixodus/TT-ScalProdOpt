@@ -4,13 +4,13 @@ cost_t ConvexSplits::solve(int i1, int i2, int j1, int j2, vector_cost_t const& 
     unsigned long long key = convert(i1, i2, j1, j2);
     if(m_cost_memo.find(key) == m_cost_memo.end()){
         //TODO: stocker ext_cost de ext_cost_tab dans AS[S.size()] ou quelque chose comme ça, de sorte que solve_diag et solve_vert puissent y accéder
-        cost_t S_cost;
-        ext_cost(i1, i2, j1, j2, ext_cost_tab, S_cost);
+        // cost_t S_cost;
+        cost_t S_cost = ext_cost(i1, i2, j1, j2, ext_cost_tab);
         //affiche(i1, i2, j1, j2);
         //affiche_A(ext_cost_tab);
         //valeur par défaut, facilite les comparaisons
         //TODO:
-        m_cost_memo[key] = best_cost;
+        m_cost_memo[key] = std::numeric_limits<cost_t>::max();//best_cost;
         //coupes diagonales
         solve_diag(i1, i2, j1, j2, key, ext_cost_tab, S_cost);
 
@@ -36,7 +36,7 @@ cost_t ConvexSplits::solve(int i1, int i2, int j1, int j2, vector_cost_t const& 
  * @param S_cost the outer-cost of the shape
  * @return cost_t 
  */
-cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long long key, vector_weight_t const& ext_cost_tab, cost_t S_cost){
+cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long long key, vector_weight_t const& ext_cost_tab, cost_t const& S_cost){
     //les blocs sont un peu difficiles à gérer, mais n'ont pas de découpe illégale en soit
     //il faut borner le sous-bloc pour éviter de couper les branches
     //les branches sont à gérer à part, elles ne doivent être coupées que verticalement
@@ -171,7 +171,7 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
             {//deuxième coupe : '\'
             //coût de séparation
             cost_t cut = start_x_cost * y_cost * end_z_cost;
-            unsigned long total = cut * S_cost;
+            cost_t total = cut * S_cost;
             //on défini de nouvelles bornes i1, i2, j1, j2
                 {//partie gauche
                     ect_copy.at(m_edge_list.at(cx).first) *= start_x_cost;
@@ -210,7 +210,7 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
  * @param S_cost the outer-cost of the shape
  * @return cost_t 
  */
-cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned long long key, vector_weight_t ext_cost_tab, cost_t S_cost){
+cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned long long key, vector_weight_t ext_cost_tab, cost_t const& S_cost){
     int start = min(i1, j1);
     //Si on a plus d'1 sommet
     if((start >= 0) || i1!=i2 || j1!=j2){
@@ -243,7 +243,7 @@ cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned lon
                 ext_cost_tab.at(m_edge_list.at(z).second) *= m_weight_list.at(z);
             }
 
-            unsigned long total = cut * S_cost;
+            cost_t total = cut * S_cost;
 
             {//partie gauche
                 int a1=i1, a2=min(i, i2), b1=j1, b2=min(i, j2);
@@ -310,8 +310,8 @@ cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned lon
  * @param ext_cost_tab 
  * @param s out
  */
-void ConvexSplits::ext_cost(int i1, int i2, int j1, int j2, vector_weight_t const& ext_cost_tab, cost_t& s){
-    s = 1;
+cost_t ConvexSplits::ext_cost(int i1, int i2, int j1, int j2, vector_weight_t const& ext_cost_tab){
+    cost_t s = 1;
     if(i1 >= 0){
         for(int i = i1; i <= i2; i++){
             s *= ext_cost_tab[i];
@@ -322,6 +322,7 @@ void ConvexSplits::ext_cost(int i1, int i2, int j1, int j2, vector_weight_t cons
             s *= ext_cost_tab[i+dim];
         }
     }
+    return s;
 }
 
 /**
@@ -375,7 +376,7 @@ void ConvexSplits::init(Network& network){
     //TODO: as expected this breaks if the cost goes beyond
     //It also breaks the result if we use int
     //what
-    best_cost = numeric_limits<cost_t>::max()- 3;
+    best_cost = std::numeric_limits<cost_t>::max();
     best_order.clear();
 
     //m_cost_memo[-1], a trash bin

@@ -42,22 +42,22 @@ class AllSplits : public Algorithm{
     void init(Network& network);
     //void init(string file); //initialise G, A, et S (S est simplement la liste des sommets au départ)
     cost_t call_solve();
-    cost_t solve(vector_vertexID_t state); //calcule le coût
+    cost_t solve(vector_vertexID_t& state); //calcule le coût
 
     //Renvoie m_ext_cost_list mis à jour pour le state actuel
-    vector_vertexID_t compute_ecl(vector_vertexID_t state);
+    vector_cost_t compute_ecl(vector_vertexID_t const& state);
 
     //renvoie le coût associé aux arètes liant directement state1 et state2 (les arêtes non sortantes)
-    cost_t cut(vector_vertexID_t state1, vector_vertexID_t state2);
+    cost_t cut(vector_vertexID_t const& state1, vector_vertexID_t const& state2);
     //renvoie le coût sortant de state
-    cost_t produit_sortant(vector_vertexID_t state, matrix_weight_t ext_cost_list);
+    cost_t produit_sortant(vector_vertexID_t const& state, matrix_weight_t const& ext_cost_list);
 
     //converti un ensemble de sommets en un entier pouvant être stocké dans une map
-    unsigned long long convert(vector_vertexID_t state);
+    unsigned long long convert(vector_vertexID_t const& state);
     //converti une clé en l'ensemble de sommets correspondant
     vector_vertexID_t recover(unsigned long long key);
 
-    void display_order(vector_vertexID_t state);
+    void display_order(vector_vertexID_t const& state);
     void display_order();
 };
 

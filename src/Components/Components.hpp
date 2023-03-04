@@ -26,7 +26,7 @@ static std::map<std::string, algorithm_e> ALGO_MAP {
 };
 
 //Type for network dimensions
-using dim_t = int ;
+using dim_t = int;
 
 //Type to encode vertices
 using vertexID_t = dim_t;
@@ -34,9 +34,9 @@ using vertexID_t = dim_t;
 using edgeID_t = dim_t;
 
 //Type to encode weights
-using weight_t = int;
+using weight_t = int64_t;
 //Type for costs
-using cost_t = int;
+using cost_t = int64_t;
 
 //Type for vector of weight
 using matrix_weight_t = std::vector<weight_t> ;

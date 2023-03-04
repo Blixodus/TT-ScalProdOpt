@@ -23,10 +23,10 @@ cost_t NaiveEdgeSort::contract(int i){
         int res = G[n_vertex*a + b];
         for(int j = 0; j < n_vertex; j++){
             if(a != j){
-                res *= max(1, G[n_vertex*b + j]);
+                res *= max((cost_t) 1, G[n_vertex*b + j]);
             }
             if(b != j){ 
-                res *= max(1, G[n_vertex*a + j]);
+                res *= max((cost_t) 1, G[n_vertex*a + j]);
             }
         }
 
@@ -69,10 +69,10 @@ double NaiveEdgeSort::ratio(int i){
     int res = 1;
     for(int j = 0; j < n_vertex; j++){
         if(a != j){
-            res *= max(1, G[n_vertex*b + j]);
+            res *= max((cost_t) 1, G[n_vertex*b + j]);
         }
         if(b != j){ 
-            res *= max(1, G[n_vertex*a + j]);
+            res *= max((cost_t) 1, G[n_vertex*a + j]);
         }
     }
 
