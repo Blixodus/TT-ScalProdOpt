@@ -91,7 +91,7 @@ def explore_files(frame : Scrollable_frame):
 
     abs_path_instances += "instances/"
 
-    filenames = ctk.filedialog.askopenfilenames(initialdir=abs_path_instances, title="Select a file or directory") 
+    filenames = ctk.filedialog.askopenfilenames(initialdir=abs_path_instances, title="Select a file or directory", filetypes=[("Networks", ".txt")]) 
 
     #each selected file adds an entry to the list of instances
     for file in filenames:

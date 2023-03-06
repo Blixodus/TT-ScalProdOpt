@@ -30,11 +30,11 @@ class ConvexSplits : public Algorithm{
     ConvexSplits(){}
     ConvexSplits(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
-    cost_t solve(int i1, int i2, int j1, int j2, vector_weight_t const& ext_cost_tab);
-    cost_t solve_vertical(int i1, int i2, int j1, int j2, unsigned long long key,  vector_weight_t ext_cost_tab, cost_t const& S_cost);
-    cost_t solve_diag(int i1, int i2, int j1, int j2, unsigned long long key, vector_weight_t const& ext_cost_tab, cost_t const& S_cost);
+    cost_t solve(int i1, int i2, int j1, int j2, vector_weight_t& ext_cost_tab);
+    cost_t solve_diag(int i1, int i2, int j1, int j2, unsigned long long key, vector_weight_t& ext_cost_tab, cost_t const& S_cost);
+    cost_t solve_vertical(int i1, int i2, int j1, int j2, unsigned long long key, vector_weight_t& ext_cost_tab, cost_t const& S_cost);
 
-    cost_t ext_cost(int i1, int i2, int j1, int j2, vector_weight_t const& ext_cost_tab);
+    cost_t ext_cost(int i1, int i2, int j1, int j2, vector_weight_t& ext_cost_tab);
 
     unsigned long long convert(int i1, int i2, int j1, int j2);
 

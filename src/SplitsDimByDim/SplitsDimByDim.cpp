@@ -11,7 +11,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
     unsigned long long key = convert(state);
 
     if(m_cost_memo.find(key) == m_cost_memo.end() && state.size() > 1){
-        m_cost_memo[key] = best_cost+1;
+        m_cost_memo[key] =std::numeric_limits<cost_t>::max(); //best_cost+1;
 
         cost_t cost;
         
@@ -22,39 +22,47 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
         cost_t cout_sortant = produit_sortant(state, compute_ect(state));
     
         //on parcours tous les découpages de dimension DELTA et moins
-        for(int i = 0; i < min(dmax, (int) state.size()); i++){
+        for(dim_t i = 0; i < min(dmax, (dim_t) state.size()); i++){
             state1.clear();
             state2.clear();
             //on attribue les sommets de state1
             //TODO: this is unnecessary, we can get all the vertices from state1 just thanks to the dimension
-            for(int k = 0; k <= i; k++){
+            for(dim_t k = 0; k <= i; k++){
                 state1.push_back(state[k]);
                 state1.push_back(state[k] + n_vertex/2);
             }
             //TODO: same here
-            //on attribue les sommets de state2
-            for(int k = i+1; k < state.size(); k++){
+            //on attribue les dimensions de state2
+            for(dim_t k = i+1; k < state.size(); k++){
                 state2.push_back(state[k]);
             }
             //on résoud state1 de manière exacte, on découpe state2 (le reste du TT)
             cost = m_exact_solver.solve(state1);
-            if(!state2.empty()){ //what
-                //There was a random '+' here ???
-                cost += solve(state2) + cout_sortant*cut(state1, state2);
-            } 
-            //cout << cost << '\n';
-            //cout << m_cost_memo[key] << '\n';
-            if(cost > 0 && (cost < m_cost_memo[key] || m_cost_memo.find(key) == m_cost_memo.end())){
+
+            if(!state2.empty()){
+                cost_t sol_state2 = solve(state2);
+
+                cost = (sol_state2 != std::numeric_limits<cost_t>::max())? cost + sol_state2 + cout_sortant*cut(state1, state2) : std::numeric_limits<cost_t>::max();
+            }
+
+            // if(cost < 0 || cost > std::numeric_limits<int32_t>::max())
+            //     {std::cout << cost << std::endl;}
+
+            if(cost > 0 && (cost < m_cost_memo[key] /* || m_cost_memo.find(key) == m_cost_memo.end()*/)){
                 m_cost_memo[key] = cost;
                 m_order_map1[key] = convert(state1);
                 m_order_map2[key] = convert(state2);
             }
         }
+
     }else if(state.size() == 1){
         vector_vertexID_t p = {state[0], state[0] + n_vertex/2};
         //overkill
         m_cost_memo[key] = m_exact_solver.solve(p);
     }
+    
+    // if(m_cost_memo[key] == std::numeric_limits<cost_t>::max())
+    //     {std::cout << "We're gonna have issues..." << std::endl;}
     return m_cost_memo[key];
 }
 
@@ -65,16 +73,17 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
  * @return vector_vertexID_t an updated copy of m_ext_cost_tab
  */
 vector_weight_t SplitsDBD::compute_ect(vector_vertexID_t const& state){
-    for(int i : state){
+    size_t size = state.size()-1;
+    for(vertexID_t i : state){
         //poids sortant de i dans l'ensemble de taille state.size() = m_adjacence_matrix[ofs + i] / le poids des liaisons avec des sommets dans state
-        m_ext_cost_tab[n_vertex*(state.size()-1) + i] = m_adjacence_matrix[n_vertex*n_vertex + i];
-        m_ext_cost_tab[n_vertex*(state.size()-1) + i+n_vertex/2] = m_adjacence_matrix[n_vertex*n_vertex + i+n_vertex/2];
+        m_ext_cost_tab[n_vertex*size + i] = m_adjacence_matrix[n_vertex*n_vertex + i];
+        m_ext_cost_tab[n_vertex*size + i+n_vertex/2] = m_adjacence_matrix[n_vertex*n_vertex + i+n_vertex/2];
         
-        for(int k : state){
-            m_ext_cost_tab[n_vertex*(state.size()-1) + i] /= m_adjacence_matrix[n_vertex*i + k];
-            m_ext_cost_tab[n_vertex*(state.size()-1) + i] /= m_adjacence_matrix[n_vertex*i + k+n_vertex/2];
-            m_ext_cost_tab[n_vertex*(state.size()-1) + i + n_vertex/2] /= m_adjacence_matrix[n_vertex*(i+n_vertex/2) + k];
-            m_ext_cost_tab[n_vertex*(state.size()-1) + i + n_vertex/2] /= m_adjacence_matrix[n_vertex*(i+n_vertex/2) + k + n_vertex/2];
+        for(vertexID_t k : state){
+            m_ext_cost_tab[n_vertex*size + i] /= m_adjacence_matrix[n_vertex*i + k];
+            m_ext_cost_tab[n_vertex*size + i] /= m_adjacence_matrix[n_vertex*i + k+n_vertex/2];
+            m_ext_cost_tab[n_vertex*size + i + n_vertex/2] /= m_adjacence_matrix[n_vertex*(i+n_vertex/2) + k];
+            m_ext_cost_tab[n_vertex*size + i + n_vertex/2] /= m_adjacence_matrix[n_vertex*(i+n_vertex/2) + k + n_vertex/2];
         }   
     }
     return m_ext_cost_tab;
@@ -89,8 +98,8 @@ vector_weight_t SplitsDBD::compute_ect(vector_vertexID_t const& state){
  */
 cost_t SplitsDBD::cut(vector_vertexID_t const& state1, vector_vertexID_t const& state2){
     cost_t res = 1;
-    for(int i : state1){
-        for(int j : state2){
+    for(vertexID_t i : state1){
+        for(vertexID_t j : state2){
             res *= m_adjacence_matrix[n_vertex*i + j];
             res *= m_adjacence_matrix[n_vertex*i + j + n_vertex/2];
         }
@@ -107,9 +116,10 @@ cost_t SplitsDBD::cut(vector_vertexID_t const& state1, vector_vertexID_t const& 
  */
 cost_t SplitsDBD::produit_sortant(vector_vertexID_t const& state, matrix_weight_t const& ext_cost_tab){
     cost_t res = 1;
-    for(int i : state){
-        res *= ext_cost_tab[n_vertex*(state.size()-1) + i];
-        res *= ext_cost_tab[n_vertex*(state.size()-1) + i + n_vertex/2];
+    size_t size = state.size()-1;
+    for(vertexID_t i : state){
+        res *= ext_cost_tab[n_vertex*size + i];
+        res *= ext_cost_tab[n_vertex*size + i + n_vertex/2];
     }
     return res;
 }
@@ -120,9 +130,9 @@ cost_t SplitsDBD::produit_sortant(vector_vertexID_t const& state, matrix_weight_
  * @param state The tensors in this state
  * @return int 
  */
-long int SplitsDBD::convert(vector_vertexID_t const& state){
-    int res = 0;
-    for(int i : state){
+unsigned long long SplitsDBD::convert(vector_vertexID_t const& state){
+    unsigned long long res = 0UL;
+    for(vertexID_t i : state){
         if(i < n_vertex/2){
             res += pow(2, i);
         }
@@ -139,7 +149,7 @@ long int SplitsDBD::convert(vector_vertexID_t const& state){
 vector_vertexID_t SplitsDBD::recover(unsigned long long key){
     vector_vertexID_t res;
     for(int i = n_vertex/2; i >= 0; i--){
-        int p = pow(2, i);
+        unsigned long long p = pow(2, i);
         if(key >= p){
             res.push_back(i);
             res.push_back(i+n_vertex/2);
@@ -160,7 +170,7 @@ vector_vertexID_t SplitsDBD::recover_full(vector_vertexID_t const& state){
 
 void SplitsDBD::display_order(vector_vertexID_t const& state){
     if(state.size() >= 1){
-        long int key = convert(state);
+        unsigned long long key = convert(state);
         if(key != -1){
             vector_vertexID_t p1K = recover(m_order_map1[key]);
             m_exact_solver.display_order(p1K);
@@ -209,7 +219,7 @@ void SplitsDBD::init(Network& network){
     
     m_ext_cost_tab.resize(n_vertex*n_vertex, 1);
 
-    best_cost = numeric_limits<cost_t>::max()-1;
+    best_cost = std::numeric_limits<cost_t>::max();
 
     for(vertexID_t i = 0; i < dim; i ++){
         m_state[i] = i;

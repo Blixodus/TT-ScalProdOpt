@@ -60,7 +60,7 @@ class SplitsDBD : public Algorithm{
     cost_t produit_sortant(vector_vertexID_t const& state, matrix_weight_t const& ext_cost_tab);
 
     //converti un ensemble de sommets en un entier pouvant être stocké dans une map
-    long int convert(vector_vertexID_t const& state);
+    unsigned long long convert(vector_vertexID_t const& state);
     //converti une clé en l'ensemble de sommets correspondant
     vector_vertexID_t recover(unsigned long long key);
     vector_vertexID_t recover_full(vector_vertexID_t const& state);

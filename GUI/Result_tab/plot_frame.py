@@ -16,19 +16,17 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from Custom_widget.checkbox_array import Checkbox_array
 from Custom_widget.scrollable_frame import Scrollable_frame
+import plot_config
 
 #TODO: define a dictionary of Algorithm - Color pairs
 #See https://matplotlib.org/stable/gallery/color/named_colors.html
 
 #TODO: display the 2 plots by putting 2 subplots instead of one
 
-#TODO: Upscale the plots
-
-#TODO: put the controls on the side
-
 class Plot_frame(ctk.CTkFrame) :
     sm_plot_width = 18
     sm_plot_height = 8
+    sm_legend_fontsize = 15
     #list storing the plot_frames
     sm_plot_frame_list = []
 
@@ -106,7 +104,6 @@ class Plot_frame(ctk.CTkFrame) :
         ax.set_title("Average execution time per amount of dimension", size = 16)
 
         algo_list = self.algo_checkboxes.grab_positive_checks()
-        ax.legend(algo_list)
 
         #for each algorithm in algo_list
         for algorithm in algo_list:
@@ -129,7 +126,9 @@ class Plot_frame(ctk.CTkFrame) :
             #compute the average execution time using the 2 tabs
             avg_time = [entry[0]/entry[1] for entry in zip(total_time, amount)]
 
-            ax.plot(np.unique(algo_df["Dimension"]), avg_time)
+            ax.plot(np.unique(algo_df["Dimension"]), avg_time, color=plot_config.COLOR_DICT[algorithm])
+
+        ax.legend(algo_list, fontsize=Plot_frame.sm_legend_fontsize)
 
     def display_cost_graph(self):
         """
@@ -161,7 +160,6 @@ class Plot_frame(ctk.CTkFrame) :
         ax.set_title("Cost per network given as number of dimension", size = 16)
 
         algo_list = self.algo_checkboxes.grab_positive_checks()
-        ax.legend(algo_list)
 
         for algorithm in algo_list:
             algo_df = df[df["Algorithm"]==algorithm]
@@ -170,7 +168,9 @@ class Plot_frame(ctk.CTkFrame) :
             # and because file_carac is used to build the x axis,
             # it is properly mapped onto the x axis as well 
             file_idx = [file_keys.index(file) for file in algo_df["File"].to_numpy()]
-            ax.plot(file_idx, algo_df[["Cost"]].to_numpy())
+            ax.plot(file_idx, algo_df[["Cost"]].to_numpy(), color=plot_config.COLOR_DICT[algorithm])
+
+        ax.legend(algo_list, fontsize=Plot_frame.sm_legend_fontsize)
 
     def goal_update(self, label):
         """

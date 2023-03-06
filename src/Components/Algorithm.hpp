@@ -56,7 +56,7 @@ class Algorithm{
     Algorithm* start_sol = nullptr;
 
     //The current best cost
-    cost_t best_cost=numeric_limits<cost_t>::max()-1;
+    cost_t best_cost=numeric_limits<cost_t>::max();
 
     //The current best order
     vector_edgeID_t best_order;
