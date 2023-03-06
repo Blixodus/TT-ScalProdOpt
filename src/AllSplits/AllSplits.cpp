@@ -12,7 +12,7 @@ cost_t AllSplits::solve(vector_vertexID_t& state){
 
     //si il reste plus d'1 sommet et que le coût n'a pas encore été calculé
     if(m_cost_map.find(key) == m_cost_map.end() && state.size() > 1){
-        m_cost_map[key] = best_cost+1;
+        m_cost_map[key] = std::numeric_limits<cost_t>::max();
         cost_t cost;
         
         vector_vertexID_t state1;
@@ -61,10 +61,7 @@ matrix_weight_t AllSplits::compute_ecl(vector_vertexID_t const& state){
     for(vertexID_t i : state){
         m_ext_cost_tab[n_vertex*(state.size()-1)+i] = m_adjacence_matrix[n_vertex*n_vertex + i];
         for(vertexID_t k : state){
-            //TODO: only place with a division I reckon
-            // std::cout << "enter" << std::endl;
             m_ext_cost_tab[n_vertex*(state.size()-1)+i] /= m_adjacence_matrix[n_vertex*i + k];
-            // std::cout << "exit" << std::endl;
         }   
     }
     return m_ext_cost_tab;
@@ -110,7 +107,7 @@ cost_t AllSplits::produit_sortant(vector_vertexID_t const& state, matrix_cost_t 
  */
 unsigned long long AllSplits::convert(vector_vertexID_t const& state){
     unsigned long long res = 0;
-    for(int i : state){
+    for(vertexID_t i : state){
         res += pow(2, i);
     }
     return res;
@@ -125,7 +122,7 @@ unsigned long long AllSplits::convert(vector_vertexID_t const& state){
 vector_vertexID_t AllSplits::recover(unsigned long long key){
     vector_vertexID_t res;
     for(vertexID_t i = n_vertex; i >= 0; i--){
-        unsigned long p = pow(2, i);
+        unsigned long long p = pow(2, i);
         if(key >= p){
             res.push_back(i);
             key -= p;
@@ -136,11 +133,11 @@ vector_vertexID_t AllSplits::recover(unsigned long long key){
 
 void AllSplits::display_order(vector_vertexID_t const& state){//dégueulasse
     if(state.size() > 1){
-        int key = convert(state);
+        unsigned long long key = convert(state);
         display_order(recover(m_order_map_1[key]));
         display_order(recover(m_order_map_2[key]));
         std::cout << "| ";
-        for(int i : state){
+        for(vertexID_t i : state){
             std::cout << i << " | ";
         }
         std::cout << std::endl;
@@ -163,7 +160,7 @@ void AllSplits::init(Network& network){
     //m_order_map_1.clear();
     //m_order_map_2.clear();
 
-    best_cost = numeric_limits<cost_t>::max() - 1;
+    best_cost = numeric_limits<cost_t>::max();
 
     m_state.resize(n_vertex);
     m_adjacence_matrix.resize(n_vertex*(n_vertex+1), 1);

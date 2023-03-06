@@ -26,7 +26,7 @@ def import_files():
 
     abs_path_instances += "results/"
 
-    filenames = [file for file in ctk.filedialog.askopenfilenames(initialdir=abs_path_instances, title="Select a file or directory") if file not in Plot_frame.sm_datafile_list]
+    filenames = [file for file in ctk.filedialog.askopenfilenames(initialdir=abs_path_instances, title="Select a file or directory", filetypes=[("Table format", ".csv")]) if file not in Plot_frame.sm_datafile_list]
 
     #each selected file adds an entry to the list of pandas dataset
     Plot_frame.sm_datafile_list += [file for file in filenames]

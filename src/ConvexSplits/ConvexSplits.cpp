@@ -1,24 +1,18 @@
 #include "ConvexSplits.hpp"
 
-cost_t ConvexSplits::solve(int i1, int i2, int j1, int j2, vector_cost_t const& ext_cost_tab){
+cost_t ConvexSplits::solve(int i1, int i2, int j1, int j2, vector_cost_t& ext_cost_tab){
     unsigned long long key = convert(i1, i2, j1, j2);
     if(m_cost_memo.find(key) == m_cost_memo.end()){
-        //TODO: stocker ext_cost de ext_cost_tab dans AS[S.size()] ou quelque chose comme ça, de sorte que solve_diag et solve_vert puissent y accéder
-        // cost_t S_cost;
+        
         cost_t S_cost = ext_cost(i1, i2, j1, j2, ext_cost_tab);
-        //affiche(i1, i2, j1, j2);
-        //affiche_A(ext_cost_tab);
         //valeur par défaut, facilite les comparaisons
         //TODO:
-        m_cost_memo[key] = std::numeric_limits<cost_t>::max();//best_cost;
+        m_cost_memo[key] = std::numeric_limits<cost_t>::max();
         //coupes diagonales
         solve_diag(i1, i2, j1, j2, key, ext_cost_tab, S_cost);
 
         //coupes verticales
         solve_vertical(i1, i2, j1, j2,key, ext_cost_tab, S_cost);
-
-        // printf("State %d %d %d %d\n", i1, i2, j1, j2);
-        // printf("Computed cost : %d\n", m_cost_memo[key]);
     }
 
     return m_cost_memo[key];
@@ -36,7 +30,7 @@ cost_t ConvexSplits::solve(int i1, int i2, int j1, int j2, vector_cost_t const& 
  * @param S_cost the outer-cost of the shape
  * @return cost_t 
  */
-cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long long key, vector_weight_t const& ext_cost_tab, cost_t const& S_cost){
+cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long long key, vector_weight_t& ext_cost_tab, cost_t const& S_cost){
     //les blocs sont un peu difficiles à gérer, mais n'ont pas de découpe illégale en soit
     //il faut borner le sous-bloc pour éviter de couper les branches
     //les branches sont à gérer à part, elles ne doivent être coupées que verticalement
@@ -85,7 +79,7 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
             cx = ignored;
             cz = ignored;
         }
-        cost_t start_x_cost = m_weight_list.at(cx), start_z_cost = m_weight_list.at(cz);
+        cost_t start_x_cost = m_weight_list[cx], start_z_cost = m_weight_list[cz];
 
         //variable dans laquelle on va accumuler le produit des arêtes centrales
         cost_t y_cost = 1;
@@ -111,12 +105,12 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
             //arête finale en bas
             int z = n_vertex-1 + ofs;
             //mise à jour du coût de séparation
-            y_cost *= m_weight_list.at(last_y);
+            y_cost *= m_weight_list[last_y];
             //mise à jour de ect_copy
-            ect_copy.at(m_edge_list[last_y].first) *= m_weight_list[last_y];
-            ect_copy.at(m_edge_list[last_y].second) *= m_weight_list[last_y];
+            ect_copy[m_edge_list[last_y].first] *= m_weight_list[last_y];
+            ect_copy[m_edge_list[last_y].second] *= m_weight_list[last_y];
 
-            cost_t end_x_cost = m_weight_list.at(x), end_z_cost = m_weight_list.at(z);
+            cost_t end_x_cost = m_weight_list[x], end_z_cost = m_weight_list[z];
             //on ne les considères que si elles sont légales
             if(ofs==end){
                 ura1 = -1;
@@ -139,21 +133,21 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
             {//première coupe : '/'
                 //coût de séparation
                 cost_t cut = start_z_cost * y_cost * end_x_cost;
-                unsigned long total = cut * S_cost;
+                cost_t total = cut * S_cost;
                 //on défini de nouvelles bornes i1, i2, j1, j2
                 {//partie gauche
                     //on met à jour les poids sortant, si les coupures sont illégales, leur coût est à 1 -> pas de modification
-                    ect_copy.at(m_edge_list.at(cz).first) *= start_z_cost;
-                    ect_copy.at(m_edge_list.at(x).first) *= end_x_cost;
-                    ect_copy.at(m_edge_list.at(cz).second) *= start_z_cost;
-                    ect_copy.at(m_edge_list.at(x).second) *= end_x_cost;
+                    ect_copy[m_edge_list[cz].first] *= start_z_cost;
+                    ect_copy[m_edge_list[x].first] *= end_x_cost;
+                    ect_copy[m_edge_list[cz].second] *= start_z_cost;
+                    ect_copy[m_edge_list[x].second] *= end_x_cost;
 
                     total += solve(ula1, ula2, ulb1, ulb2, ect_copy);
                 }
             
                 //TODO: potential break-point
                 //on ne rentre que si le coût jusqu'à présent est inférieur au meilleur coût trouvé pour cet ensemble
-                if(total < m_cost_memo[key] && total > 0)
+                if(total < m_cost_memo[key])
                 {//partie droite 
                     total += solve(ura1, ura2, urb1, urb2, ect_copy);
                     if(total < m_cost_memo[key] && total > 0){
@@ -163,10 +157,10 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
             }
 
             //on remet ect_copy à un état antérieur
-            ect_copy.at(m_edge_list.at(cz).first) /= m_weight_list.at(cz);
-            ect_copy.at(m_edge_list.at(cz).second) /= m_weight_list.at(cz);
-            ect_copy.at(m_edge_list.at(x).first) /= m_weight_list.at(x);
-            ect_copy.at(m_edge_list.at(x).second) /= m_weight_list.at(x);
+            ect_copy[m_edge_list[cz].first] /= m_weight_list[cz];
+            ect_copy[m_edge_list[cz].second] /= m_weight_list[cz];
+            ect_copy[m_edge_list[x].first] /= m_weight_list[x];
+            ect_copy[m_edge_list[x].second] /= m_weight_list[x];
 
             {//deuxième coupe : '\'
             //coût de séparation
@@ -174,17 +168,17 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
             cost_t total = cut * S_cost;
             //on défini de nouvelles bornes i1, i2, j1, j2
                 {//partie gauche
-                    ect_copy.at(m_edge_list.at(cx).first) *= start_x_cost;
-                    ect_copy.at(m_edge_list.at(z).first) *= end_z_cost;
-                    ect_copy.at(m_edge_list.at(cx).second) *= start_x_cost;
-                    ect_copy.at(m_edge_list.at(z).second) *= end_z_cost;
+                    ect_copy[m_edge_list[cx].first] *= start_x_cost;
+                    ect_copy[m_edge_list[z].first] *= end_z_cost;
+                    ect_copy[m_edge_list[cx].second] *= start_x_cost;
+                    ect_copy[m_edge_list[z].second] *= end_z_cost;
 
                     total += solve(dla1, dla2, dlb1, dlb2, ect_copy);
                 }
 
                 //TODO: potential break-point
                 //on ne rentre que si le coût jusqu'à présent est inférieur au meilleur coût trouvé pour cet ensemble
-                if(total < m_cost_memo[key] && total > 0)
+                if(total < m_cost_memo[key])
                 {//partie droite
                     total += solve(dra1, dra2, drb1, drb2, ect_copy);
 
@@ -210,7 +204,7 @@ cost_t ConvexSplits::solve_diag(int i1, int i2, int j1, int j2, unsigned long lo
  * @param S_cost the outer-cost of the shape
  * @return cost_t 
  */
-cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned long long key, vector_weight_t ext_cost_tab, cost_t const& S_cost){
+cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned long long key, vector_weight_t& ext_cost_tab, cost_t const& S_cost){
     int start = min(i1, j1);
     //Si on a plus d'1 sommet
     if((start >= 0) || i1!=i2 || j1!=j2){
@@ -230,17 +224,17 @@ cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned lon
             //cas on ne dépasse pas de la ligne i1 i2
             if(i >= i1 && i < i2){
                 x = i;
-                cut *= m_weight_list.at(x);
-                ext_cost_tab.at(m_edge_list.at(x).first) *= m_weight_list.at(x);
-                ext_cost_tab.at(m_edge_list.at(x).second) *= m_weight_list.at(x);
+                cut *= m_weight_list[x];
+                ext_cost_tab[m_edge_list[x].first] *= m_weight_list[x];
+                ext_cost_tab[m_edge_list[x].second] *= m_weight_list[x];
             }
 
             //cas on ne dépasse pas de la ligne j1 j2
             if(i >= j1 && i < j2){
                 z = n_vertex-1+i;
-                cut *= m_weight_list.at(z);
-                ext_cost_tab.at(m_edge_list.at(z).first) *= m_weight_list.at(z);
-                ext_cost_tab.at(m_edge_list.at(z).second) *= m_weight_list.at(z);
+                cut *= m_weight_list[z];
+                ext_cost_tab[m_edge_list[z].first] *= m_weight_list[z];
+                ext_cost_tab[m_edge_list[z].second] *= m_weight_list[z];
             }
 
             cost_t total = cut * S_cost;
@@ -289,10 +283,10 @@ cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned lon
             }
 
             //on remet ext_cost_tab à l'état précédent
-            ext_cost_tab.at(m_edge_list.at(x).first) /= m_weight_list.at(x);
-            ext_cost_tab.at(m_edge_list.at(x).second) /= m_weight_list.at(x);
-            ext_cost_tab.at(m_edge_list.at(z).first) /= m_weight_list.at(z);
-            ext_cost_tab.at(m_edge_list.at(z).second) /= m_weight_list.at(z);
+            ext_cost_tab[m_edge_list[x].first] /= m_weight_list[x];
+            ext_cost_tab[m_edge_list[x].second] /= m_weight_list[x];
+            ext_cost_tab[m_edge_list[z].first] /= m_weight_list[z];
+            ext_cost_tab[m_edge_list[z].second] /= m_weight_list[z];
         }
     }else{
         m_cost_memo[key] = 0;
@@ -310,7 +304,7 @@ cost_t ConvexSplits::solve_vertical(int i1, int i2, int j1, int j2, unsigned lon
  * @param ext_cost_tab 
  * @param s out
  */
-cost_t ConvexSplits::ext_cost(int i1, int i2, int j1, int j2, vector_weight_t const& ext_cost_tab){
+cost_t ConvexSplits::ext_cost(int i1, int i2, int j1, int j2, vector_weight_t& ext_cost_tab){
     cost_t s = 1;
     if(i1 >= 0){
         for(int i = i1; i <= i2; i++){
@@ -371,12 +365,10 @@ void ConvexSplits::init(Network& network){
         m_weight_list[i] = network.adjacence_matrix[n_vertex*v1 + v2];
     }
 
-    //a short because it needs to fit into the map, we could update it,
-    //it would require changing the encoding tho
     //TODO: as expected this breaks if the cost goes beyond
     //It also breaks the result if we use int
     //what
-    best_cost = std::numeric_limits<cost_t>::max();
+    best_cost = std::numeric_limits<int32_t>::max();
     best_order.clear();
 
     //m_cost_memo[-1], a trash bin
@@ -389,5 +381,6 @@ void ConvexSplits::init(Network& network){
  * @return cost_t 
  */
 cost_t ConvexSplits::call_solve(){
-    return solve(0, dim-1, 0, dim-1, vector_cost_t (n_vertex+1, 1));
+    vector_cost_t ext_cost_tab(n_vertex+1, 1);
+    return solve(0, dim-1, 0, dim-1, ext_cost_tab);
 }
