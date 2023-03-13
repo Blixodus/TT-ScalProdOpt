@@ -27,6 +27,8 @@ class Plot_frame(ctk.CTkFrame) :
     sm_plot_width = 18
     sm_plot_height = 8
     sm_legend_fontsize = 15
+    sm_axis_fontsize = 15
+
     #list storing the plot_frames
     sm_plot_frame_list = []
 
@@ -94,14 +96,12 @@ class Plot_frame(ctk.CTkFrame) :
         df = self.current_dataframe
         max_dim = max(df["Dimension"])
         
-        ax.set_xlabel("Dimension", size=14)
-        # ax.set_xticks(np.arange(0, max_dim+1, 1), fontsize=12)
+        ax.set_xlabel("Instance / #Dimensions", size=Plot_frame.sm_axis_fontsize)
 
-        ax.set_ylabel("Time", size=14)
-        # ax.set_yticks(fontsize=12)
+        ax.set_ylabel("Time (s)", size=Plot_frame.sm_axis_fontsize)
         ax.set_yscale("log")
         
-        ax.set_title("Average execution time per amount of dimension", size = 16)
+        ax.set_title("Execution time (log) of algorithms", size = 16)
 
         algo_list = self.algo_checkboxes.grab_positive_checks()
 
@@ -128,6 +128,7 @@ class Plot_frame(ctk.CTkFrame) :
 
             ax.plot(np.unique(algo_df["Dimension"]), avg_time, color=plot_config.COLOR_DICT[algorithm])
 
+        ax.grid()
         ax.legend(algo_list, fontsize=Plot_frame.sm_legend_fontsize)
 
     def display_cost_graph(self):
@@ -146,18 +147,13 @@ class Plot_frame(ctk.CTkFrame) :
         #To avoid repeating labels, while still acknowledging them
         filtered_values = np.array([([val] + [None]*(file_values.count(val)-1)) for val in np.unique(file_values)]).flatten()
 
-        # ax.set_xticks(range(len(file_carac)), file_values)
         ax.set_xticks(range(len(file_carac)), filtered_values)
+        ax.set_xlabel("Instance / #Dimensions", size=Plot_frame.sm_axis_fontsize)
 
-        # print(list(file_carac.values()))
-        ax.set_xlabel("Dimension", size=14)
-        # ax.set_xticks(np.arange(0, max_dim+1, 1), fontsize=12)
-
-        ax.set_ylabel("Cost", size=14)
-        # ax.set_yticks(fontsize=12)
+        ax.set_ylabel("Cost", size=Plot_frame.sm_axis_fontsize)
         ax.set_yscale("log")
         
-        ax.set_title("Cost per network given as number of dimension", size = 16)
+        ax.set_title("Contraction cost (log) per instance, for networks with increasing ranks towards the middle", size = 16)
 
         algo_list = self.algo_checkboxes.grab_positive_checks()
 
@@ -170,6 +166,7 @@ class Plot_frame(ctk.CTkFrame) :
             file_idx = [file_keys.index(file) for file in algo_df["File"].to_numpy()]
             ax.plot(file_idx, algo_df[["Cost"]].to_numpy(), color=plot_config.COLOR_DICT[algorithm])
 
+        ax.grid()
         ax.legend(algo_list, fontsize=Plot_frame.sm_legend_fontsize)
 
     def goal_update(self, label):

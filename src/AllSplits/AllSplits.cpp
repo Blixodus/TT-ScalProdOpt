@@ -8,7 +8,7 @@
  */
 cost_t AllSplits::solve(vector_vertexID_t& state){
     //encodage de l'ensemble de sommets
-    unsigned long long key = convert(state);
+    double key = convert(state);
 
     //si il reste plus d'1 sommet et que le coût n'a pas encore été calculé
     if(m_cost_map.find(key) == m_cost_map.end() && state.size() > 1){
@@ -105,8 +105,8 @@ cost_t AllSplits::produit_sortant(vector_vertexID_t const& state, matrix_cost_t 
  * @param state The tensors in this state
  * @return int 
  */
-unsigned long long AllSplits::convert(vector_vertexID_t const& state){
-    unsigned long long res = 0;
+double AllSplits::convert(vector_vertexID_t const& state){
+    double res = 0;
     for(vertexID_t i : state){
         res += pow(2, i);
     }
@@ -119,10 +119,10 @@ unsigned long long AllSplits::convert(vector_vertexID_t const& state){
  * @param key a code generated from a state using convert(state)
  * @return vector_vertexID_t
  */
-vector_vertexID_t AllSplits::recover(unsigned long long key){
+vector_vertexID_t AllSplits::recover(double key){
     vector_vertexID_t res;
     for(vertexID_t i = n_vertex; i >= 0; i--){
-        unsigned long long p = pow(2, i);
+        double p = pow(2, i);
         if(key >= p){
             res.push_back(i);
             key -= p;
@@ -133,7 +133,7 @@ vector_vertexID_t AllSplits::recover(unsigned long long key){
 
 void AllSplits::display_order(vector_vertexID_t const& state){//dégueulasse
     if(state.size() > 1){
-        unsigned long long key = convert(state);
+        double key = convert(state);
         display_order(recover(m_order_map_1[key]));
         display_order(recover(m_order_map_2[key]));
         std::cout << "| ";

@@ -34,7 +34,8 @@ class SouG{
 class AllEdgeByEdge : public Algorithm{
     public:
     SouG sgref; //structure avec son propre graphe qu'on peut modifier librement
-    // vector<pair<int, int>> E; //liste des arêtes (fixe)
+    
+    //liste des arêtes (fixe)
     std::vector<std::pair<vertexID_t, vertexID_t>> m_edge_list;
     //Tab G; //size*(size+1)
     //Tab m_adjacence_matrix;

@@ -8,7 +8,8 @@
  */
 cost_t SplitsDBD::solve(vector_vertexID_t const& state){
     //encodage de l'ensemble de sommets
-    unsigned long long key = convert(state);
+    //unsigned long long key = convert(state);
+    double key = convert(state);
 
     if(m_cost_memo.find(key) == m_cost_memo.end() && state.size() > 1){
         m_cost_memo[key] =std::numeric_limits<cost_t>::max(); //best_cost+1;
@@ -39,14 +40,14 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
             //on résoud state1 de manière exacte, on découpe state2 (le reste du TT)
             cost = m_exact_solver.solve(state1);
 
+            // if(cost == std::numeric_limits<cost_t>::max())
+            //     {std::cout << "Solving state1 does some funky stuff" << std::endl;}
+
             if(!state2.empty()){
                 cost_t sol_state2 = solve(state2);
 
                 cost = (sol_state2 != std::numeric_limits<cost_t>::max())? cost + sol_state2 + cout_sortant*cut(state1, state2) : std::numeric_limits<cost_t>::max();
             }
-
-            // if(cost < 0 || cost > std::numeric_limits<int32_t>::max())
-            //     {std::cout << cost << std::endl;}
 
             if(cost > 0 && (cost < m_cost_memo[key] /* || m_cost_memo.find(key) == m_cost_memo.end()*/)){
                 m_cost_memo[key] = cost;
@@ -62,7 +63,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
     }
     
     // if(m_cost_memo[key] == std::numeric_limits<cost_t>::max())
-    //     {std::cout << "We're gonna have issues..." << std::endl;}
+    //     {std::cout << key << " : " << m_cost_memo[key] << std::endl;}
     return m_cost_memo[key];
 }
 
@@ -124,14 +125,14 @@ cost_t SplitsDBD::produit_sortant(vector_vertexID_t const& state, matrix_weight_
     return res;
 }
 
-/**TODO: Juste use the start and end (in dimension of the sub-network)
- * @brief converts a state in a unique integer key
+/** TODO: Juste use the start and end (in dimension of the sub-network)
+ * @brief converts a state in a unique integer (double) key
  * 
- * @param state The tensors in this state
+ * @param state the dimensions in this state
  * @return int 
  */
-unsigned long long SplitsDBD::convert(vector_vertexID_t const& state){
-    unsigned long long res = 0UL;
+double SplitsDBD::convert(vector_vertexID_t const& state){
+    double res = 0;
     for(vertexID_t i : state){
         if(i < n_vertex/2){
             res += pow(2, i);
@@ -146,10 +147,10 @@ unsigned long long SplitsDBD::convert(vector_vertexID_t const& state){
  * @param key a code generated from a state using convert(state)
  * @return vector_vertexID_t 
  */
-vector_vertexID_t SplitsDBD::recover(unsigned long long key){
+vector_vertexID_t SplitsDBD::recover(double key){
     vector_vertexID_t res;
     for(int i = n_vertex/2; i >= 0; i--){
-        unsigned long long p = pow(2, i);
+        double p = pow(2, i);
         if(key >= p){
             res.push_back(i);
             res.push_back(i+n_vertex/2);
@@ -170,7 +171,7 @@ vector_vertexID_t SplitsDBD::recover_full(vector_vertexID_t const& state){
 
 void SplitsDBD::display_order(vector_vertexID_t const& state){
     if(state.size() >= 1){
-        unsigned long long key = convert(state);
+        double key = convert(state);
         if(key != -1){
             vector_vertexID_t p1K = recover(m_order_map1[key]);
             m_exact_solver.display_order(p1K);
