@@ -13,26 +13,26 @@
 
 class SplitsDBD : public Algorithm{
     public:
-    //Tab G; //la matrice d'adjacence + 1 colonne donnant le poids sortant de chaque sommet
+    //la matrice d'adjacence + 1 colonne donnant le poids sortant de chaque sommet
     //Tab m_adjacence_matrix;
     matrix_weight_t m_adjacence_matrix;
 
-    //Tab S; //un état (ensemble de sommets)
+    //un état (ensemble de dimensions)
     //Tab m_state;
     vector_vertexID_t m_state;
 
-    //Tab A; //un tableau donnant pour chaque taille d'état le poids sortant des sommets
+    //un tableau donnant pour chaque taille d'état le poids sortant des sommets
     //Tab m_ext_cost_tab;
     matrix_weight_t m_ext_cost_tab;
 
-    //unordered_map<unsigned long long, cost_t> C;//vector<cost_t> C; //la liste des coûts obtenus
-    unordered_map<unsigned long long, cost_t> m_cost_memo;
-    
-    //unordered_map<unsigned long long, int> P1; //vector<long int> P1; //la liste des ordres state1
-    //unordered_map<unsigned long long, int> m_order_map1;
-    unordered_map<unsigned long long, int> m_order_map1;
+    //The map of obtained cost
+    //unordered_map<unsigned long long, cost_t> m_cost_memo;
+    std::unordered_map<double, cost_t> m_cost_memo;
 
-    unordered_map<unsigned long long, int> m_order_map2;//vector<long int> P2; //la liste des ordres state2
+    //la liste des ordres state1
+    unordered_map<double, int> m_order_map1;
+
+    unordered_map<double, int> m_order_map2;//vector<long int> P2; //la liste des ordres state2
 
     // AllSplits solverGreedy;
     AllSplits m_exact_solver;
@@ -60,9 +60,9 @@ class SplitsDBD : public Algorithm{
     cost_t produit_sortant(vector_vertexID_t const& state, matrix_weight_t const& ext_cost_tab);
 
     //converti un ensemble de sommets en un entier pouvant être stocké dans une map
-    unsigned long long convert(vector_vertexID_t const& state);
+    double convert(vector_vertexID_t const& state);
     //converti une clé en l'ensemble de sommets correspondant
-    vector_vertexID_t recover(unsigned long long key);
+    vector_vertexID_t recover(double key);
     vector_vertexID_t recover_full(vector_vertexID_t const& state);
 
     void display_order();
