@@ -4,8 +4,8 @@
  * Type : exact algorithm
  * Complexity : 2^4D
  */
-#ifndef SPLITSOLVER_HPP
-#define SPLITSOLVER_HPP
+#ifndef COTENGRA_OPTIMAL_WRAPPER_HPP
+#define COTENGRA_OPTIMAL_WRAPPER_HPP
 #include "../Components/Algorithm.hpp"
 
 class CotengraOptimalWrapper : public Algorithm{

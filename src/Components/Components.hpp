@@ -18,11 +18,12 @@ using namespace std;
 
 //Enum and map to switch on the algorithms' name
 enum algorithm_e {ALLSPLITS, ALLEDGEBYEDGE, CONVEXSPLITS, GREEDYEDGESORT,
-ONESIDEDIMBYDIM, SHUFFLE, SPLITSDIMBYDIM};
+ONESIDEDIMBYDIM, SHUFFLE, SPLITSDIMBYDIM, COTENGRAOPTIMALWRAPPER};
 static std::map<std::string, algorithm_e> ALGO_MAP {
     {"AllSplits", ALLSPLITS}, {"AllEdgeByEdge", ALLEDGEBYEDGE},{"ConvexSplits", CONVEXSPLITS},
     {"GreedyEdgeSort", GREEDYEDGESORT},{"OneSideDimByDim", ONESIDEDIMBYDIM},
-    {"Shuffle", SHUFFLE},{"SplitsDimByDim", SPLITSDIMBYDIM}
+    {"Shuffle", SHUFFLE},{"SplitsDimByDim", SPLITSDIMBYDIM},
+    {"CotengraOptimalWrapper", COTENGRAOPTIMALWRAPPER}
 };
 
 //Type for network dimensions

@@ -1,4 +1,5 @@
 #include "CotengraOptimalWrapper.hpp"
+#include <iostream>
 //TODO: broken, floating point exception
 /**
  * @brief Solves a given state
@@ -7,48 +8,12 @@
  * @return int the best cost for S
  */
 cost_t CotengraOptimalWrapper::solve(vector_vertexID_t& state){
-    //encodage de l'ensemble de sommets
-    double key = convert(state);
-
-    //si il reste plus d'1 sommet et que le coût n'a pas encore été calculé
-    if(m_cost_map.find(key) == m_cost_map.end() && state.size() > 1){
-        m_cost_map[key] = std::numeric_limits<cost_t>::max();
-        cost_t cost;
-        
-        vector_vertexID_t state1;
-        vector_vertexID_t state2;
-
-        cost_t cout_sortant = produit_sortant(state, compute_ecl(state));
-        
-        //pour toutes les séparations de state
-        do{
-            //on déplace la "barre" où on fait la coupure state1/state2 dans state
-            for(vertexID_t i = 0; i < state.size() - 1; i++){
-                state1.clear();
-                state2.clear();
-                //on attribue les sommets de state1
-                for(vertexID_t k = 0; k <= i; k++){
-                    state1.push_back(state[k]);
-                }
-                //on attribue les sommets de state2
-                for(vertexID_t k = i+1; k < state.size(); k++){
-                    state2.push_back(state[k]);
-                }
-                cost = solve(state1);
-                if(!state2.empty()){ 
-                    cost += solve(state2) + cout_sortant*cut(state1, state2);
-                }
-                if(cost < m_cost_map[key] && cost > 0){
-                    m_cost_map[key] = cost;
-                    //m_order_map_1[key] = convert(state1);
-                    //m_order_map_2[key] = convert(state2);
-                }
-            }
-        }while(next_permutation(state.begin(), state.end()));
-    }else if(state.size() == 1){
-        m_cost_map[key] = 0;
+    std::cout<<"[Cotengra wrapper] Request for solving state : ";
+    for(vertexID_t i : state){
+        std::cout << i << " | ";
     }
-    return m_cost_map[key];
+    std::cout << std::endl;
+    return 10;
 }
 
 /**

@@ -1,6 +1,7 @@
 #include "CotengraOptimalWrapper.hpp"
 
 int main(int argc, char* argv[]){
+    std::cout << "Hello, World!" << std::endl;
     CotengraOptimalWrapper solver;
     switch (argc){
     case 1:
