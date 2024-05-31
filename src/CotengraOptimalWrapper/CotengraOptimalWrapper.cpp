@@ -1,5 +1,9 @@
 #include "CotengraOptimalWrapper.hpp"
+#include <pybind11/embed.h>
 #include <iostream>
+
+namespace py = pybind11;
+
 //TODO: broken, floating point exception
 /**
  * @brief Solves a given state
@@ -13,6 +17,12 @@ cost_t CotengraOptimalWrapper::solve(vector_vertexID_t& state){
         std::cout << i << " | ";
     }
     std::cout << std::endl;
+
+    // Start the Python interpreter
+    std::cout << "Starting Python interpreter" << std::endl;
+    py::scoped_interpreter guard{};
+
+    py::print("Hello, World!");
     return 10;
 }
 
