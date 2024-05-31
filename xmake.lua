@@ -24,6 +24,10 @@ target("SplitsDimByDim")
     set_kind("binary")
     add_files("src/SplitsDimByDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/AllSplits/AllSplits.cpp")
 
+target("CotengraOptimalWrapper")
+    set_kind("binary")
+    add_files("src/CotengraOptimalWrapper/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp")
+
 target("OptiTenseurs")
     set_kind("binary")
     add_files("src/**/*.cpp", "tools/Compute/Compute.cpp", "tools/Argparser/*.cpp", "tools/Export/Export.cpp")

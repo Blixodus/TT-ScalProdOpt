@@ -36,8 +36,8 @@ class CotengraOptimalWrapper : public Algorithm{
     //S : Une liste de sommet, les sommets sélectionné pour cet état
     //P : une map associant au code binaire de chaque état un ordre
 
-    AllSplits(){}
-    AllSplits(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
+    CotengraOptimalWrapper(){}
+    CotengraOptimalWrapper(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
     //initialiseurs
     void init(Network& network);
