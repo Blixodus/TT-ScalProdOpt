@@ -7,23 +7,23 @@
  * @param dict_list a list generated using Argparser.grab_dictionnary_list()
  */
 void init_algos(std::vector<std::map<std::string, std::any>> dict_list){
-    //we iterate over the dictionaries
+    // Iterate over the dictionaries
     for(auto& dict : dict_list){
         std::string algo_name = std::any_cast<std::string>(dict["main_alg"]);
         std::cout << "Instantiating : " << algo_name << std::endl;
-        //we instantiate the right algorithm based on its name
+        // Instantiate the right algorithm based on its name
         Algorithm* new_alg = instantiate(dict);
         
-        //verify that the algorithm exists
+        // Verify that the algorithm exists
         if(new_alg != nullptr){
             main_algorithm_list.emplace_back(new_alg);
 
-            //initialization of sub_alg
+            // Initialization of sub_alg
             if(dict.find("sub_alg") != dict.end()){
                 new_alg->sub_alg = instantiate(std::any_cast<std::string>(dict["sub_alg"]));
             }
 
-            //initialization of start_sol
+            // Initialization of start_sol
             if(dict.find("start_sol") != dict.end()){
                 new_alg->start_sol = instantiate(std::any_cast<std::string>(dict["start_sol"]));
             }
@@ -106,7 +106,7 @@ void launch_exec(T& solver, Network& network){
         condition_variable cv;
         mutex mtx;
 
-        //Thread that will carry the execution
+        // Thread that will carry the execution
         std::thread t1([&solver, &cv, &network](){
             execfile_no_display(solver, network);
             cv.notify_all();
