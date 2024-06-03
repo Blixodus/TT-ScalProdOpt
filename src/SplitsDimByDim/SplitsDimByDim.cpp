@@ -1,4 +1,5 @@
 #include "SplitsDimByDim.hpp"
+#include <iostream>
 
 /**
  * @brief Solves a given state
@@ -10,6 +11,8 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
     //encodage de l'ensemble de sommets
     //unsigned long long key = convert(state);
     double key = convert(state);
+
+    std::cout << "SplitsDimByDim : solve start " << std::endl;
 
     if(m_cost_memo.find(key) == m_cost_memo.end() && state.size() > 1){
         m_cost_memo[key] =std::numeric_limits<cost_t>::max(); //best_cost+1;
@@ -23,6 +26,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
         cost_t cout_sortant = produit_sortant(state, compute_ect(state));
     
         //on parcours tous les découpages de dimension DELTA et moins
+        std::cout << "SplitsDimByDim : dim size " << min(dmax, (dim_t) state.size()) << std::endl;
         for(dim_t i = 0; i < min(dmax, (dim_t) state.size()); i++){
             state1.clear();
             state2.clear();
@@ -39,6 +43,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
             }
             //on résoud state1 de manière exacte, on découpe state2 (le reste du TT)
             cost = m_exact_solver.solve(state1);
+            std::cout << "SplitsDimByDim : solve dim " << i << " cost " << cost << std::endl;
 
             // if(cost == std::numeric_limits<cost_t>::max())
             //     {std::cout << "Solving state1 does some funky stuff" << std::endl;}

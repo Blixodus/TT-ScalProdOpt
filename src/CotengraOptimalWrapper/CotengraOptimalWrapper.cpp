@@ -12,22 +12,34 @@ namespace py = pybind11;
  * @return int the best cost for S
  */
 cost_t CotengraOptimalWrapper::solve(vector_vertexID_t& state){
-    //std::cout<<"[Cotengra wrapper] Request for solving state : ";
+    std::cout<<"[Cotengra wrapper CPP] Request for solving state : ";
     for(vertexID_t i : state){
         std::cout << i << " | ";
     }
     std::cout << std::endl;
+    std::cout<<"!"<<std::endl;
+    int dim = state.size() / 2;
+    std::cout<<"!!"<<std::endl;
 
     // Start the Python interpreter
     //std::cout << "Starting Python interpreter" << std::endl;
-    py::scoped_interpreter guard{};
+    //py::scoped_interpreter guard{};
+    py::initialize_interpreter();
+    py::gil_scoped_acquire acquire;
+    std::cout<<"!!!"<<std::endl;
     //py::print("Hello, World!");
 
-    auto python_script = py::module::import("contegra_wrapper");
+    //std::cout<<"[Cotengra wrapper CPP] Calling Python script for dim : "<<dim << "and file "<<m_network->m_filename<<std::endl;
+    std::cout<<"!!!!"<<std::endl<<std::flush;
+
+    auto python_script = py::module::import("cotengra_wrapper");
+    std::cout<<"!!!!!"<<std::endl<<std::flush;
     auto resultobj = python_script.attr("cotengra_wrapper_solve")(m_network->m_filename, dim);
+    std::cout<<"!!!!!!"<<std::endl<<std::flush;
     double result = resultobj.cast<double>();
-    //std::cout<<"Result of the call: "<<result<<std::endl;
+    std::cout<<"Result of the call: "<<result<<std::endl;
     //std::cout<<"Filename"<<filename<<std::endl;
+    py::finalize_interpreter();
 
     return result;
 }
@@ -113,16 +125,7 @@ vector_vertexID_t CotengraOptimalWrapper::recover(double key){
 }
 
 void CotengraOptimalWrapper::display_order(vector_vertexID_t const& state){//dégueulasse
-    if(state.size() > 1){
-        double key = convert(state);
-        display_order(recover(m_order_map_1[key]));
-        display_order(recover(m_order_map_2[key]));
-        std::cout << "| ";
-        for(vertexID_t i : state){
-            std::cout << i << " | ";
-        }
-        std::cout << std::endl;
-    }
+    std::cout << "| CTG-wrapper: TBD | " << std::endl;
 }
 
 /**
@@ -132,6 +135,7 @@ void CotengraOptimalWrapper::display_order(vector_vertexID_t const& state){//dé
 void CotengraOptimalWrapper::display_order(){}
 
 void CotengraOptimalWrapper::init(Network& network){
+    m_network = &network;
     set_limit_dim(network.n_vertex);
     dim = network.dimension;
     n_vertex = network.n_vertex;

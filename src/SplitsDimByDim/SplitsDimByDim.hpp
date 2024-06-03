@@ -9,7 +9,7 @@
 #define RANGESPLITSOLVER_HPP
 //We should technically include EVERY other algorithm
 #include "../Components/Components.hpp"
-#include "../AllSplits/AllSplits.hpp"
+#include "../CotengraOptimalWrapper/CotengraOptimalWrapper.hpp"
 
 class SplitsDBD : public Algorithm{
     public:
@@ -35,7 +35,7 @@ class SplitsDBD : public Algorithm{
     unordered_map<double, int> m_order_map2;//vector<long int> P2; //la liste des ordres state2
 
     // AllSplits solverGreedy;
-    AllSplits m_exact_solver;
+    CotengraOptimalWrapper m_exact_solver;
 
     //A : Un tableau de taille n*n, le poids des arrêtes sortantes de chaque sommet, pour les n états state d'un "plongeon"
     //G : un tableau de taille n+1*n, la matrice d'adjacence + la colonne A de départ. M[i][j] = G[i*size+j]
