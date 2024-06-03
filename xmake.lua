@@ -1,7 +1,7 @@
 add_rules("mode.debug", "mode.release")
 add_includedirs("extern/pybind11/include")
-add_includedirs("/Library/Frameworks/Python.framework/Versions/3.11/include/python3.11")
-
+add_includedirs("/usr/include/python3.11")
+add_links("python3.11")
 
 target("GreedyEdgeSort")
     set_kind("binary")

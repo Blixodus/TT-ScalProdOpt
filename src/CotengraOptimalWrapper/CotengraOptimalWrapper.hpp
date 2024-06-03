@@ -10,6 +10,8 @@
 
 class CotengraOptimalWrapper : public Algorithm{
     public:
+    std::string filename;
+
     //size : n_vertex(n_vertex + 1)
     //An adjacence matrix, + 1 column that stores the base external cost associated with each vertex
     //i.e. m_ext_cost_tab[n_vertex]

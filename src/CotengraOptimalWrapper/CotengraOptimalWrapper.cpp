@@ -12,18 +12,24 @@ namespace py = pybind11;
  * @return int the best cost for S
  */
 cost_t CotengraOptimalWrapper::solve(vector_vertexID_t& state){
-    std::cout<<"[Cotengra wrapper] Request for solving state : ";
+    //std::cout<<"[Cotengra wrapper] Request for solving state : ";
     for(vertexID_t i : state){
         std::cout << i << " | ";
     }
     std::cout << std::endl;
 
     // Start the Python interpreter
-    std::cout << "Starting Python interpreter" << std::endl;
+    //std::cout << "Starting Python interpreter" << std::endl;
     py::scoped_interpreter guard{};
+    //py::print("Hello, World!");
 
-    py::print("Hello, World!");
-    return 10;
+    auto python_script = py::module::import("contegra_wrapper");
+    auto resultobj = python_script.attr("cotengra_wrapper_solve")(m_network->m_filename, dim);
+    double result = resultobj.cast<double>();
+    //std::cout<<"Result of the call: "<<result<<std::endl;
+    //std::cout<<"Filename"<<filename<<std::endl;
+
+    return result;
 }
 
 /**
