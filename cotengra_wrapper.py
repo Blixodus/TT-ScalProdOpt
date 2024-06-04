@@ -48,7 +48,15 @@ def import_tensor_train(filename, dim_min=None, dim_max=None):
             nodes_down.append(int(node))
 
     # Limit the tensor network to given dimension
+    outer_edges = []
+
     if dim_min is not None and dim_max is not None:
+        if dim_min > 0:
+            outer_edges.append(ranks[(nodes_up[dim_min], nodes_up[dim_min - 1])])
+            outer_edges.append(ranks[(nodes_down[dim_min], nodes_down[dim_min - 1])])
+        if dim_max < n:
+            outer_edges.append(ranks[(nodes_up[dim_max - 1], nodes_up[dim_max])])
+            outer_edges.append(ranks[(nodes_down[dim_max - 1], nodes_down[dim_max])])
         nodes_up = nodes_up[dim_min:dim_max]
         nodes_down = nodes_down[dim_min:dim_max]
         n = dim_max - dim_min
@@ -111,15 +119,23 @@ def import_tensor_train(filename, dim_min=None, dim_max=None):
             sizes_dict[ll] = ranks[(nodes_up[i], nodes_up[i - 1])]
             sizes_dict[m] = ranks[(nodes_up[i], nodes_down[i])]
 
-    return inputs, output, sizes_dict, einsum_str
+    return inputs, output, sizes_dict, einsum_str, outer_edges
 
 
 def cotengra_wrapper_solve(input_file, dim_min, dim_max):
     #print("[Cotengra wrapper PY]", input_file, dim_min, "...", dim_max)
 
-    inputs, output, sizes_dict, _ = import_tensor_train(input_file, dim_min, dim_max)
+    inputs, output, sizes_dict, _, outer_edges = import_tensor_train(input_file, dim_min, dim_max)
+
+    print(inputs, output, sizes_dict)
+
+    #ctg.HyperGraph(inputs, output, sizes_dict).plot()
     tree = ctg.array_contract_tree(inputs, output, sizes_dict, optimize='optimal')
 
-    return tree.contraction_cost()
+    outer_edges_cost = 1
+    for weight in outer_edges:
+        outer_edges_cost *= weight
+
+    return tree.contraction_cost() * outer_edges_cost
 
 #print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs/instances/test/uniform/instance_03_00.txt", 1))
