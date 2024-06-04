@@ -25,7 +25,7 @@ target("OneSideDimByDim")
 
 target("SplitsDimByDim")
     set_kind("binary")
-    add_files("src/SplitsDimByDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/AllSplits/AllSplits.cpp")
+    add_files("src/SplitsDimByDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/CotengraOptimalWrapper/CotengraOptimalWrapper.cpp")
 
 target("CotengraOptimalWrapper")
     set_kind("binary")

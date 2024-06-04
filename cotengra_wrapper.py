@@ -1,8 +1,9 @@
 import re
 import time
+import sys
 import cotengra as ctg
 
-def import_tensor_train(filename, dim=None):
+def import_tensor_train(filename, dim_min=None, dim_max=None):
     # Import text file with tensor train description
     text_file = open(filename, "r")
     lines = text_file.readlines()
@@ -47,10 +48,10 @@ def import_tensor_train(filename, dim=None):
             nodes_down.append(int(node))
 
     # Limit the tensor network to given dimension
-    if dim is not None and dim <= n:
-        nodes_up = nodes_up[:dim]
-        nodes_down = nodes_down[:dim]
-        n = dim
+    if dim_min is not None and dim_max is not None:
+        nodes_up = nodes_up[dim_min:dim_max]
+        nodes_down = nodes_down[dim_min:dim_max]
+        n = dim_max - dim_min
 
     # Left side of tensor train
     # O--
@@ -113,10 +114,10 @@ def import_tensor_train(filename, dim=None):
     return inputs, output, sizes_dict, einsum_str
 
 
-def cotengra_wrapper_solve(input_file, dim):
-    print("[Cotengra wrapper PY]", input_file, dim)
+def cotengra_wrapper_solve(input_file, dim_min, dim_max):
+    #print("[Cotengra wrapper PY]", input_file, dim_min, "...", dim_max)
 
-    inputs, output, sizes_dict, _ = import_tensor_train(input_file, dim)
+    inputs, output, sizes_dict, _ = import_tensor_train(input_file, dim_min, dim_max)
     tree = ctg.array_contract_tree(inputs, output, sizes_dict, optimize='optimal')
 
     return tree.contraction_cost()

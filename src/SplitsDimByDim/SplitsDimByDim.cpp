@@ -13,6 +13,11 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
     double key = convert(state);
 
     std::cout << "SplitsDimByDim : solve start " << std::endl;
+    for (vertexID_t i : state)
+    {
+        std::cout << i << " | ";
+    }
+    std::cout << std::endl;
 
     if(m_cost_memo.find(key) == m_cost_memo.end() && state.size() > 1){
         m_cost_memo[key] =std::numeric_limits<cost_t>::max(); //best_cost+1;
@@ -41,15 +46,31 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
             for(dim_t k = i+1; k < state.size(); k++){
                 state2.push_back(state[k]);
             }
+
+            std::cout << "SplitsDimByDim : state1 ";
+            for(vertexID_t k : state1){
+                std::cout<< k << " ";
+            }
+            std::cout << std::endl;
+
+            std::cout << "SplitsDimByDim : state2 ";
+            for(vertexID_t k : state2){
+                std::cout<< k << " ";
+            }
+            std::cout << std::endl;
+
             //on résoud state1 de manière exacte, on découpe state2 (le reste du TT)
-            cost = m_exact_solver.solve(state1);
-            std::cout << "SplitsDimByDim : solve dim " << i << " cost " << cost << std::endl;
+            std::cout << "SplitsDimByDim : request to solve dim " << i << std::endl;
+            cost = m_exact_solver.solve(state1, false);
+            std::cout << "SplitsDimByDim : solved dim " << i << " cost " << cost << std::endl << std::flush;
 
             // if(cost == std::numeric_limits<cost_t>::max())
             //     {std::cout << "Solving state1 does some funky stuff" << std::endl;}
 
             if(!state2.empty()){
                 cost_t sol_state2 = solve(state2);
+
+                std::cout<<cost<<" "<<sol_state2<<" "<<cout_sortant*cut(state1, state2)<<std::endl<<endl;
 
                 cost = (sol_state2 != std::numeric_limits<cost_t>::max())? cost + sol_state2 + cout_sortant*cut(state1, state2) : std::numeric_limits<cost_t>::max();
             }
@@ -64,7 +85,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
     }else if(state.size() == 1){
         vector_vertexID_t p = {state[0], state[0] + n_vertex/2};
         //overkill
-        m_cost_memo[key] = m_exact_solver.solve(p);
+        m_cost_memo[key] = m_exact_solver.solve(p, false);
     }
     
     // if(m_cost_memo[key] == std::numeric_limits<cost_t>::max())

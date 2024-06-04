@@ -43,7 +43,7 @@ class CotengraOptimalWrapper : public Algorithm{
     void init(Network& network);
     //void init(string file); //initialise G, A, et S (S est simplement la liste des sommets au départ)
     cost_t call_solve();
-    cost_t solve(vector_vertexID_t& state); //calcule le coût
+    cost_t solve(vector_vertexID_t& state, bool contiguous_ids); //calcule le coût
 
     //Renvoie m_ext_cost_list mis à jour pour le state actuel
     vector_cost_t compute_ecl(vector_vertexID_t const& state);
