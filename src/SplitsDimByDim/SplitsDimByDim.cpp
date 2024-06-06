@@ -12,12 +12,12 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
     //unsigned long long key = convert(state);
     double key = convert(state);
 
-    std::cout << "SplitsDimByDim : solve start " << std::endl;
+    /*std::cout << "SplitsDimByDim : solve start " << std::endl;
     for (vertexID_t i : state)
     {
         std::cout << i << " | ";
     }
-    std::cout << std::endl;
+    std::cout << std::endl;*/
 
     if(m_cost_memo.find(key) == m_cost_memo.end() && state.size() > 1){
         m_cost_memo[key] =std::numeric_limits<cost_t>::max(); //best_cost+1;
@@ -31,7 +31,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
         cost_t cout_sortant = produit_sortant(state, compute_ect(state));
     
         //on parcours tous les découpages de dimension DELTA et moins
-        std::cout << "SplitsDimByDim : dim size " << min(dmax, (dim_t) state.size()) << std::endl;
+        //std::cout << "SplitsDimByDim : dim size " << min(dmax, (dim_t) state.size()) << std::endl;
         for(dim_t i = 0; i < min(dmax, (dim_t) state.size()); i++){
             state1.clear();
             state2.clear();
@@ -47,7 +47,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
                 state2.push_back(state[k]);
             }
 
-            std::cout << "SplitsDimByDim : state1 ";
+            /*std::cout << "SplitsDimByDim : state1 ";
             for(vertexID_t k : state1){
                 std::cout<< k << " ";
             }
@@ -57,12 +57,12 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
             for(vertexID_t k : state2){
                 std::cout<< k << " ";
             }
-            std::cout << std::endl;
+            std::cout << std::endl;*/
 
             //on résoud state1 de manière exacte, on découpe state2 (le reste du TT)
-            std::cout << "SplitsDimByDim : request to solve dim " << i << std::endl;
+            //std::cout << "SplitsDimByDim : request to solve dim " << i << std::endl;
             cost = m_exact_solver.solve(state1, false);
-            std::cout << "SplitsDimByDim : solved dim " << i << " cost " << cost << std::endl << std::flush;
+            //std::cout << "SplitsDimByDim : solved dim " << i << " cost " << cost << std::endl << std::flush;
 
             // if(cost == std::numeric_limits<cost_t>::max())
             //     {std::cout << "Solving state1 does some funky stuff" << std::endl;}
@@ -70,7 +70,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
             if(!state2.empty()){
                 cost_t sol_state2 = solve(state2);
 
-                std::cout<<cost<<" "<<sol_state2<<" "<<cout_sortant*cut(state1, state2)<<std::endl<<endl;
+                //std::cout<<cost<<" "<<sol_state2<<" "<<cout_sortant*cut(state1, state2)<<std::endl<<endl;
 
                 cost = (sol_state2 != std::numeric_limits<cost_t>::max())? cost + sol_state2 + cout_sortant*cut(state1, state2) : std::numeric_limits<cost_t>::max();
             }
@@ -133,6 +133,7 @@ cost_t SplitsDBD::cut(vector_vertexID_t const& state1, vector_vertexID_t const& 
     }
     return res;
 }
+
 
 /**
  * @brief computes the product of all the edges leaving a state

@@ -12,10 +12,12 @@ namespace py = pybind11;
  * @return int the best cost for S
  */
 cost_t CotengraOptimalWrapper::solve(vector_vertexID_t& state, bool contiguous_ids = true){
-    //std::cout<<"[Cotengra wrapper CPP] Request for solving state : ";
-    //for(vertexID_t i : state){
-    //    std::cout << i << " | ";
-    //
+    double key = convert(state);
+    /*std::cout<<"[Cotengra wrapper CPP] Request for solving state : ";
+    for(vertexID_t i : state){
+        std::cout << i << " | ";
+    }
+    std::cout << std::endl << std::flush;*/
 
     // Locate which range of dimensions from whole network file should be solved
     int dim_min = state[0], dim_max = state[0];
@@ -61,7 +63,7 @@ cost_t CotengraOptimalWrapper::solve(vector_vertexID_t& state, bool contiguous_i
     //std::cout<<"!!!!!"<<std::endl<<std::flush;
     auto resultobj = python_script.attr("cotengra_wrapper_solve")(m_network->m_filename, dim_min, dim_max);
     //std::cout<<"!!!!!!"<<std::endl<<std::flush;
-    cost_t result = resultobj.cast<cost_t>();
+    cost_t cost = resultobj.cast<cost_t>();
     //std::cout<<"Result of the call: "<<result<<std::endl;
     //std::cout<<"Filename"<<filename<<std::endl;
     //py::gil_scoped_release release;
@@ -70,7 +72,28 @@ cost_t CotengraOptimalWrapper::solve(vector_vertexID_t& state, bool contiguous_i
     //py::gil_scoped_acquire acquire;
     //std::cout<<"Finalized interpreter"<<std::endl;
 
-    return result;
+    std::cout<<"[Cotengra] Request for solving state : " << key << std::endl;
+    for(vertexID_t i : state){
+        std::cout << i << " | ";
+    }
+
+    /*cost_t result = cost;
+    cost_t cout_sortant = produit_sortant(state, compute_ecl(state));
+
+    if(n_vertex - state.size() > 0)
+    {
+        if(state.size() == 2) {
+            result = cost * cout_sortant;
+        } else {
+            result = cost + cout_sortant * cut(state);
+        }
+    }
+
+    std::cout << "Cost: " << result << std::endl;
+    std::cout << cost << " " << cout_sortant << " " << cut(state) << std::endl;*/
+    std::cout << "Cost: " << cost << std::endl;
+
+    return cost;
 }
 
 /**
@@ -98,6 +121,30 @@ matrix_weight_t CotengraOptimalWrapper::compute_ecl(vector_vertexID_t const& sta
  */
 cost_t CotengraOptimalWrapper::cut(vector_vertexID_t const& state1, vector_vertexID_t const& state2){
     cost_t res = 1;
+    for(vertexID_t i : state1){
+        for(vertexID_t j : state2){
+            res *= m_adjacence_matrix[n_vertex*i + j];
+        }
+    }
+    return res;
+}
+
+/**
+ * @brief computes the product of all edges linking 2 states together
+ * 
+ * @param state1 a state
+ * @param state2 a state
+ * @return int 
+ */
+cost_t CotengraOptimalWrapper::cut(vector_vertexID_t const& state1){
+    vector_vertexID_t state2;
+    for(vertexID_t i = 0; i < n_vertex; i++){
+        if(std::find(state1.begin(), state1.end(), i) == state1.end()){
+            state2.push_back(i);
+        }
+    }
+
+    cost_t res = 1;    
     for(vertexID_t i : state1){
         for(vertexID_t j : state2){
             res *= m_adjacence_matrix[n_vertex*i + j];

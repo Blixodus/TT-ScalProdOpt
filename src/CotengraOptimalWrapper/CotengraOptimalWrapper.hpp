@@ -50,6 +50,8 @@ class CotengraOptimalWrapper : public Algorithm{
 
     //renvoie le coût associé aux arètes liant directement state1 et state2 (les arêtes non sortantes)
     cost_t cut(vector_vertexID_t const& state1, vector_vertexID_t const& state2);
+    cost_t cut(vector_vertexID_t const& state1);
+
     //renvoie le coût sortant de state
     cost_t produit_sortant(vector_vertexID_t const& state, matrix_weight_t const& ext_cost_list);
 
