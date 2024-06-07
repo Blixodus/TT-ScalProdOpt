@@ -72,7 +72,8 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
 
                 //std::cout<<cost<<" "<<sol_state2<<" "<<cout_sortant*cut(state1, state2)<<std::endl<<endl;
 
-                cost = (sol_state2 != std::numeric_limits<cost_t>::max())? cost + sol_state2 + cout_sortant*cut(state1, state2) : std::numeric_limits<cost_t>::max();
+                //cost = (sol_state2 != std::numeric_limits<cost_t>::max())? cost + sol_state2 + cout_sortant*cut(state1, state2) : std::numeric_limits<cost_t>::max();
+                cost = (sol_state2 != std::numeric_limits<cost_t>::max())? cost + sol_state2 : std::numeric_limits<cost_t>::max();
             }
 
             if(cost > 0 && (cost < m_cost_memo[key] /* || m_cost_memo.find(key) == m_cost_memo.end()*/)){

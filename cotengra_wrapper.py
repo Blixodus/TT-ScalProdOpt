@@ -138,11 +138,13 @@ def import_tensor_train(filename, dim_min=None, dim_max=None):
 
         # Add outer edges from the left size to include them in the cost
         if i == dim_min and dim_min > 0:
-            output.append(ul)
-            output.append(ll)
+            inputs.append([ul, ll])
+            #output.append(ul)
+            #output.append(ll)
 
         # Add outer edges from the right size to include them in the cost
         if i == dim_max - 1 and dim_max < n:
+            #inputs.append([ur, lr])
             output.append(ur)
             output.append(lr)
 
@@ -187,4 +189,4 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max):
 
     return tree.contraction_cost()
 
-#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs_dev/small_test_2.txt", 0, 2))
+#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs_dev/small_test_2.txt", 1, 2))
