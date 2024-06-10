@@ -91,6 +91,10 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
     
     // if(m_cost_memo[key] == std::numeric_limits<cost_t>::max())
     //     {std::cout << key << " : " << m_cost_memo[key] << std::endl;}
+
+    if(m_cost_memo[key] ==  std::numeric_limits<cost_t>::max()){
+        std::cout << "!!!SplitsDimByDim : solve MAX_VALUE for " << key << std::endl;
+    }
     return m_cost_memo[key];
 }
 
@@ -159,14 +163,15 @@ cost_t SplitsDBD::produit_sortant(vector_vertexID_t const& state, matrix_weight_
  * @param state the dimensions in this state
  * @return int 
  */
-double SplitsDBD::convert(vector_vertexID_t const& state){
-    double res = 0;
-    for(vertexID_t i : state){
-        if(i < n_vertex/2){
-            res += pow(2, i);
-        }
+int64_t SplitsDBD::convert(vector_vertexID_t const& state){
+    int64_t seed = state.size();
+    for(auto x : state) {
+        x = ((x >> 16) ^ x) * 0x45d9f3b;
+        x = ((x >> 16) ^ x) * 0x45d9f3b;
+        x = (x >> 16) ^ x;
+        seed ^= x + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
-    return res;
+    return seed;
 }
 
 /**

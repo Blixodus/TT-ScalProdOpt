@@ -25,12 +25,12 @@ class CotengraOptimalWrapper : public Algorithm{
     
     //Map binding the binary key of a state to a cost
     //std::unordered_map<unsigned long long, cost_t> m_cost_map;
-    std::unordered_map<double, cost_t> m_cost_map;
+    std::unordered_map<int64_t, cost_t> m_cost_map;
 
     //unordered_map<unsigned long long, int> P1; //la liste des ordres S1
-    std::unordered_map<double, int> m_order_map_1;
+    std::unordered_map<int64_t, int> m_order_map_1;
 
-    std::unordered_map<double, int> m_order_map_2; //la liste des ordres S2
+    std::unordered_map<int64_t, int> m_order_map_2; //la liste des ordres S2
 
     //G : un tableau de taille n+1*n, la matrice d'adjacence + la colonne A de départ. M[i][j] = G[i*size+j]
     //S : Une liste de sommet, les sommets sélectionné pour cet état
@@ -56,7 +56,7 @@ class CotengraOptimalWrapper : public Algorithm{
     cost_t produit_sortant(vector_vertexID_t const& state, matrix_weight_t const& ext_cost_list);
 
     //converti un ensemble de sommets en un entier pouvant être stocké dans une map
-    double convert(vector_vertexID_t const& state);
+    int64_t convert(vector_vertexID_t const& state);
     //converti une clé en l'ensemble de sommets correspondant
     vector_vertexID_t recover(double key);
 

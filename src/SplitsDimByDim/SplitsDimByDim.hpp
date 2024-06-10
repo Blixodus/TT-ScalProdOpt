@@ -27,12 +27,12 @@ class SplitsDBD : public Algorithm{
 
     //The map of obtained cost
     //unordered_map<unsigned long long, cost_t> m_cost_memo;
-    std::unordered_map<double, cost_t> m_cost_memo;
+    std::unordered_map<int64_t, cost_t> m_cost_memo;
 
     //la liste des ordres state1
-    unordered_map<double, int> m_order_map1;
+    unordered_map<int64_t, int> m_order_map1;
 
-    unordered_map<double, int> m_order_map2;//vector<long int> P2; //la liste des ordres state2
+    unordered_map<int64_t, int> m_order_map2;//vector<long int> P2; //la liste des ordres state2
 
     // AllSplits solverGreedy;
     CotengraOptimalWrapper m_exact_solver;
@@ -60,7 +60,7 @@ class SplitsDBD : public Algorithm{
     cost_t produit_sortant(vector_vertexID_t const& state, matrix_weight_t const& ext_cost_tab);
 
     //converti un ensemble de sommets en un entier pouvant être stocké dans une map
-    double convert(vector_vertexID_t const& state);
+    int64_t convert(vector_vertexID_t const& state);
     //converti une clé en l'ensemble de sommets correspondant
     vector_vertexID_t recover(double key);
     vector_vertexID_t recover_full(vector_vertexID_t const& state);

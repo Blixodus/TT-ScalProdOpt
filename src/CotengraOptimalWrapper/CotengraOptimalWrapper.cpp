@@ -12,7 +12,7 @@ namespace py = pybind11;
  * @return int the best cost for S
  */
 cost_t CotengraOptimalWrapper::solve(vector_vertexID_t& state, bool contiguous_ids = true){
-    double key = convert(state);
+    int64_t key = convert(state);
     /*std::cout<<"[Cotengra wrapper CPP] Request for solving state : ";
     for(vertexID_t i : state){
         std::cout << i << " | ";
@@ -174,12 +174,15 @@ cost_t CotengraOptimalWrapper::produit_sortant(vector_vertexID_t const& state, m
  * @param state The tensors in this state
  * @return int 
  */
-double CotengraOptimalWrapper::convert(vector_vertexID_t const& state){
-    double res = 0;
-    for(vertexID_t i : state){
-        res += pow(2, i);
+int64_t CotengraOptimalWrapper::convert(vector_vertexID_t const& state){
+    int64_t seed = state.size();
+    for(auto x : state) {
+        x = ((x >> 16) ^ x) * 0x45d9f3b;
+        x = ((x >> 16) ^ x) * 0x45d9f3b;
+        x = (x >> 16) ^ x;
+        seed ^= x + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
-    return res;
+    return seed;
 }
 
 /**
