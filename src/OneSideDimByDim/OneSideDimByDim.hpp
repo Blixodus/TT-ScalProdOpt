@@ -43,20 +43,23 @@ class OneSideDBD : public Algorithm{
     //list of pairs {0, 1, 2}x{0, 1, 2}, corresponding to the duo of edges we contracted
     std::vector<pair<int, int>> m_order_by_dim;
 
+    // Constructors
     OneSideDBD(){}
     OneSideDBD(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
-    cost_t solve();
+    // Initializers 
+    void init(Network& network);
 
+    // Solvers
+    cost_t solve();
+    cost_t call_solve();
     cost_t contract(int s, int i, int x, pair<int, int>& p);
  
+    // Utility functions
     void compute_ect(int s, int k);
     void restore_ect(int s);
     void display_order(int s, int k);
     void display_order();
     void get_order(int s, int k);
-
-    void init(Network& network);
-    cost_t call_solve();
 };
 #endif

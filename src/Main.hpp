@@ -11,6 +11,7 @@
 #include "OneSideDimByDim/OneSideDimByDim.hpp"
 #include "Shuffle/Shuffle.hpp"
 #include "SplitsDimByDim/SplitsDimByDim.hpp"
+#include "CotengraOptimalWrapper/CotengraOptimalWrapper.hpp"
 #include "../tools/Export/Export.hpp"
 
 #include <algorithm>

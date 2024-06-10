@@ -1,4 +1,7 @@
 add_rules("mode.debug", "mode.release")
+add_includedirs("extern/pybind11/include")
+add_includedirs("/usr/include/python3.11")
+add_links("python3.11")
 
 target("GreedyEdgeSort")
     set_kind("binary")
@@ -22,7 +25,11 @@ target("OneSideDimByDim")
 
 target("SplitsDimByDim")
     set_kind("binary")
-    add_files("src/SplitsDimByDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/AllSplits/AllSplits.cpp")
+    add_files("src/SplitsDimByDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/CotengraOptimalWrapper/CotengraOptimalWrapper.cpp")
+
+target("CotengraOptimalWrapper")
+    set_kind("binary")
+    add_files("src/CotengraOptimalWrapper/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp")
 
 target("OptiTenseurs")
     set_kind("binary")
