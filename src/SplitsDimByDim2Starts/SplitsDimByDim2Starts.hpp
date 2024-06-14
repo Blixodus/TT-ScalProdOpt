@@ -13,7 +13,7 @@
 class SplitsDBD2Starts : public Algorithm{
     public:
     // State (set of nodes)
-    vector_vertexID_t m_state;
+    deque_vertexID_t m_state;
 
     // The memoization table for the costs of each state
     std::unordered_map<int64_t, cost_t> m_cost_memo_LR;
@@ -36,20 +36,20 @@ class SplitsDBD2Starts : public Algorithm{
 
     // Initializers
     void init(Network& network);
-    cost_t solve(vector_vertexID_t const& state, direction_e direction); // compute the contraction cost of a given state
+    cost_t solve(deque_vertexID_t const& state, direction_e direction); // compute the contraction cost of a given state
     cost_t call_solve();
 
     // Deprecated
-    vector_weight_t compute_ect(vector_vertexID_t const& state);
+    deque_vertexID_t compute_ect(deque_vertexID_t const& state);
 
     // Utility functions
-    int64_t convert(vector_vertexID_t state); // convert state to hash key
-    vector_vertexID_t recover(double key); // convert hash key to state
-    vector_vertexID_t recover_full(vector_vertexID_t const& state);
+    int64_t convert(deque_vertexID_t state); // convert state to hash key
+    deque_vertexID_t recover(double key); // convert hash key to state
+    deque_vertexID_t recover_full(deque_vertexID_t const& state);
 
     // Display functions
     void display_order();
-    void display_order(vector_vertexID_t const& state);
+    void display_order(deque_vertexID_t const& state);
 };
 
 #endif
