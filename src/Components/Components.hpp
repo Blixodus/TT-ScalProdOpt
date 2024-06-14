@@ -18,11 +18,12 @@ using namespace std;
 
 //Enum and map to switch on the algorithms' name
 enum algorithm_e {ALLSPLITS, ALLEDGEBYEDGE, CONVEXSPLITS, GREEDYEDGESORT,
-ONESIDEDIMBYDIM, SHUFFLE, SPLITSDIMBYDIM, COTENGRAOPTIMALWRAPPER};
+ONESIDEDIMBYDIM, SHUFFLE, SPLITSDIMBYDIM, SPLITSDIMBYDIM2SIDES, SPLITSDIMBYDIM2STARTS, COTENGRAOPTIMALWRAPPER};
 static std::map<std::string, algorithm_e> ALGO_MAP {
     {"AllSplits", ALLSPLITS}, {"AllEdgeByEdge", ALLEDGEBYEDGE},{"ConvexSplits", CONVEXSPLITS},
     {"GreedyEdgeSort", GREEDYEDGESORT},{"OneSideDimByDim", ONESIDEDIMBYDIM},
-    {"Shuffle", SHUFFLE},{"SplitsDimByDim", SPLITSDIMBYDIM},
+    {"Shuffle", SHUFFLE},{"SplitsDimByDim", SPLITSDIMBYDIM}, {"SplitsDimByDim2Sides", SPLITSDIMBYDIM2SIDES},
+    {"SplitsDimByDim2Starts", SPLITSDIMBYDIM2STARTS},
     {"CotengraOptimalWrapper", COTENGRAOPTIMALWRAPPER}
 };
 
@@ -60,5 +61,8 @@ struct edge_t{
     edge_t(vertexID_t v1, vertexID_t v2, weight_t weight=0) : m_edge(std::make_pair(v1, v2)), m_weight(weight) {}
     edge_t(std::pair<int, int> edge, weight_t weight=0) : m_edge(edge), m_weight(weight) {}
 };
+
+// Direction for the start of the contraction
+enum direction_e {LEFT_TO_RIGHT, RIGHT_TO_LEFT};
 
 #endif

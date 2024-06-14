@@ -10,7 +10,7 @@ namespace py = pybind11;
  * @param state The tensors in this state
  * @return cost_t the best cost for S
  */
-cost_t CotengraOptimalWrapper::solve(vector_vertexID_t& state, bool contiguous_ids = true){
+cost_t CotengraOptimalWrapper::solve(vector_vertexID_t& state, bool contiguous_ids = true, direction_e direction = LEFT_TO_RIGHT) {
     int64_t key = convert(state);
 
     // Locate which range of dimensions from whole network file should be solved
@@ -33,7 +33,7 @@ cost_t CotengraOptimalWrapper::solve(vector_vertexID_t& state, bool contiguous_i
     // Call the Cotengra wrapper script to solve the subpart of the network
     // using the optimal algorithm from the Cotengra library
     auto python_script = py::module::import("cotengra_wrapper");
-    auto resultobj = python_script.attr("cotengra_wrapper_solve")(m_network->m_filename, dim_min, dim_max);
+    auto resultobj = python_script.attr("cotengra_wrapper_solve")(m_network->m_filename, dim_min, dim_max, (int)direction);
     cost_t cost = resultobj.cast<cost_t>();
 
     return cost;

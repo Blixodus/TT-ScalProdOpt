@@ -3,7 +3,7 @@ import time
 import sys
 import cotengra as ctg
 
-def import_tensor_train(filename, dim_min=None, dim_max=None):
+def import_tensor_train(filename, dim_min=None, dim_max=None, reversed=False):
     # Import text file with tensor train description
     text_file = open(filename, "r")
     lines = text_file.readlines()
@@ -27,7 +27,7 @@ def import_tensor_train(filename, dim_min=None, dim_max=None):
             ranks[(a, b)] = rank
             ranks[(b, a)] = rank
 
-    print(ranks)
+    #print(ranks)
 
     # Locate node names for upper and lower indices
     line_up = ""
@@ -138,15 +138,20 @@ def import_tensor_train(filename, dim_min=None, dim_max=None):
 
         # Add outer edges from the left size to include them in the cost
         if i == dim_min and dim_min > 0:
-            inputs.append([ul, ll])
-            #output.append(ul)
-            #output.append(ll)
+            if reversed == False:
+                inputs.append([ul, ll])
+            else:
+                output.append(ul)
+                output.append(ll)
 
         # Add outer edges from the right size to include them in the cost
         if i == dim_max - 1 and dim_max < n:
             #inputs.append([ur, lr])
-            output.append(ur)
-            output.append(lr)
+            if reversed == False:
+                output.append(ur)
+                output.append(lr)
+            else:
+                inputs.append([ur, lr])
 
 
 
@@ -172,21 +177,21 @@ def import_tensor_train(filename, dim_min=None, dim_max=None):
     return inputs, output, sizes_dict
 
 
-def cotengra_wrapper_solve(input_file, dim_min, dim_max):
-    inputs, output, sizes_dict = import_tensor_train(input_file, dim_min, dim_max)
+def cotengra_wrapper_solve(input_file, dim_min, dim_max, reversed):
+    inputs, output, sizes_dict = import_tensor_train(input_file, dim_min, dim_max, reversed)
 
     #print(inputs, output, sizes_dict)
 
     #fig, ax = ctg.HyperGraph(inputs, output, sizes_dict).plot()
-    #fig.savefig("graph.png")
+    #fig.savefig("graph_3.pdf")
     tree = ctg.array_contract_tree(inputs, output, sizes_dict, optimize='optimal')
 
     #fig, ax = tree.plot_rubberband()
-    #fig.savefig("tree.png")
+    #fig.savefig("tree_3.pdf")
 
-    print(sizes_dict, output)
+    #print(sizes_dict, output)
     #print("[Cotengra wrapper PY]", input_file, dim_min, "...", dim_max, tree.contraction_cost() * outer_edges_cost, tree.contraction_cost(), outer_edges_cost)
 
     return tree.contraction_cost()
 
-#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs_dev/small_test_2.txt", 1, 2))
+#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs/instances/test/uniform_pt2/instance_058_037.txt", 0, 58))

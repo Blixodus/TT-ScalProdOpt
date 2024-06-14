@@ -27,6 +27,14 @@ target("SplitsDimByDim")
     set_kind("binary")
     add_files("src/SplitsDimByDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/CotengraOptimalWrapper/CotengraOptimalWrapper.cpp")
 
+target("SplitsDimByDim2Sides")
+set_kind("binary")
+add_files("src/SplitsDimByDim2Sides/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/CotengraOptimalWrapper/CotengraOptimalWrapper.cpp")
+
+target("SplitsDimByDim2Starts")
+set_kind("binary")
+add_files("src/SplitsDimByDim2Starts/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/CotengraOptimalWrapper/CotengraOptimalWrapper.cpp")
+
 target("CotengraOptimalWrapper")
     set_kind("binary")
     add_files("src/CotengraOptimalWrapper/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp")

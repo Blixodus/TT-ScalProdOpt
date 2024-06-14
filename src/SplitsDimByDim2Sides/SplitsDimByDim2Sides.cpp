@@ -1,4 +1,4 @@
-#include "SplitsDimByDim.hpp"
+#include "SplitsDimByDim2Sides.hpp"
 #include <iostream>
 
 /**
@@ -7,7 +7,7 @@
  * @param state The dimensions in this state
  * @return cost_t the best cost for state
  */
-cost_t SplitsDBD::solve(vector_vertexID_t const& state){
+cost_t SplitsDBD2Sides::solve(vector_vertexID_t const& state){
     // Encode the state as unique key (hash)
     double key = convert(state);
 
@@ -36,7 +36,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
             }
 
             // Solve the first state optimally (using Cotengra optimal algorithm)
-            cost = m_exact_solver.solve(state1, false, LEFT_TO_RIGHT);
+            cost = m_exact_solver.solve(state1, false, (direction_e)this->reversed);
 
             // Solve the second state recursively
             if(!state2.empty()){
@@ -54,7 +54,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
 
     }else if(state.size() == 1){
         vector_vertexID_t p = {state[0], state[0] + n_vertex/2};
-        m_cost_memo[key] = m_exact_solver.solve(p, false, LEFT_TO_RIGHT);
+        m_cost_memo[key] = m_exact_solver.solve(p, false, (direction_e)this->reversed);
     }
     
     return m_cost_memo[key];
@@ -66,7 +66,7 @@ cost_t SplitsDBD::solve(vector_vertexID_t const& state){
  * @param state The tensors in this state
  * @return vector_vertexID_t an updated copy of m_ext_cost_tab
  */
-vector_weight_t SplitsDBD::compute_ect(vector_vertexID_t const& state){
+vector_weight_t SplitsDBD2Sides::compute_ect(vector_vertexID_t const& state){
     return vector_weight_t();
 }
 
@@ -76,7 +76,7 @@ vector_weight_t SplitsDBD::compute_ect(vector_vertexID_t const& state){
  * @param state the dimensions in this state
  * @return int64_t (hash of the state)
  */
-int64_t SplitsDBD::convert(vector_vertexID_t const& state){
+int64_t SplitsDBD2Sides::convert(vector_vertexID_t const& state){
     int64_t seed = state.size();
     for(auto x : state) {
         x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -93,7 +93,7 @@ int64_t SplitsDBD::convert(vector_vertexID_t const& state){
  * @param key a code generated from a state using convert(state)
  * @return vector_vertexID_t 
  */
-vector_vertexID_t SplitsDBD::recover(double key){
+vector_vertexID_t SplitsDBD2Sides::recover(double key){
     vector_vertexID_t res;
     for(int i = n_vertex/2; i >= 0; i--){
         double p = pow(2, i);
@@ -106,7 +106,7 @@ vector_vertexID_t SplitsDBD::recover(double key){
     return res;
 }
 
-vector_vertexID_t SplitsDBD::recover_full(vector_vertexID_t const& state){
+vector_vertexID_t SplitsDBD2Sides::recover_full(vector_vertexID_t const& state){
     vector_vertexID_t res;
     for(vertexID_t i : state){
         res.push_back(i);
@@ -115,7 +115,7 @@ vector_vertexID_t SplitsDBD::recover_full(vector_vertexID_t const& state){
     return res;
 }
 
-void SplitsDBD::display_order(vector_vertexID_t const& state){
+void SplitsDBD2Sides::display_order(vector_vertexID_t const& state){
     if(state.size() >= 1){
         double key = convert(state);
         if(key != -1){
@@ -138,9 +138,9 @@ void SplitsDBD::display_order(vector_vertexID_t const& state){
  * @brief dummy method to use in template
  * 
  */
-void SplitsDBD::display_order(){}
+void SplitsDBD2Sides::display_order(){}
 
-void SplitsDBD::init(Network& network){
+void SplitsDBD2Sides::init(Network& network){
     set_limit_dim(network.dimension);
     dim = network.dimension;
     std::cout<<"dimension init: "<<dim<<std::endl;
@@ -155,13 +155,24 @@ void SplitsDBD::init(Network& network){
     best_cost = std::numeric_limits<cost_t>::max();
 
     for(vertexID_t i = 0; i < dim; i++){
-        m_state[i] = i;
+        if(!this->reversed) m_state[i] = i;
+        else m_state[i] = dim - i - 1;
     }
 
-    m_exact_solver.init(network);
+    if(!this->reversed) m_exact_solver.init(network);
 }
 
-cost_t SplitsDBD::call_solve(){
+cost_t SplitsDBD2Sides::call_solve(){
     std::cout<<"Called solve"<<std::endl;
-    return solve(m_state);
+    cost_t cost_left = solve(m_state);
+
+    this->reversed = true;
+    this->init(*m_network);
+    cost_t cost_right = solve(m_state);
+
+    std::cout<<"[SplitsDBD2Sides] Cost left: "<<cost_left<<std::endl;
+    std::cout<<"[SplitsDBD2Sides] Cost right: "<<cost_right<<std::endl;
+    std::cout<<"[SplitsDBD2Sides] Best cost: "<<min(cost_left, cost_right)<<std::endl;
+
+    return min(cost_left, cost_right);
 }
