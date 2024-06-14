@@ -1,7 +1,7 @@
-#include "SplitsDimByDim2Starts.hpp"
+#include "TwoSidedDeltaDim.hpp"
 
 int main(int argc, char* argv[]){
-    SplitsDBD2Starts solver;
+    TwoSidedDeltaDim solver;
     const char* path;
     bool sf = true;
 

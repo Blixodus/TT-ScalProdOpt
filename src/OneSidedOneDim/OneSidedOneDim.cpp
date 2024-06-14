@@ -1,6 +1,6 @@
-#include "OneSideDimByDim.hpp"
+#include "OneSidedOneDim.hpp"
 
-cost_t OneSideDBD::solve(){
+cost_t OneSidedOneDim::solve(){
     std::pair<int, int> p;
     // Maximum number of accumulated central edges results
     int kmax = 2 * dmax + 1;
@@ -83,7 +83,7 @@ cost_t OneSideDBD::solve(){
  * @param p a buffer that stores the exact order of contraction in {0, 1, 2}^2
  * @return cost_t 
  */
-cost_t OneSideDBD::contract(int s, int k, int x, pair<int, int>& p){
+cost_t OneSidedOneDim::contract(int s, int k, int x, pair<int, int>& p){
     // Calculate the outgoing weights of the vertices
     compute_ect(s, k);
 
@@ -151,7 +151,7 @@ cost_t OneSideDBD::contract(int s, int k, int x, pair<int, int>& p){
  * @param k the index in m_central_weight of the tensor t we just calculated
  * @param s the state we are currently at
  */
-void OneSideDBD::compute_ect(int s, int k){
+void OneSidedOneDim::compute_ect(int s, int k){
     m_ext_cost_tab[s] = m_adjacence_matrix[n_vertex*s + s+1]*m_central_weight[k];
     m_ext_cost_tab[s+n_vertex/2] = m_adjacence_matrix[n_vertex*(s+n_vertex/2) + s+1+n_vertex/2]*m_central_weight[k];
 }
@@ -161,7 +161,7 @@ void OneSideDBD::compute_ect(int s, int k){
  * 
  * @param s the state
  */
-void OneSideDBD::restore_ect(int s){
+void OneSidedOneDim::restore_ect(int s){
     m_ext_cost_tab[s] = m_adjacence_matrix[n_vertex*n_vertex + s];
     m_ext_cost_tab[s+n_vertex/2] = m_adjacence_matrix[n_vertex*n_vertex + s+n_vertex/2];
 }
@@ -172,7 +172,7 @@ void OneSideDBD::restore_ect(int s){
  * @param s a state
  * @param k the center-edge that lead to the best final cost
  */
-void OneSideDBD::display_order(int s, int k){
+void OneSidedOneDim::display_order(int s, int k){
     int ofs = (s+1)*(s+1)-1;
     if(s >= 0){
         if(k > 1){
@@ -184,14 +184,14 @@ void OneSideDBD::display_order(int s, int k){
     }
 }
 
-void OneSideDBD::display_order(){
+void OneSidedOneDim::display_order(){
     for(int i = 0; i < best_order.size()-1; i++){
         cout << best_order[i] << " - ";
     }
     cout << best_order.back() << '\n';
 }
 
-void OneSideDBD::get_order(int s, int k){
+void OneSidedOneDim::get_order(int s, int k){
     int ofs = (s+1)*(s+1)-1;
     if(s >= 0){
         if(k > 1){
@@ -229,7 +229,7 @@ void OneSideDBD::get_order(int s, int k){
     }
 }
 
-void OneSideDBD::init(Network& network){
+void OneSidedOneDim::init(Network& network){
     set_limit_dim(network.dimension);
     dim = network.dimension;
     n_vertex = network.n_vertex;
@@ -265,7 +265,7 @@ void OneSideDBD::init(Network& network){
     }
 }
 
-cost_t OneSideDBD::call_solve(){
+cost_t OneSidedOneDim::call_solve(){
     cost_t c = solve();
     get_order(n_vertex/2-2, m_central_ref[n_vertex/2-1]);
     best_order.push_back(n_vertex-2);

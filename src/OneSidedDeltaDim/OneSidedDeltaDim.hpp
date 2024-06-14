@@ -4,12 +4,12 @@
  * of size i and D-i, solved optimally and recursively respectively.
  * Type : Heuristic
  */
-#ifndef SPLITSDIMBYDIM2SIDES_HPP
-#define SPLITSDIMBYDIM2SIDES_HPP
+#ifndef ONESIDEDDELTADIM_HPP
+#define ONESIDEDDELTADIM_HPP
 #include "../Components/Components.hpp"
 #include "../CotengraOptimalWrapper/CotengraOptimalWrapper.hpp"
 
-class SplitsDBD2Sides : public Algorithm{
+class OneSidedDeltaDim : public Algorithm{
     public:
     bool reversed = false;
 
@@ -27,8 +27,8 @@ class SplitsDBD2Sides : public Algorithm{
     CotengraOptimalWrapper m_exact_solver;
 
     // Constructors
-    SplitsDBD2Sides(){}
-    SplitsDBD2Sides(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
+    OneSidedDeltaDim(){}
+    OneSidedDeltaDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
     // Initializers
     void init(Network& network);
