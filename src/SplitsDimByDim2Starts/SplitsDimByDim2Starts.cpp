@@ -8,7 +8,7 @@
  * @param state The dimensions in this state
  * @return cost_t the best cost for state
  */
-cost_t SplitsDBD2Starts::solve(vector_vertexID_t const& state, direction_e direction = LEFT_TO_RIGHT){
+cost_t SplitsDBD2Starts::solve(deque_vertexID_t const& state, direction_e direction = LEFT_TO_RIGHT){
     // Encode the state as unique key (hash)
     double key = convert(state);
 
@@ -28,8 +28,8 @@ cost_t SplitsDBD2Starts::solve(vector_vertexID_t const& state, direction_e direc
     if(!memoized_cost && state.size() > 1) {
         cost_t cost;
         
-        vector_vertexID_t state1;
-        vector_vertexID_t state2;
+        deque_vertexID_t state1, state2;
+        vector_vertexID_t state1_vec;
     
         // Solve all the possible splits of the state up to DELTA
         if(direction == LEFT_TO_RIGHT) {
@@ -43,6 +43,9 @@ cost_t SplitsDBD2Starts::solve(vector_vertexID_t const& state, direction_e direc
                 for(dim_t k = 0; k <= i; k++) {
                     state1.push_back(state[k]);
                     state1.push_back(state[k] + n_vertex/2);
+
+                    state1_vec.push_back(state[k]);
+                    state1_vec.push_back(state[k] + n_vertex/2);
                 }
 
                 // Assign the remaining nodes to second state (to be solved recursively)
@@ -51,11 +54,11 @@ cost_t SplitsDBD2Starts::solve(vector_vertexID_t const& state, direction_e direc
                 }
 
                 // Solve the first state optimally (using Cotengra optimal algorithm)
-                cost = m_exact_solver.solve(state1, false, direction);
+                cost = m_exact_solver.solve(state1_vec, false, direction);
 
                 // Solve the second state recursively
                 if(!state2.empty()) {
-                    cost_t sol_state2 = solve(state2);
+                    cost_t sol_state2 = solve(state2, direction);
                     cost = (sol_state2 != std::numeric_limits<cost_t>::max())? cost + sol_state2 : std::numeric_limits<cost_t>::max();
                 }
 
@@ -77,6 +80,9 @@ cost_t SplitsDBD2Starts::solve(vector_vertexID_t const& state, direction_e direc
                 for(dim_t k = i; k < state.size(); k++) {
                     state1.push_back(state[k]);
                     state1.push_back(state[k] + n_vertex/2);
+
+                    state1_vec.push_back(state[k]);
+                    state1_vec.push_back(state[k] + n_vertex/2);
                 }
 
                 // Assign the remaining nodes to second state (to be solved recursively)
@@ -85,7 +91,7 @@ cost_t SplitsDBD2Starts::solve(vector_vertexID_t const& state, direction_e direc
                 }
 
                 // Solve the first state optimally (using Cotengra optimal algorithm)
-                cost = m_exact_solver.solve(state1, false, direction);
+                cost = m_exact_solver.solve(state1_vec, false, direction);
 
                 // Solve the second state recursively
                 if(!state2.empty()) {
@@ -126,8 +132,8 @@ cost_t SplitsDBD2Starts::solve(vector_vertexID_t const& state, direction_e direc
  * @param state The tensors in this state
  * @return vector_vertexID_t an updated copy of m_ext_cost_tab
  */
-vector_weight_t SplitsDBD2Starts::compute_ect(vector_vertexID_t const& state){
-    return vector_weight_t();
+deque_vertexID_t SplitsDBD2Starts::compute_ect(deque_vertexID_t const& state){
+    return deque_vertexID_t();
 }
 
 /**
@@ -136,7 +142,7 @@ vector_weight_t SplitsDBD2Starts::compute_ect(vector_vertexID_t const& state){
  * @param state the dimensions in this state
  * @return int64_t (hash of the state)
  */
-int64_t SplitsDBD2Starts::convert(vector_vertexID_t state){
+int64_t SplitsDBD2Starts::convert(deque_vertexID_t state){
     std::sort(state.begin(), state.end());
     int64_t seed = state.size();
     for(auto x : state) {
@@ -154,8 +160,8 @@ int64_t SplitsDBD2Starts::convert(vector_vertexID_t state){
  * @param key a code generated from a state using convert(state)
  * @return vector_vertexID_t 
  */
-vector_vertexID_t SplitsDBD2Starts::recover(double key){
-    vector_vertexID_t res;
+deque_vertexID_t SplitsDBD2Starts::recover(double key){
+    deque_vertexID_t res;
     for(int i = n_vertex/2; i >= 0; i--){
         double p = pow(2, i);
         if(key >= p){
@@ -167,8 +173,8 @@ vector_vertexID_t SplitsDBD2Starts::recover(double key){
     return res;
 }
 
-vector_vertexID_t SplitsDBD2Starts::recover_full(vector_vertexID_t const& state){
-    vector_vertexID_t res;
+deque_vertexID_t SplitsDBD2Starts::recover_full(deque_vertexID_t const& state){
+    deque_vertexID_t res;
     for(vertexID_t i : state){
         res.push_back(i);
         res.push_back(i+n_vertex/2);
@@ -176,12 +182,12 @@ vector_vertexID_t SplitsDBD2Starts::recover_full(vector_vertexID_t const& state)
     return res;
 }
 
-void SplitsDBD2Starts::display_order(vector_vertexID_t const& state){
+void SplitsDBD2Starts::display_order(deque_vertexID_t const& state){
     if(state.size() >= 1){
         double key = convert(state);
         if(key != -1){
-            vector_vertexID_t p1K = recover(m_order_map1_LR[key]);
-            m_exact_solver.display_order(p1K);
+            deque_vertexID_t p1K = recover(m_order_map1_LR[key]);
+            //m_exact_solver.display_order(p1K);
             if(!p1K.empty() && p1K.size() != state.size()){
                 //display_order(recover(m_order_map1[key]));
                 display_order(recover(m_order_map2_LR[key]));
@@ -230,8 +236,8 @@ cost_t SplitsDBD2Starts::call_solve(){
     int final_split = 0;
 
     // Iterate over all the possible starting splits
-    vector_vertexID_t nodes_left(m_state);
-    vector_vertexID_t nodes_right;
+    deque_vertexID_t nodes_left(m_state);
+    deque_vertexID_t nodes_right;
     for(int split = 0; split < dim; split++){
         // Solve the left part using 1DΔD
         // (assuming we start the split from the left side of TT)
@@ -268,9 +274,9 @@ cost_t SplitsDBD2Starts::call_solve(){
         auto node = nodes_left.back();
         nodes_left.pop_back();
 
-        std::reverse(nodes_right.begin(), nodes_right.end());
-        nodes_right.push_back(node);
-        std::reverse(nodes_right.begin(), nodes_right.end());
+        //std::reverse(nodes_right.begin(), nodes_right.end());
+        nodes_right.push_front(node);
+        //std::reverse(nodes_right.begin(), nodes_right.end());
     }
 
 

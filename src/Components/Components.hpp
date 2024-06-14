@@ -1,6 +1,7 @@
 #ifndef COMPONENTS_HPP
 #define COMPONENTS_HPP
 #include <vector>
+#include <deque>
 #include <iostream>
 #include <algorithm>
 #include <math.h>
@@ -51,6 +52,7 @@ using vector_cost_t = std::vector<cost_t> ;
 // using Tab = std::vector<int> ;
 using vector_edgeID_t = std::vector<edgeID_t> ;
 using vector_vertexID_t = std::vector<vertexID_t> ;
+using deque_vertexID_t = std::deque<vertexID_t> ;
 
 //Type for edges
 struct edge_t{
