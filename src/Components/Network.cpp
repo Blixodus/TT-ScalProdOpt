@@ -90,3 +90,22 @@ Network::Network(std::string file){
     printf("Dimension : %d\n", dimension);
     printf("Density : %.1f\n\n", density);
 }
+
+void Network::reverse(){
+    auto edge_list_copy(edge_list);
+    auto adjacence_matrix_copy(adjacence_matrix);
+    edge_list.clear();
+    adjacence_matrix.clear();
+
+    for(auto edge : edge_list_copy){
+        edge_list.push_back(std::make_pair(n_vertex - edge.first - 1, n_vertex - edge.first - 1));
+    }
+
+    for(int i = 0; i < n_vertex; i++){
+        for(int j = 0; j < n_vertex; j++){
+            adjacence_matrix.push_back(adjacence_matrix_copy[n_vertex*(n_vertex - i - 1) + n_vertex - j - 1]);
+        }
+    }
+
+    sort_edges();
+}

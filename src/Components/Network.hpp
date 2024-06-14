@@ -42,6 +42,8 @@ struct Network{
     Network(char* file) : Network(std::string(file)) {}
     const void display(){std::cout << m_display << std::flush;}
     void sort_edges();
+
+    void reverse();
 };
 
 #endif

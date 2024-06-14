@@ -64,6 +64,12 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
         case SPLITSDIMBYDIM:
             return new SplitsDBD(dictionary);
             break;
+        case SPLITSDIMBYDIM2SIDES:
+            return new SplitsDBD2Sides(dictionary);
+            break;
+        case SPLITSDIMBYDIM2STARTS:
+            return new SplitsDBD2Starts(dictionary);
+            break;
         case COTENGRAOPTIMALWRAPPER:
             return new CotengraOptimalWrapper(dictionary);
             break;
