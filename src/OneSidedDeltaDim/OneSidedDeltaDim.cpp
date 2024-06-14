@@ -1,4 +1,4 @@
-#include "SplitsDimByDim2Sides.hpp"
+#include "OneSidedDeltaDim.hpp"
 #include <iostream>
 
 /**
@@ -7,7 +7,7 @@
  * @param state The dimensions in this state
  * @return cost_t the best cost for state
  */
-cost_t SplitsDBD2Sides::solve(vector_vertexID_t const& state){
+cost_t OneSidedDeltaDim::solve(vector_vertexID_t const& state){
     // Encode the state as unique key (hash)
     double key = convert(state);
 
@@ -66,7 +66,7 @@ cost_t SplitsDBD2Sides::solve(vector_vertexID_t const& state){
  * @param state The tensors in this state
  * @return vector_vertexID_t an updated copy of m_ext_cost_tab
  */
-vector_weight_t SplitsDBD2Sides::compute_ect(vector_vertexID_t const& state){
+vector_weight_t OneSidedDeltaDim::compute_ect(vector_vertexID_t const& state){
     return vector_weight_t();
 }
 
@@ -76,7 +76,7 @@ vector_weight_t SplitsDBD2Sides::compute_ect(vector_vertexID_t const& state){
  * @param state the dimensions in this state
  * @return int64_t (hash of the state)
  */
-int64_t SplitsDBD2Sides::convert(vector_vertexID_t const& state){
+int64_t OneSidedDeltaDim::convert(vector_vertexID_t const& state){
     int64_t seed = state.size();
     for(auto x : state) {
         x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -93,7 +93,7 @@ int64_t SplitsDBD2Sides::convert(vector_vertexID_t const& state){
  * @param key a code generated from a state using convert(state)
  * @return vector_vertexID_t 
  */
-vector_vertexID_t SplitsDBD2Sides::recover(double key){
+vector_vertexID_t OneSidedDeltaDim::recover(double key){
     vector_vertexID_t res;
     for(int i = n_vertex/2; i >= 0; i--){
         double p = pow(2, i);
@@ -106,7 +106,7 @@ vector_vertexID_t SplitsDBD2Sides::recover(double key){
     return res;
 }
 
-vector_vertexID_t SplitsDBD2Sides::recover_full(vector_vertexID_t const& state){
+vector_vertexID_t OneSidedDeltaDim::recover_full(vector_vertexID_t const& state){
     vector_vertexID_t res;
     for(vertexID_t i : state){
         res.push_back(i);
@@ -115,7 +115,7 @@ vector_vertexID_t SplitsDBD2Sides::recover_full(vector_vertexID_t const& state){
     return res;
 }
 
-void SplitsDBD2Sides::display_order(vector_vertexID_t const& state){
+void OneSidedDeltaDim::display_order(vector_vertexID_t const& state){
     if(state.size() >= 1){
         double key = convert(state);
         if(key != -1){
@@ -138,9 +138,9 @@ void SplitsDBD2Sides::display_order(vector_vertexID_t const& state){
  * @brief dummy method to use in template
  * 
  */
-void SplitsDBD2Sides::display_order(){}
+void OneSidedDeltaDim::display_order(){}
 
-void SplitsDBD2Sides::init(Network& network){
+void OneSidedDeltaDim::init(Network& network){
     set_limit_dim(network.dimension);
     dim = network.dimension;
     std::cout<<"dimension init: "<<dim<<std::endl;
@@ -162,7 +162,7 @@ void SplitsDBD2Sides::init(Network& network){
     if(!this->reversed) m_exact_solver.init(network);
 }
 
-cost_t SplitsDBD2Sides::call_solve(){
+cost_t OneSidedDeltaDim::call_solve(){
     std::cout<<"Called solve"<<std::endl;
     cost_t cost_left = solve(m_state);
 
@@ -170,9 +170,9 @@ cost_t SplitsDBD2Sides::call_solve(){
     this->init(*m_network);
     cost_t cost_right = solve(m_state);
 
-    std::cout<<"[SplitsDBD2Sides] Cost left: "<<cost_left<<std::endl;
-    std::cout<<"[SplitsDBD2Sides] Cost right: "<<cost_right<<std::endl;
-    std::cout<<"[SplitsDBD2Sides] Best cost: "<<min(cost_left, cost_right)<<std::endl;
+    std::cout<<"[OneSidedDeltaDim] Cost left: "<<cost_left<<std::endl;
+    std::cout<<"[OneSidedDeltaDim] Cost right: "<<cost_right<<std::endl;
+    std::cout<<"[OneSidedDeltaDim] Best cost: "<<min(cost_left, cost_right)<<std::endl;
 
     return min(cost_left, cost_right);
 }

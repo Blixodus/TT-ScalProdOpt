@@ -5,12 +5,12 @@
  * Type : Heuristic
  * Complexity : 
  */
-#ifndef SIDEEXSOLVER_HPP
-#define SIDEEXSOLVER_HPP
+#ifndef ONESIDEDONEDIM_HPP
+#define ONESIDEDONEDIM_HPP
 #include "../Components/Components.hpp"
 #include "../Components/Algorithm.hpp"
 
-class OneSideDBD : public Algorithm{
+class OneSidedOneDim : public Algorithm{
     public:
 
     //size : n_vertex
@@ -44,8 +44,8 @@ class OneSideDBD : public Algorithm{
     std::vector<pair<int, int>> m_order_by_dim;
 
     // Constructors
-    OneSideDBD(){}
-    OneSideDBD(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
+    OneSidedOneDim(){}
+    OneSidedOneDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
     // Initializers 
     void init(Network& network);

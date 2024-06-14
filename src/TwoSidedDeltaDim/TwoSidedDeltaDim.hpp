@@ -4,13 +4,13 @@
  * of size i and D-i, solved optimally and recursively respectively.
  * Type : Heuristic
  */
-#ifndef SPLITSDIMBYDIM2STARTS_HPP
-#define SPLITSDIMBYDIM2STARTS_HPP
+#ifndef TWOSIDEDDELTADIM_HPP
+#define TWOSIDEDDELTADIM_HPP
 #include "../Components/Components.hpp"
 #include "../CotengraOptimalWrapper/CotengraOptimalWrapper.hpp"
 
 
-class SplitsDBD2Starts : public Algorithm{
+class TwoSidedDeltaDim : public Algorithm{
     public:
     // State (set of nodes)
     deque_vertexID_t m_state;
@@ -26,13 +26,12 @@ class SplitsDBD2Starts : public Algorithm{
     unordered_map<int64_t, int> m_order_map1_RL;
     unordered_map<int64_t, int> m_order_map2_RL;
 
-
     // Exact solver for the subproblems (Cotengra optimal algorithm)
     CotengraOptimalWrapper m_exact_solver;
 
     // Constructors
-    SplitsDBD2Starts(){}
-    SplitsDBD2Starts(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
+    TwoSidedDeltaDim(){}
+    TwoSidedDeltaDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
     // Initializers
     void init(Network& network);

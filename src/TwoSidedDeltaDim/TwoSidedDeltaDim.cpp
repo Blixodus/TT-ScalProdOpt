@@ -1,4 +1,4 @@
-#include "SplitsDimByDim2Starts.hpp"
+#include "TwoSidedDeltaDim.hpp"
 #include <iostream>
 #include <algorithm>
 
@@ -8,7 +8,7 @@
  * @param state The dimensions in this state
  * @return cost_t the best cost for state
  */
-cost_t SplitsDBD2Starts::solve(deque_vertexID_t const& state, direction_e direction = LEFT_TO_RIGHT){
+cost_t TwoSidedDeltaDim::solve(deque_vertexID_t const& state, direction_e direction = LEFT_TO_RIGHT){
     // Encode the state as unique key (hash)
     double key = convert(state);
 
@@ -132,7 +132,7 @@ cost_t SplitsDBD2Starts::solve(deque_vertexID_t const& state, direction_e direct
  * @param state The tensors in this state
  * @return vector_vertexID_t an updated copy of m_ext_cost_tab
  */
-deque_vertexID_t SplitsDBD2Starts::compute_ect(deque_vertexID_t const& state){
+deque_vertexID_t TwoSidedDeltaDim::compute_ect(deque_vertexID_t const& state){
     return deque_vertexID_t();
 }
 
@@ -142,7 +142,7 @@ deque_vertexID_t SplitsDBD2Starts::compute_ect(deque_vertexID_t const& state){
  * @param state the dimensions in this state
  * @return int64_t (hash of the state)
  */
-int64_t SplitsDBD2Starts::convert(deque_vertexID_t state){
+int64_t TwoSidedDeltaDim::convert(deque_vertexID_t state){
     std::sort(state.begin(), state.end());
     int64_t seed = state.size();
     for(auto x : state) {
@@ -160,7 +160,7 @@ int64_t SplitsDBD2Starts::convert(deque_vertexID_t state){
  * @param key a code generated from a state using convert(state)
  * @return vector_vertexID_t 
  */
-deque_vertexID_t SplitsDBD2Starts::recover(double key){
+deque_vertexID_t TwoSidedDeltaDim::recover(double key){
     deque_vertexID_t res;
     for(int i = n_vertex/2; i >= 0; i--){
         double p = pow(2, i);
@@ -173,7 +173,7 @@ deque_vertexID_t SplitsDBD2Starts::recover(double key){
     return res;
 }
 
-deque_vertexID_t SplitsDBD2Starts::recover_full(deque_vertexID_t const& state){
+deque_vertexID_t TwoSidedDeltaDim::recover_full(deque_vertexID_t const& state){
     deque_vertexID_t res;
     for(vertexID_t i : state){
         res.push_back(i);
@@ -182,7 +182,7 @@ deque_vertexID_t SplitsDBD2Starts::recover_full(deque_vertexID_t const& state){
     return res;
 }
 
-void SplitsDBD2Starts::display_order(deque_vertexID_t const& state){
+void TwoSidedDeltaDim::display_order(deque_vertexID_t const& state){
     if(state.size() >= 1){
         double key = convert(state);
         if(key != -1){
@@ -205,9 +205,9 @@ void SplitsDBD2Starts::display_order(deque_vertexID_t const& state){
  * @brief dummy method to use in template
  * 
  */
-void SplitsDBD2Starts::display_order(){}
+void TwoSidedDeltaDim::display_order(){}
 
-void SplitsDBD2Starts::init(Network& network){
+void TwoSidedDeltaDim::init(Network& network){
     set_limit_dim(network.dimension);
     dim = network.dimension;
     std::cout<<"dimension init: "<<dim<<std::endl;
@@ -231,7 +231,7 @@ void SplitsDBD2Starts::init(Network& network){
     m_exact_solver.init(network);
 }
 
-cost_t SplitsDBD2Starts::call_solve(){
+cost_t TwoSidedDeltaDim::call_solve(){
     cost_t final_cost = std::numeric_limits<cost_t>::max();
     int final_split = 0;
 
@@ -251,11 +251,6 @@ cost_t SplitsDBD2Starts::call_solve(){
         // the two subproblems) together
         cost_t cost_connect = 0;
         if(!nodes_left.empty() && !nodes_right.empty()) {
-            if(split == 2)
-            {
-                std::cout<<nodes_left.back()<<" "<<nodes_right.front()<<std::endl;
-                std::cout<<nodes_left.back()+ n_vertex/2<<" "<<nodes_right.front()+ n_vertex/2<<std::endl;
-            }
             cost_connect = m_network->adjacence_matrix[nodes_left.back() * n_vertex + nodes_right.front()] *
                            m_network->adjacence_matrix[(nodes_left.back() + n_vertex/2) * n_vertex + (nodes_right.front() + n_vertex/2)];
         }
@@ -295,9 +290,9 @@ cost_t SplitsDBD2Starts::call_solve(){
     this->init(*m_network);
     cost_t cost_right = solve(m_state);
 
-    std::cout<<"[SplitsDBD2Starts] Cost left: "<<cost_left<<std::endl;
-    std::cout<<"[SplitsDBD2Starts] Cost right: "<<cost_right<<std::endl;
-    std::cout<<"[SplitsDBD2Starts] Best cost: "<<min(cost_left, cost_right)<<std::endl;
+    std::cout<<"[TwoSidedDeltaDim] Cost left: "<<cost_left<<std::endl;
+    std::cout<<"[TwoSidedDeltaDim] Cost right: "<<cost_right<<std::endl;
+    std::cout<<"[TwoSidedDeltaDim] Best cost: "<<min(cost_left, cost_right)<<std::endl;
 
     for(auto elem : m_cost_memo) {
         std::cout << elem.first << " " << elem.second << std::endl;
