@@ -2,6 +2,9 @@
 #include <iostream>
 #include <algorithm>
 
+#define COST first
+#define ORDER second
+
 template <size_t delta, split_direction_e dir, size_t tt_dim>
 void TwoSidedDeltaDim<delta, dir, tt_dim>::compute_splits() {
     // Calculate the optimal cost of all the possible windows starting from the left
@@ -12,7 +15,9 @@ void TwoSidedDeltaDim<delta, dir, tt_dim>::compute_splits() {
             for(int s = 0; s < (this->dim - t + 1); s++) {
                 // Solve the window [s, s+t-1] optimally and store the result
                 // in the memoization table
-                this->m_cost[LR][t][s] = m_exact_solver.solve(s, s + t - 1, LR);
+                std::pair<cost_t, std::string> optimal_result = m_exact_solver.solve(s, s + t - 1, LR);
+                this->m_cost[LR][t][s] = optimal_result.COST;
+                this->m_order[LR][t][s] = optimal_result.ORDER;
                 //std::cout<<"[Window LR: " << t << "]\t" << s << " ... " << s + t - 1 << " - cost: " << this->m_cost[LR][t][s]<<std::endl;
             }
         }
@@ -28,8 +33,11 @@ void TwoSidedDeltaDim<delta, dir, tt_dim>::compute_splits() {
                 for(int k = 1; k <= delta; k++) {
                     //if(this->m_cost[LR][k][s] != std::numeric_limits<cost_t>::max() &&
                     //   this->m_cost[LR][t - k][s + k] != std::numeric_limits<cost_t>::max()) {
-                    this->m_cost[LR][t][s] = std::min(this->m_cost[LR][t][s],
-                                                      this->m_cost[LR][k][s] + this->m_cost[LR][t - k][s + k]);
+                    cost_t cost = this->m_cost[LR][k][s] + this->m_cost[LR][t - k][s + k];
+                    if(cost < this->m_cost[LR][t][s]) {
+                        this->m_cost[LR][t][s] = cost;
+                        this->m_order[LR][t][s] = this->m_order[LR][k][s] + ", " + this->m_order[LR][t - k][s + k];
+                    }
                     //std::cout<<"[Extended window LR: " << t << "]\t" << s << " ... " << s + t - 1 << " - cost: " << this->m_cost[LR][k][s] + this->m_cost[LR][t - k][s + k] << " (" << this->m_cost[LR][k][s] << ", " << this->m_cost[LR][t - k][s + k] << ")" <<std::endl;
                     //std::cout<<"\t"<<this->m_cost[LR][6][0]<<std::endl;
                 }
@@ -46,7 +54,9 @@ void TwoSidedDeltaDim<delta, dir, tt_dim>::compute_splits() {
             for(int s = 0; s < (this->dim - t + 1); s++) {
                 // Solve the window [s, s+t-1] optimally and store the result
                 // in the memoization table
-                this->m_cost[RL][t][s] = m_exact_solver.solve(s, s + t - 1, RL);
+                std::pair<cost_t, std::string> optimal_result = m_exact_solver.solve(s, s + t - 1, RL);
+                this->m_cost[RL][t][s] = optimal_result.COST;
+                this->m_order[RL][t][s] = optimal_result.ORDER;
                 //std::cout<<"[Window RL: " << t << "]\t" << s << " ... " << s + t - 1 << " - cost: " << this->m_cost[RL][t][s]<<std::endl;
             }
         }
@@ -62,8 +72,11 @@ void TwoSidedDeltaDim<delta, dir, tt_dim>::compute_splits() {
             for(int s = 0; s < (this->dim - t + 1); s++) {
                 // Solve the window [s, s+t-1] by splitting it into two subproblems
                 for(int k = 1; k <= delta; k++) {
-                    this->m_cost[RL][t][s] = std::min(this->m_cost[RL][t][s],
-                                                      this->m_cost[RL][t - k][s] + this->m_cost[RL][k][s + t - k]);
+                    cost_t cost = this->m_cost[RL][t - k][s] + this->m_cost[RL][k][s + t - k];
+                    if(cost < this->m_cost[RL][t][s]) {
+                        this->m_cost[RL][t][s] = cost;
+                        this->m_order[RL][t][s] = this->m_order[RL][t - k][s] + ", " + this->m_order[RL][k][s + t - k];
+                    }
                     //std::cout<<"[Extended window RL: " << t << "]\t" << s << " ... " << s + t - 1 << " - cost: " << this->m_cost[RL][t - k][s] + this->m_cost[RL][k][s + t - k] << " (" << this->m_cost[RL][t - k][s] << ", " << this->m_cost[RL][k][s + t - k] << ")" <<std::endl;
                 }
             }
@@ -118,14 +131,18 @@ cost_t TwoSidedDeltaDim<delta, dir, tt_dim>::call_solve(){
 
     // Include the cost of starting from the left side of TT
     if constexpr(dir & START_LEFT) {
-        this->best_cost = std::min(this->best_cost, this->m_cost[LR][this->dim][0]);
-        //std::cout<<"LR"<<": \t"<<this->m_cost[LR][this->dim][0]<<std::endl;
+        if(this->m_cost[LR][this->dim][0] < this->best_cost) {
+            this->best_cost = this->m_cost[LR][this->dim][0];
+            this->best_order_str = this->m_order[LR][this->dim][0];
+        }
     }
 
     // Include the cost of starting from the right side of TT
     if constexpr(dir & START_RIGHT) {
-        this->best_cost = std::min(this->best_cost, this->m_cost[RL][this->dim][0]);
-        //std::cout<<"RL"<<": \t"<<this->m_cost[RL][this->dim][0]<<std::endl;
+        if(this->m_cost[RL][this->dim][0] < this->best_cost) {
+            this->best_cost = this->m_cost[RL][this->dim][0];
+            this->best_order_str = this->m_order[RL][this->dim][0];
+        }
     }
 
     // Include the cost of starting from both sides of TT
@@ -148,9 +165,14 @@ cost_t TwoSidedDeltaDim<delta, dir, tt_dim>::call_solve(){
             //std::cout<<split<<": \t"<<total_cost<<"\t"<<cost_left<<"\t"<<cost_right<<"\t"<<cost_connect<<std::endl;
 
             // Update the best cost
-            this->best_cost = std::min(this->best_cost, total_cost);
+            if(total_cost < this->best_cost) {
+                this->best_cost = total_cost;
+                this->best_order_str = this->m_order[LR][split][0] + ", " + this->m_order[RL][dim - split][split];
+            }
         }
     }
+
+    std::cout<<this->best_order_str<<std::endl;
 
     return this->best_cost;
 }
