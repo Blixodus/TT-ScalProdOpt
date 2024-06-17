@@ -55,20 +55,11 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
         case GREEDYEDGESORT:
             return new GreedyEdgeSort(dictionary);
             break;
-        case ONESIDEDONEDIM:
-            return new OneSidedOneDim(dictionary);
-            break;
         case SHUFFLE:
             return new Shuffle(dictionary);
             break;
-        case SPLITSDIMBYDIM:
-            return new SplitsDBD(dictionary);
-            break;
-        case ONESIDEDDELTADIM:
-            return new OneSidedDeltaDim(dictionary);
-            break;
         case TWOSIDEDDELTADIM:
-            return new TwoSidedDeltaDim(dictionary);
+            return new TwoSidedDeltaDim<2, 4, BOTH_SIDES>(dictionary);
             break;
         case COTENGRAOPTIMALWRAPPER:
             return new CotengraOptimalWrapper(dictionary);

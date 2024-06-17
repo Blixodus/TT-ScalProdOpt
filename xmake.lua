@@ -23,14 +23,6 @@ target("OneSidedOneDim")
     set_kind("binary")
     add_files("src/OneSidedOneDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp")
 
-target("SplitsDimByDim")
-    set_kind("binary")
-    add_files("src/SplitsDimByDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/CotengraOptimalWrapper/CotengraOptimalWrapper.cpp")
-
-target("OneSidedDeltaDim")
-    set_kind("binary")
-    add_files("src/OneSidedDeltaDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/CotengraOptimalWrapper/CotengraOptimalWrapper.cpp")
-
 target("TwoSidedDeltaDim")
     set_kind("binary")
     add_files("src/TwoSidedDeltaDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/CotengraOptimalWrapper/CotengraOptimalWrapper.cpp")

@@ -178,7 +178,7 @@ def import_tensor_train(filename, dim_min=None, dim_max=None, reversed=False):
 
 
 def cotengra_wrapper_solve(input_file, dim_min, dim_max, reversed):
-    inputs, output, sizes_dict = import_tensor_train(input_file, dim_min, dim_max, reversed)
+    inputs, output, sizes_dict = import_tensor_train(input_file, dim_min, dim_max + 1, reversed)
 
     #print(inputs, output, sizes_dict)
 

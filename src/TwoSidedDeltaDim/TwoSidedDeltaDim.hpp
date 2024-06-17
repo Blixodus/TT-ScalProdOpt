@@ -9,22 +9,14 @@
 #include "../Components/Components.hpp"
 #include "../CotengraOptimalWrapper/CotengraOptimalWrapper.hpp"
 
-
+template <size_t tt_dim, size_t delta, split_direction_e dir>
 class TwoSidedDeltaDim : public Algorithm{
     public:
-    // State (set of nodes)
-    deque_vertexID_t m_state;
-
     // The memoization table for the costs of each state
-    std::unordered_map<int64_t, cost_t> m_cost_memo_LR;
-    std::unordered_map<int64_t, cost_t> m_cost_memo_RL;
+    std::vector<std::vector<cost_t>> m_cost[2];
 
     // The memoization table for the order of the splits
-    unordered_map<int64_t, int> m_order_map1_LR;
-    unordered_map<int64_t, int> m_order_map2_LR;
-
-    unordered_map<int64_t, int> m_order_map1_RL;
-    unordered_map<int64_t, int> m_order_map2_RL;
+    std::vector<std::vector<std::string>> m_order[2];
 
     // Exact solver for the subproblems (Cotengra optimal algorithm)
     CotengraOptimalWrapper m_exact_solver;
@@ -35,20 +27,11 @@ class TwoSidedDeltaDim : public Algorithm{
 
     // Initializers
     void init(Network& network);
-    cost_t solve(deque_vertexID_t const& state, direction_e direction); // compute the contraction cost of a given state
+    
+    // Computation functions
+    void compute_splits();
+    cost_t solve(const int dim_min, const int dim_max, result_direction_e direction); // compute the contraction cost of a given state
     cost_t call_solve();
-
-    // Deprecated
-    deque_vertexID_t compute_ect(deque_vertexID_t const& state);
-
-    // Utility functions
-    int64_t convert(deque_vertexID_t state); // convert state to hash key
-    deque_vertexID_t recover(double key); // convert hash key to state
-    deque_vertexID_t recover_full(deque_vertexID_t const& state);
-
-    // Display functions
-    void display_order();
-    void display_order(deque_vertexID_t const& state);
 };
 
 #endif

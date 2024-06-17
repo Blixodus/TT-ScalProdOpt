@@ -1,7 +1,7 @@
 #include "TwoSidedDeltaDim.hpp"
 
 int main(int argc, char* argv[]){
-    TwoSidedDeltaDim solver;
+    TwoSidedDeltaDim<2, 4, BOTH_SIDES> solver;
     const char* path;
     bool sf = true;
 
