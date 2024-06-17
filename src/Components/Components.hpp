@@ -66,9 +66,10 @@ struct edge_t{
 
 // Direction for the start of the contraction
 enum split_direction_e {
-    START_LEFT  = 1,
-    START_RIGHT = 2,
-    BOTH_SIDES  = 3 // because 11 will light up 1 and 2
+    START_LEFT  = 1,    // contraction starting from the left side of TT
+    START_RIGHT = 2,    // contraction starting from the right side of TT
+    BOTH_SIDES  = 3,     // contraction starting from either side of TT (that is minimum of left, right)
+    ALL         = 7     // contraction starting from both sides of TT (and mimimum of all options)
 };
 
 enum result_direction_e {

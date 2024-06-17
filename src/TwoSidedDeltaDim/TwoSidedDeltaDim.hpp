@@ -9,7 +9,7 @@
 #include "../Components/Components.hpp"
 #include "../CotengraOptimalWrapper/CotengraOptimalWrapper.hpp"
 
-template <size_t tt_dim, size_t delta, split_direction_e dir>
+template <size_t delta = 3, split_direction_e dir = ALL, size_t tt_dim = 2>
 class TwoSidedDeltaDim : public Algorithm{
     public:
     // The memoization table for the costs of each state

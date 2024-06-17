@@ -2,8 +2,8 @@
 #include <iostream>
 #include <algorithm>
 
-template <size_t tt_dim, size_t delta, split_direction_e dir>
-void TwoSidedDeltaDim<tt_dim, delta, dir>::compute_splits() {
+template <size_t delta, split_direction_e dir, size_t tt_dim>
+void TwoSidedDeltaDim<delta, dir, tt_dim>::compute_splits() {
     // Calculate the optimal cost of all the possible windows starting from the left
     if constexpr(dir & START_LEFT) {
         // Iterate over windows of size t up to Δ
@@ -79,13 +79,13 @@ void TwoSidedDeltaDim<tt_dim, delta, dir>::compute_splits() {
  * @param state The dimensions in this state
  * @return cost_t the best cost for state
  */
-template <size_t tt_dim, size_t delta, split_direction_e dir>
-cost_t TwoSidedDeltaDim<tt_dim, delta, dir>::solve(const int dim_min, const int dim_max, result_direction_e direction){
+template <size_t delta, split_direction_e dir, size_t tt_dim>
+cost_t TwoSidedDeltaDim<delta, dir, tt_dim>::solve(const int dim_min, const int dim_max, result_direction_e direction){
     return this->m_cost[direction][dim_max - dim_min][dim_min];
 }
 
-template <size_t tt_dim, size_t delta, split_direction_e dir>
-void TwoSidedDeltaDim<tt_dim, delta, dir>::init(Network& network){
+template <size_t delta, split_direction_e dir, size_t tt_dim>
+void TwoSidedDeltaDim<delta, dir, tt_dim>::init(Network& network){
     // Initialize network
     this->set_limit_dim(network.dimension);
     this->dim = network.dimension;
@@ -111,8 +111,8 @@ void TwoSidedDeltaDim<tt_dim, delta, dir>::init(Network& network){
     this->m_exact_solver.init(network);
 }
 
-template <size_t tt_dim, size_t delta, split_direction_e dir>
-cost_t TwoSidedDeltaDim<tt_dim, delta, dir>::call_solve(){
+template <size_t delta, split_direction_e dir, size_t tt_dim>
+cost_t TwoSidedDeltaDim<delta, dir, tt_dim>::call_solve(){
     // Compute the optimal cost of all the possible splits
     this->compute_splits();
 
@@ -129,7 +129,7 @@ cost_t TwoSidedDeltaDim<tt_dim, delta, dir>::call_solve(){
     }
 
     // Include the cost of starting from both sides of TT
-    if constexpr(dir & BOTH_SIDES) {
+    if constexpr(dir & ALL) {
         // Iterate over all the possible starting splits
         for(int split = 1; split < dim - 1; split++) {
             // Retrieve the cost of the left part
@@ -156,4 +156,5 @@ cost_t TwoSidedDeltaDim<tt_dim, delta, dir>::call_solve(){
 }
 
 // Instantiation of the template class
-template class TwoSidedDeltaDim<2, 4, BOTH_SIDES>;
+template class TwoSidedDeltaDim<3, ALL, 2>;
+template class TwoSidedDeltaDim<4, ALL, 2>;
