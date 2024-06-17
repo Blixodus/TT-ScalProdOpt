@@ -2,317 +2,158 @@
 #include <iostream>
 #include <algorithm>
 
+template <size_t tt_dim, size_t delta, split_direction_e dir>
+void TwoSidedDeltaDim<tt_dim, delta, dir>::compute_splits() {
+    // Calculate the optimal cost of all the possible windows starting from the left
+    if constexpr(dir & START_LEFT) {
+        // Iterate over windows of size t up to Δ
+        for(int t = 1; t <= delta; t++) {
+            // Iterate over all the possible starting points
+            for(int s = 0; s < (this->dim - t + 1); s++) {
+                // Solve the window [s, s+t-1] optimally and store the result
+                // in the memoization table
+                this->m_cost[LR][t][s] = m_exact_solver.solve(s, s + t - 1, LR);
+                //std::cout<<"[Window LR: " << t << "]\t" << s << " ... " << s + t - 1 << " - cost: " << this->m_cost[LR][t][s]<<std::endl;
+            }
+        }
+
+        // Iterate over subproblems larger than Δ up to the full dimension
+        // In this case the algorithm performs the splits into two subproblems
+        // of size t up Δ and D-t, and solves the first one optimally and the
+        // second one recursively
+        for(int t = delta + 1; t <= this->dim; t++) {
+            // Iterate over all the possible starting points
+            for(int s = 0; s < (this->dim - t + 1); s++) {
+                // Solve the window [s, s+t-1] by splitting it into two subproblems
+                for(int k = 1; k <= delta; k++) {
+                    //if(this->m_cost[LR][k][s] != std::numeric_limits<cost_t>::max() &&
+                    //   this->m_cost[LR][t - k][s + k] != std::numeric_limits<cost_t>::max()) {
+                    this->m_cost[LR][t][s] = std::min(this->m_cost[LR][t][s],
+                                                      this->m_cost[LR][k][s] + this->m_cost[LR][t - k][s + k]);
+                    //std::cout<<"[Extended window LR: " << t << "]\t" << s << " ... " << s + t - 1 << " - cost: " << this->m_cost[LR][k][s] + this->m_cost[LR][t - k][s + k] << " (" << this->m_cost[LR][k][s] << ", " << this->m_cost[LR][t - k][s + k] << ")" <<std::endl;
+                    //std::cout<<"\t"<<this->m_cost[LR][6][0]<<std::endl;
+                }
+            }
+        }
+    }
+
+    // Calculate the optimal cost of all the possible windows starting from the right
+    if constexpr(dir & START_RIGHT) {
+        //std::cout<<"\t"<<this->m_cost[LR][6][0]<<" "<<this->m_cost[RL][6][0]<<std::endl;
+        // Iterate over windows of size t up to Δ
+        for(int t = 1; t <= delta; t++) {
+            // Iterate over all the possible starting splits
+            for(int s = 0; s < (this->dim - t + 1); s++) {
+                // Solve the window [s, s+t-1] optimally and store the result
+                // in the memoization table
+                this->m_cost[RL][t][s] = m_exact_solver.solve(s, s + t - 1, RL);
+                //std::cout<<"[Window RL: " << t << "]\t" << s << " ... " << s + t - 1 << " - cost: " << this->m_cost[RL][t][s]<<std::endl;
+            }
+        }
+
+        //std::cout<<"\t"<<this->m_cost[LR][6][0]<<" "<<this->m_cost[RL][6][0]<<std::endl;
+
+        // Iterate over subproblems larger than Δ up to the full dimension
+        // In this case the algorithm performs the splits into two subproblems
+        // of size D-t and t up Δ, and solves the first one recursively and the
+        // second one optimally
+        for(int t = delta + 1; t <= this->dim; t++) {
+            // Iterate over all the possible starting points
+            for(int s = 0; s < (this->dim - t + 1); s++) {
+                // Solve the window [s, s+t-1] by splitting it into two subproblems
+                for(int k = 1; k <= delta; k++) {
+                    this->m_cost[RL][t][s] = std::min(this->m_cost[RL][t][s],
+                                                      this->m_cost[RL][t - k][s] + this->m_cost[RL][k][s + t - k]);
+                    //std::cout<<"[Extended window RL: " << t << "]\t" << s << " ... " << s + t - 1 << " - cost: " << this->m_cost[RL][t - k][s] + this->m_cost[RL][k][s + t - k] << " (" << this->m_cost[RL][t - k][s] << ", " << this->m_cost[RL][k][s + t - k] << ")" <<std::endl;
+                }
+            }
+        }
+    }
+
+    //std::cout<<"\t"<<this->m_cost[LR][6][0]<<std::endl;
+}
+
 /**
  * @brief Solves a given state
  * 
  * @param state The dimensions in this state
  * @return cost_t the best cost for state
  */
-cost_t TwoSidedDeltaDim::solve(deque_vertexID_t const& state, direction_e direction = LEFT_TO_RIGHT){
-    // Encode the state as unique key (hash)
-    double key = convert(state);
+template <size_t tt_dim, size_t delta, split_direction_e dir>
+cost_t TwoSidedDeltaDim<tt_dim, delta, dir>::solve(const int dim_min, const int dim_max, result_direction_e direction){
+    return this->m_cost[direction][dim_max - dim_min][dim_min];
+}
 
-    // Check the momoization table for the cost of the state
-    bool memoized_cost = false;
-    if(direction == LEFT_TO_RIGHT) {
-        if(m_cost_memo_LR.find(key) != m_cost_memo_LR.end()) {
-            memoized_cost = true;
-        }
-    } else {
-        if(m_cost_memo_RL.find(key) != m_cost_memo_RL.end()) {
-            memoized_cost = true;
-        }
-    }
+template <size_t tt_dim, size_t delta, split_direction_e dir>
+void TwoSidedDeltaDim<tt_dim, delta, dir>::init(Network& network){
+    // Initialize network
+    this->set_limit_dim(network.dimension);
+    this->dim = network.dimension;
+    this->n_vertex = network.n_vertex;
 
-    // Solve the subpart if the solution is not already in the memoization table
-    if(!memoized_cost && state.size() > 1) {
-        cost_t cost;
-        
-        deque_vertexID_t state1, state2;
-        vector_vertexID_t state1_vec;
-    
-        // Solve all the possible splits of the state up to DELTA
-        if(direction == LEFT_TO_RIGHT) {
-            m_cost_memo_LR[key] = std::numeric_limits<cost_t>::max();
-
-            for(dim_t i = 0; i < min(dmax, (dim_t) state.size()); i++) {
-                state1.clear();
-                state2.clear();
-
-                // Assign the nodes to first state (to be solved optimally)
-                for(dim_t k = 0; k <= i; k++) {
-                    state1.push_back(state[k]);
-                    state1.push_back(state[k] + n_vertex/2);
-
-                    state1_vec.push_back(state[k]);
-                    state1_vec.push_back(state[k] + n_vertex/2);
-                }
-
-                // Assign the remaining nodes to second state (to be solved recursively)
-                for(dim_t k = i+1; k < state.size(); k++) {
-                    state2.push_back(state[k]);
-                }
-
-                // Solve the first state optimally (using Cotengra optimal algorithm)
-                cost = m_exact_solver.solve(state1_vec, false, direction);
-
-                // Solve the second state recursively
-                if(!state2.empty()) {
-                    cost_t sol_state2 = solve(state2, direction);
-                    cost = (sol_state2 != std::numeric_limits<cost_t>::max())? cost + sol_state2 : std::numeric_limits<cost_t>::max();
-                }
-
-                // Update the cost if the new cost is better
-                if(cost > 0 && cost < m_cost_memo_LR[key]) {
-                    m_cost_memo_LR[key] = cost;
-                    m_order_map1_LR[key] = convert(state1);
-                    m_order_map2_LR[key] = convert(state2);
-                }
-            }
-        } else {
-            m_cost_memo_RL[key] = std::numeric_limits<cost_t>::max();
-
-            for(dim_t i = (dim_t)state.size() - 1; i >= max(0, (dim_t)state.size() - dmax + 1); i--) {
-                state1.clear();
-                state2.clear();
-
-                // Assign the nodes to first state (to be solved optimally)
-                for(dim_t k = i; k < state.size(); k++) {
-                    state1.push_back(state[k]);
-                    state1.push_back(state[k] + n_vertex/2);
-
-                    state1_vec.push_back(state[k]);
-                    state1_vec.push_back(state[k] + n_vertex/2);
-                }
-
-                // Assign the remaining nodes to second state (to be solved recursively)
-                for(dim_t k = 0; k <= i - 1; k++) {
-                    state2.push_back(state[k]);
-                }
-
-                // Solve the first state optimally (using Cotengra optimal algorithm)
-                cost = m_exact_solver.solve(state1_vec, false, direction);
-
-                // Solve the second state recursively
-                if(!state2.empty()) {
-                    cost_t sol_state2 = solve(state2);
-                    cost = (sol_state2 != std::numeric_limits<cost_t>::max())? cost + sol_state2 : std::numeric_limits<cost_t>::max();
-                }
-
-                // Update the cost if the new cost is better
-                if(cost > 0 && cost < m_cost_memo_RL[key]) {
-                    m_cost_memo_RL[key] = cost;
-                    m_order_map1_RL[key] = convert(state1);
-                    m_order_map2_RL[key] = convert(state2);
-                }
+    // Initialize the memoization tables
+    for(int type = 0; type < 2; type++) {
+        this->m_cost[type].resize(this->dim + 1);
+        this->m_order[type].resize(this->dim + 1);
+        for(int t = 0; t <= this->dim; t++) {
+            this->m_cost[type][t].resize(this->dim);
+            this->m_order[type][t].resize(this->dim);
+            for(int s = 0; s < this->dim; s++) {
+                this->m_cost[type][t][s] = std::numeric_limits<cost_t>::max();
             }
         }
-    } else if(state.size() == 1) {
-        vector_vertexID_t p = {state[0], state[0] + n_vertex/2};
-        cost_t cost = m_exact_solver.solve(p, false, direction);
-        if(direction == LEFT_TO_RIGHT) m_cost_memo_LR[key] = cost;
-        else m_cost_memo_RL[key] = cost;
-    } else if(state.size() == 0) {
-        return 0;
     }
 
-    cost_t computed_cost;
-    if(direction == LEFT_TO_RIGHT) {
-        computed_cost = m_cost_memo_LR[key];
-    } else {
-        computed_cost = m_cost_memo_RL[key];
+    // Initialize the result variables
+    this->best_cost = std::numeric_limits<cost_t>::max();
+
+    // Initialize the exact solver
+    this->m_exact_solver.init(network);
+}
+
+template <size_t tt_dim, size_t delta, split_direction_e dir>
+cost_t TwoSidedDeltaDim<tt_dim, delta, dir>::call_solve(){
+    // Compute the optimal cost of all the possible splits
+    this->compute_splits();
+
+    // Include the cost of starting from the left side of TT
+    if constexpr(dir & START_LEFT) {
+        this->best_cost = std::min(this->best_cost, this->m_cost[LR][this->dim][0]);
+        //std::cout<<"LR"<<": \t"<<this->m_cost[LR][this->dim][0]<<std::endl;
     }
-    
-    return computed_cost;
-}
 
-/**
- * @brief DEPRECATED computes the state.size()-1'th column of m_ext_cost_tab
- * 
- * @param state The tensors in this state
- * @return vector_vertexID_t an updated copy of m_ext_cost_tab
- */
-deque_vertexID_t TwoSidedDeltaDim::compute_ect(deque_vertexID_t const& state){
-    return deque_vertexID_t();
-}
-
-/**
- * @brief converts a state in a unique integer (hash) key
- * 
- * @param state the dimensions in this state
- * @return int64_t (hash of the state)
- */
-int64_t TwoSidedDeltaDim::convert(deque_vertexID_t state){
-    std::sort(state.begin(), state.end());
-    int64_t seed = state.size();
-    for(auto x : state) {
-        x = ((x >> 16) ^ x) * 0x45d9f3b;
-        x = ((x >> 16) ^ x) * 0x45d9f3b;
-        x = (x >> 16) ^ x;
-        seed ^= x + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    // Include the cost of starting from the right side of TT
+    if constexpr(dir & START_RIGHT) {
+        this->best_cost = std::min(this->best_cost, this->m_cost[RL][this->dim][0]);
+        //std::cout<<"RL"<<": \t"<<this->m_cost[RL][this->dim][0]<<std::endl;
     }
-    return seed;
-}
 
-/**
- * @brief converts a key into a set of tensors
- * 
- * @param key a code generated from a state using convert(state)
- * @return vector_vertexID_t 
- */
-deque_vertexID_t TwoSidedDeltaDim::recover(double key){
-    deque_vertexID_t res;
-    for(int i = n_vertex/2; i >= 0; i--){
-        double p = pow(2, i);
-        if(key >= p){
-            res.push_back(i);
-            res.push_back(i+n_vertex/2);
-            key -= p;
+    // Include the cost of starting from both sides of TT
+    if constexpr(dir & BOTH_SIDES) {
+        // Iterate over all the possible starting splits
+        for(int split = 1; split < dim - 1; split++) {
+            // Retrieve the cost of the left part
+            cost_t cost_left = this->m_cost[LR][split][0];
+
+            // Retrieve the cost of the right part
+            cost_t cost_right = this->m_cost[RL][dim - split][split];
+
+            // Compute the cost of contracting the final two nodes together
+            // (results of the two subproblems) 
+            cost_t cost_connect = this->m_network->adjacence_matrix[(split - 1) * this->n_vertex + split] *
+                                  this->m_network->adjacence_matrix[((split - 1) + this->n_vertex/2) * n_vertex + (split + n_vertex/2)];
+
+            // Calculate the total cost of the split
+            cost_t total_cost = cost_left + cost_right + cost_connect;
+            //std::cout<<split<<": \t"<<total_cost<<"\t"<<cost_left<<"\t"<<cost_right<<"\t"<<cost_connect<<std::endl;
+
+            // Update the best cost
+            this->best_cost = std::min(this->best_cost, total_cost);
         }
     }
-    return res;
+
+    return this->best_cost;
 }
 
-deque_vertexID_t TwoSidedDeltaDim::recover_full(deque_vertexID_t const& state){
-    deque_vertexID_t res;
-    for(vertexID_t i : state){
-        res.push_back(i);
-        res.push_back(i+n_vertex/2);
-    }
-    return res;
-}
-
-void TwoSidedDeltaDim::display_order(deque_vertexID_t const& state){
-    if(state.size() >= 1){
-        double key = convert(state);
-        if(key != -1){
-            deque_vertexID_t p1K = recover(m_order_map1_LR[key]);
-            //m_exact_solver.display_order(p1K);
-            if(!p1K.empty() && p1K.size() != state.size()){
-                //display_order(recover(m_order_map1[key]));
-                display_order(recover(m_order_map2_LR[key]));
-            }
-            cout << "| ";
-            for(vertexID_t i : recover(key)){
-                cout << i << " | ";
-            }
-            cout << endl;
-        }
-    }
-}
-
-/**
- * @brief dummy method to use in template
- * 
- */
-void TwoSidedDeltaDim::display_order(){}
-
-void TwoSidedDeltaDim::init(Network& network){
-    set_limit_dim(network.dimension);
-    dim = network.dimension;
-    std::cout<<"dimension init: "<<dim<<std::endl;
-    n_vertex = network.n_vertex;
-
-    m_state.clear();
-    m_cost_memo_LR.clear();
-    m_cost_memo_RL.clear();
-    m_order_map1_LR.clear();
-    m_order_map2_LR.clear();
-    m_order_map1_RL.clear();
-    m_order_map2_RL.clear();
-    m_state.resize(dim);
-
-    best_cost = std::numeric_limits<cost_t>::max();
-
-    for(vertexID_t i = 0; i < dim; i++){
-        m_state[i] = i;
-    }
-
-    m_exact_solver.init(network);
-}
-
-cost_t TwoSidedDeltaDim::call_solve(){
-    cost_t final_cost = std::numeric_limits<cost_t>::max();
-    int final_split = 0;
-
-    // Iterate over all the possible starting splits
-    deque_vertexID_t nodes_left(m_state);
-    deque_vertexID_t nodes_right;
-    for(int split = 0; split < dim; split++){
-        // Solve the left part using 1DΔD
-        // (assuming we start the split from the left side of TT)
-        cost_t cost_left = solve(nodes_left, LEFT_TO_RIGHT);
-        
-        // Solve the right part using 1DΔD in reverse order
-        // (assuming we start the split from the right side of TT)
-        cost_t cost_right = solve(nodes_right, RIGHT_TO_LEFT);
-
-        // Compute the cost of contracting the final two nodes (results of
-        // the two subproblems) together
-        cost_t cost_connect = 0;
-        if(!nodes_left.empty() && !nodes_right.empty()) {
-            cost_connect = m_network->adjacence_matrix[nodes_left.back() * n_vertex + nodes_right.front()] *
-                           m_network->adjacence_matrix[(nodes_left.back() + n_vertex/2) * n_vertex + (nodes_right.front() + n_vertex/2)];
-        }
-
-        // Calculate the total cost of the split
-        cost_t cost = cost_left + cost_right + cost_connect;
-
-        std::cout<<split<<": \t"<<cost<<"\t"<<cost_left<<"\t"<<cost_right<<"\t"<<cost_connect<<std::endl;
-
-        if (cost < final_cost) {
-            final_cost = cost;
-            final_split = split;
-        }
-
-        // Move the split node to the right part
-        auto node = nodes_left.back();
-        nodes_left.pop_back();
-
-        //std::reverse(nodes_right.begin(), nodes_right.end());
-        nodes_right.push_front(node);
-        //std::reverse(nodes_right.begin(), nodes_right.end());
-    }
-
-
-    /*std::cout<<"Called solve"<<std::endl;
-    cost_t cost_left = solve(m_state);
-
-    std::cout<<"!!!!"<<std::endl;
-    for(auto elem : m_cost_memo) {
-        std::cout << elem.first << " " << elem.second << std::endl;
-    }
-    std::cout<<endl;
-
-    auto m_cost_memo_left(m_cost_memo);
-
-    this->reversed = true;
-    this->init(*m_network);
-    cost_t cost_right = solve(m_state);
-
-    std::cout<<"[TwoSidedDeltaDim] Cost left: "<<cost_left<<std::endl;
-    std::cout<<"[TwoSidedDeltaDim] Cost right: "<<cost_right<<std::endl;
-    std::cout<<"[TwoSidedDeltaDim] Best cost: "<<min(cost_left, cost_right)<<std::endl;
-
-    for(auto elem : m_cost_memo) {
-        std::cout << elem.first << " " << elem.second << std::endl;
-    }
-
-    cost_t cost_2starts = std::numeric_limits<cost_t>::max();
-    vector_vertexID_t state_left, state_right(m_state);
-    for(int i = 0; i < dim; i++)
-    {
-        state_left.push_back(i);
-        state_right.pop_back();
-
-        cost_t cost_left = m_cost_memo_left[convert(state_left)];
-        cost_t cost_right = m_cost_memo[convert(state_right)];
-
-        std::cout<<i<<": "<<cost_left<<" "<<cost_right<<std::endl;
-        cost_2starts = min(cost_2starts, cost_left + cost_right);
-    }
-    std::cout<<m_cost_memo_left[convert(m_state)]<<" "<<m_cost_memo[convert(m_state)]<<std::endl;
-
-    return min(min(cost_left, cost_right), cost_2starts);*/
-    return final_cost;
-}
+// Instantiation of the template class
+template class TwoSidedDeltaDim<2, 4, BOTH_SIDES>;

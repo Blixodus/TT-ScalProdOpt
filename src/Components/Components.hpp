@@ -65,6 +65,15 @@ struct edge_t{
 };
 
 // Direction for the start of the contraction
-enum direction_e {LEFT_TO_RIGHT, RIGHT_TO_LEFT};
+enum split_direction_e {
+    START_LEFT  = 1,
+    START_RIGHT = 2,
+    BOTH_SIDES  = 3 // because 11 will light up 1 and 2
+};
+
+enum result_direction_e {
+    LR = 0,
+    RL = 1
+};
 
 #endif

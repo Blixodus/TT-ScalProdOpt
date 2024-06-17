@@ -24,7 +24,7 @@ class CotengraOptimalWrapper : public Algorithm{
 
     // Solvers
     cost_t call_solve();
-    cost_t solve(vector_vertexID_t& state, bool contiguous_ids, direction_e direction); // compute the contraction cost of a given state
+    cost_t solve(const int dim_min, const int dim_max, const result_direction_e direction) ; // compute the contraction cost of a given state
 
     // Utility functions
     int64_t convert(vector_vertexID_t const& state); // convert state to hash key

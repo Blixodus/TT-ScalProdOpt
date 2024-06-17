@@ -10,8 +10,6 @@
 #include "GreedyEdgeSort/GreedyEdgeSort.hpp"
 #include "OneSidedOneDim/OneSidedOneDim.hpp"
 #include "Shuffle/Shuffle.hpp"
-#include "SplitsDimByDim/SplitsDimByDim.hpp"
-#include "OneSidedDeltaDim/OneSidedDeltaDim.hpp"
 #include "TwoSidedDeltaDim/TwoSidedDeltaDim.hpp"
 #include "CotengraOptimalWrapper/CotengraOptimalWrapper.hpp"
 #include "../tools/Export/Export.hpp"
