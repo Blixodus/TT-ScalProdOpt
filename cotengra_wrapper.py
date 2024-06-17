@@ -183,15 +183,18 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, reversed):
     #print(inputs, output, sizes_dict)
 
     #fig, ax = ctg.HyperGraph(inputs, output, sizes_dict).plot()
-    #fig.savefig("graph_3.pdf")
+    #fig.savefig("graph_4.pdf")
     tree = ctg.array_contract_tree(inputs, output, sizes_dict, optimize='optimal')
 
     #fig, ax = tree.plot_rubberband()
-    #fig.savefig("tree_3.pdf")
+    #fig.savefig("tree_4.pdf")
+
+    path_str = str(tree.get_path())[1:-1]
+    #print(path_str)
 
     #print(sizes_dict, output)
     #print("[Cotengra wrapper PY]", input_file, dim_min, "...", dim_max, tree.contraction_cost() * outer_edges_cost, tree.contraction_cost(), outer_edges_cost)
+    
+    return (tree.contraction_cost(), path_str)
 
-    return tree.contraction_cost()
-
-#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs/instances/test/uniform_pt2/instance_058_037.txt", 0, 58))
+#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs/instances/test/uniform_all2/instance_004_01.txt", 0, 3, False, True))

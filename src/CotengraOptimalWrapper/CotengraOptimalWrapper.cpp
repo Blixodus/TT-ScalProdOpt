@@ -1,5 +1,6 @@
 #include "CotengraOptimalWrapper.hpp"
 #include <pybind11/embed.h>
+#include <pybind11/stl.h>
 #include <iostream>
 
 namespace py = pybind11;
@@ -10,14 +11,14 @@ namespace py = pybind11;
  * @param state The tensors in this state
  * @return cost_t the best cost for S
  */
-cost_t CotengraOptimalWrapper::solve(const int dim_min, const int dim_max, const result_direction_e direction) {
+std::pair<cost_t, std::string> CotengraOptimalWrapper::solve(const int dim_min, const int dim_max, const result_direction_e direction) {
     // Call the Cotengra wrapper script to solve the subpart of the network
     // using the optimal algorithm from the Cotengra library
     auto python_script = py::module::import("cotengra_wrapper");
     auto resultobj = python_script.attr("cotengra_wrapper_solve")(m_network->m_filename, dim_min, dim_max, (int)direction);
-    cost_t cost = resultobj.cast<cost_t>();
+    auto result = resultobj.cast<py::tuple>();
 
-    return cost;
+    return make_pair(result[0].cast<cost_t>(), result[1].cast<std::string>());
 }
 
 /**
@@ -55,7 +56,7 @@ vector_vertexID_t CotengraOptimalWrapper::recover(double key){
     return res;
 }
 
-void CotengraOptimalWrapper::display_order(vector_vertexID_t const& state){//dégueulasse
+void CotengraOptimalWrapper::display_order(vector_vertexID_t const& state){
     std::cout << "| CTG-wrapper: TBD | " << std::endl;
 }
 
@@ -84,5 +85,5 @@ void CotengraOptimalWrapper::init(Network& network){
 }
 
 cost_t CotengraOptimalWrapper::call_solve(){
-    return solve(0, this->dim - 1, LR);
+    return solve(0, this->dim - 1, LR).first;
 }
