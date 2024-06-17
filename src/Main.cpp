@@ -41,6 +41,12 @@ void init_algos(std::vector<std::map<std::string, std::any>> dict_list){
  */
 Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
     std::string algo_name(std::any_cast<std::string>(dictionary["main_alg"]));
+    int delta = 0;
+    
+    if(dictionary.find("dmax") != dictionary.end()){
+        delta = std::any_cast<int>(dictionary["dmax"]);
+    }
+
     if(ALGO_MAP.find(algo_name) == ALGO_MAP.end()){return nullptr;}
     switch(ALGO_MAP[algo_name]){
         case ALLSPLITS:
@@ -59,7 +65,10 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
             return new Shuffle(dictionary);
             break;
         case TWOSIDEDDELTADIM:
-            return new TwoSidedDeltaDim<2, 4, BOTH_SIDES>(dictionary);
+            std::cout<<"!!!!!!"<<delta<<std::endl;
+            if(delta == 3) return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
+            else if(delta == 4) return new TwoSidedDeltaDim<4, ALL, 2>(dictionary);
+            else return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
             break;
         case COTENGRAOPTIMALWRAPPER:
             return new CotengraOptimalWrapper(dictionary);
