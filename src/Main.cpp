@@ -42,8 +42,11 @@ void init_algos(std::vector<std::map<std::string, std::any>> dict_list){
 Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
     std::string algo_name(std::any_cast<std::string>(dictionary["main_alg"]));
     int delta = 0;
-    
-    if(dictionary.find("dmax") != dictionary.end()){
+
+    if(dictionary.find("delta") != dictionary.end()){
+        delta = std::stoi(std::any_cast<string>(dictionary["delta"]));
+    } else if(dictionary.find("dmax") != dictionary.end()){
+        // Backward compatibility
         delta = std::any_cast<int>(dictionary["dmax"]);
     }
 
