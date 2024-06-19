@@ -35,6 +35,7 @@ using dim_t = int;
 using vertexID_t = dim_t;
 //Type to encode edges
 using edgeID_t = dim_t;
+using vertex_pair_t = std::pair<vertexID_t, vertexID_t>;
 
 //Type to encode weights
 using weight_t = int64_t;
@@ -51,6 +52,7 @@ using vector_cost_t = std::vector<cost_t> ;
 //Type for vector of integer
 // using Tab = std::vector<int> ;
 using vector_edgeID_t = std::vector<edgeID_t> ;
+using vector_vertex_pair_t = std::vector<vertex_pair_t> ;
 using vector_vertexID_t = std::vector<vertexID_t> ;
 using deque_vertexID_t = std::deque<vertexID_t> ;
 

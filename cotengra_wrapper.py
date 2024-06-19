@@ -102,27 +102,27 @@ def import_tensor_train(filename, dim_min=None, dim_max=None, reversed=False):
             inputs.append([m, lr])
 
             sizes_dict[m] = ranks[(nodes_up[i], nodes_down[i])]
-            sizes_dict[ur] = ranks[(nodes_down[i], nodes_down[i + 1])]
-            sizes_dict[lr] = ranks[(nodes_up[i], nodes_up[i + 1])]
+            sizes_dict[ur] = ranks[(nodes_up[i], nodes_up[i + 1])]
+            sizes_dict[lr] = ranks[(nodes_down[i], nodes_down[i + 1])]
         # Right size of the tensor train with no outer edges
         elif i == dim_max - 1 and dim_max == n:
             inputs.append([m, ul])
             inputs.append([m, ll])
 
             sizes_dict[m] = ranks[(nodes_up[i], nodes_down[i])]
-            sizes_dict[ul] = ranks[(nodes_down[i], nodes_down[i - 1])]
-            sizes_dict[ll] = ranks[(nodes_up[i], nodes_up[i - 1])]
+            sizes_dict[ul] = ranks[(nodes_up[i], nodes_up[i - 1])]
+            sizes_dict[ll] = ranks[(nodes_down[i], nodes_down[i - 1])]
         else:
             inputs.append([m, ul, ur])
             inputs.append([m, ll, lr])
 
             sizes_dict[m] = ranks[(nodes_up[i], nodes_down[i])]
 
-            sizes_dict[ul] = ranks[(nodes_down[i], nodes_down[i - 1])]
-            sizes_dict[ur] = ranks[(nodes_down[i], nodes_down[i + 1])]
+            sizes_dict[ul] = ranks[(nodes_up[i], nodes_up[i - 1])]
+            sizes_dict[ur] = ranks[(nodes_up[i], nodes_up[i + 1])]
 
-            sizes_dict[ll] = ranks[(nodes_up[i], nodes_up[i - 1])]
-            sizes_dict[lr] = ranks[(nodes_up[i], nodes_up[i + 1])]
+            sizes_dict[ll] = ranks[(nodes_down[i], nodes_down[i - 1])]
+            sizes_dict[lr] = ranks[(nodes_down[i], nodes_down[i + 1])]
 
     return inputs, output, sizes_dict, input_node_included
 
@@ -181,7 +181,7 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
     #print(contraction_list)
 
     contraction_list_renamed = rename_nodes_from_ctg(tree.flat_tree(), 2, dim, dim_min, input_node_included)
-    #print(contraction_list_renamed)
+    print(contraction_list_renamed)
 
     #tree2 = ctg.array_contract_tree(inputs, output, sizes_dict, optimize=tree.flat_tree())
     #print(tree2.contraction_cost())
@@ -194,4 +194,4 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
     
     return (tree.contraction_cost(), path_str)
 
-#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs/instances/test/uniform_all2/instance_010_01.txt", 0, 9, 10, True))
+#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs/instances/test/uniform_all2/instance_006_01.txt", 0, 5, 6, False))
