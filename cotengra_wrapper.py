@@ -50,52 +50,40 @@ def import_tensor_train(filename, dim_min=None, dim_max=None, reversed=False):
             nodes_down.append(int(node))
 
 
-    # Limit the tensor network to given dimension
+    # Generate tensor train 
+    inputs = []
     output = []
     sizes_dict = {}
-    if False and dim_min is not None and dim_max is not None:
-        # Add outer edges from the left size to include them in the cost
-        if dim_min > 0:
-            i = dim_min - 1
-            j = 3 * i
-            ul, m, ll, =  (ctg.get_symbol(i) for i in (j - 1, j, j - 2))
+    input_node_included = False
+
+    # Generate the input node (representing the part of TT which is already
+    # contracted prior to this subproblem) and the output node (representing 
+    # the part of TT which is result of this computation)
+
+    # Add outer edges from the left size to include them in the cost
+    if dim_min > 0:
+        i = dim_min
+        j = 3 * i
+        ul, ur, m, ll, lr = (ctg.get_symbol(i) for i in (j - 1, j + 2, j, j - 2, j + 1))
+        if reversed == False:
+            inputs.append([ul, ll])
+            input_node_included = True
+        else:
             output.append(ul)
             output.append(ll)
 
-            sizes_dict[ll] = ranks[(nodes_up[dim_min - 1], nodes_up[dim_min])]
-            sizes_dict[ul] = ranks[(nodes_down[dim_min - 1], nodes_down[dim_min])]
-        
-        # Add outer edges from the right size to include them in the cost
-        if dim_max < n:
-            i = dim_max
-            j = 3 * i
-            ul, m, ll, =  (ctg.get_symbol(i) for i in (j - 1, j, j - 2))
-            output.append(ul)
-            output.append(ll)
+    # Add outer edges from the right size to include them in the cost
+    if dim_max < n:
+        i = dim_max - 1
+        j = 3 * i
+        ul, ur, m, ll, lr = (ctg.get_symbol(i) for i in (j - 1, j + 2, j, j - 2, j + 1))
+        if reversed == False:
+            output.append(ur)
+            output.append(lr)
+        else:
+            inputs.append([ur, lr])
+            input_node_included = True
 
-            sizes_dict[ll] = ranks[(nodes_up[dim_max - 1], nodes_up[dim_max])]
-            sizes_dict[ul] = ranks[(nodes_down[dim_max - 1], nodes_down[dim_max])]
-
-        #nodes_up = nodes_up[dim_min:dim_max]
-        #nodes_down = nodes_down[dim_min:dim_max]
-        #n = dim_max - dim_min
-
-    # Left side of tensor train
-    # O--
-    # |
-    # O--
-    #j = 3 * dim_min
-    #ul, ur, m, ll, lr = (ctg.get_symbol(i) for i in (j - 1, j + 2, j, j - 2, j + 1))
-    #inputs = [[m, ur], [m,lr]]
-    
-    #if n == 1:
-    #    inputs = [[m], [m]]
-
-    #print(nodes_up, nodes_down)
-    #sizes_dict['a'] = ranks[(nodes_up[0], nodes_down[0])]
-
-    # Middle part of tensor train
-    inputs = []
     for i in range(dim_min, dim_max):
         # set the upper left/right, middle and lower left/right indices
         # --O--
@@ -136,49 +124,48 @@ def import_tensor_train(filename, dim_min=None, dim_max=None, reversed=False):
             sizes_dict[ll] = ranks[(nodes_up[i], nodes_up[i - 1])]
             sizes_dict[lr] = ranks[(nodes_up[i], nodes_up[i + 1])]
 
-        # Add outer edges from the left size to include them in the cost
-        if i == dim_min and dim_min > 0:
-            if reversed == False:
-                inputs.append([ul, ll])
-            else:
-                output.append(ul)
-                output.append(ll)
+    return inputs, output, sizes_dict, input_node_included
 
-        # Add outer edges from the right size to include them in the cost
-        if i == dim_max - 1 and dim_max < n:
-            #inputs.append([ur, lr])
-            if reversed == False:
-                output.append(ur)
-                output.append(lr)
-            else:
-                inputs.append([ur, lr])
+def node_id_from_ctg(node_id, tt_dim, dim, dmin, input_node_included):
+    if input_node_included:
+        if node_id == 0:
+            return '#'
+        else:
+            node_id -= 1
 
+    column = node_id // tt_dim
+    row = node_id % tt_dim
+    return row * dim + dmin + column
 
+def rename_nodes_from_ctg(contraction_tree, tt_dim, dim, dmin, input_node_included):
+    if isinstance(contraction_tree, tuple):
+        return (rename_nodes_from_ctg(contraction_tree[0], tt_dim, dim, dmin, input_node_included), rename_nodes_from_ctg(contraction_tree[1], tt_dim, dim, dmin, input_node_included))
+    else:
+        return node_id_from_ctg(contraction_tree, tt_dim, dim, dmin, input_node_included)
 
-    # Right side of tensor train
-    # --O
-    #   |
-    # --O
-    if False and n >= 2:
-        i = n - 1
-        j = 3 * i
-        ul, m, ll, =  (ctg.get_symbol(i) for i in (j - 1, j, j - 2))
-        #print(ul, m, ll)
-            
-        inputs.append([m, ul])
-        inputs.append([m, ll])
+def generate_contraction_list(contraction_tree):
+    if len(contraction_tree) > 2:
+        exit("Error! The contraction tree is not binary.")
+    
+    contraction_list = []
+    ids = []
 
-        sizes_dict[m] = ranks[(nodes_up[i], nodes_down[i])]
-        if n == 2:
-            sizes_dict[ul] = ranks[(nodes_down[i], nodes_down[i - 1])]
-            sizes_dict[ll] = ranks[(nodes_up[i], nodes_up[i - 1])]
-            sizes_dict[m] = ranks[(nodes_up[i], nodes_down[i])]
+    for i in range(len(contraction_tree)):
+        if isinstance(contraction_tree[i], tuple):
+            local_list, min_id = generate_contraction_list(contraction_tree[i])
+            ids.append(min_id)
+            contraction_list += local_list
+        else:
+            ids.append(contraction_tree[i])
 
-    return inputs, output, sizes_dict
+    for i in range(len(ids) - 1):
+        contraction_list.append((ids[i], ids[i + 1]))
 
+    return contraction_list, min(ids)
+        
 
-def cotengra_wrapper_solve(input_file, dim_min, dim_max, reversed):
-    inputs, output, sizes_dict = import_tensor_train(input_file, dim_min, dim_max + 1, reversed)
+def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
+    inputs, output, sizes_dict, input_node_included = import_tensor_train(input_file, dim_min, dim_max + 1, reversed)
 
     #print(inputs, output, sizes_dict)
 
@@ -189,7 +176,17 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, reversed):
     #fig, ax = tree.plot_rubberband()
     #fig.savefig("tree_4.pdf")
 
-    path_str = str(tree.get_path())[1:-1]
+    #print(tree.flat_tree())
+    #contraction_list, _ = generate_contraction_list(tree.flat_tree())
+    #print(contraction_list)
+
+    contraction_list_renamed = rename_nodes_from_ctg(tree.flat_tree(), 2, dim, dim_min, input_node_included)
+    #print(contraction_list_renamed)
+
+    #tree2 = ctg.array_contract_tree(inputs, output, sizes_dict, optimize=tree.flat_tree())
+    #print(tree2.contraction_cost())
+
+    path_str = str(contraction_list_renamed)
     #print(path_str)
 
     #print(sizes_dict, output)
@@ -197,4 +194,4 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, reversed):
     
     return (tree.contraction_cost(), path_str)
 
-#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs/instances/test/uniform_all2/instance_004_01.txt", 0, 3, False, True))
+#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs/instances/test/uniform_all2/instance_010_01.txt", 0, 9, 10, True))

@@ -35,8 +35,15 @@ void TwoSidedDeltaDim<delta, dir, tt_dim>::compute_splits() {
                     //   this->m_cost[LR][t - k][s + k] != std::numeric_limits<cost_t>::max()) {
                     cost_t cost = this->m_cost[LR][k][s] + this->m_cost[LR][t - k][s + k];
                     if(cost < this->m_cost[LR][t][s]) {
+                        // Update the cost of the window [s, s+t-1]
                         this->m_cost[LR][t][s] = cost;
-                        this->m_order[LR][t][s] = this->m_order[LR][k][s] + ", " + this->m_order[LR][t - k][s + k];
+
+                        // Update the order of the splits by concatenating
+                        // the two recursive results (right part assumes that
+                        // the left part is already contracted - denoted by #,
+                        // and now we are inserting the exact order to yield it)
+                        this->m_order[LR][t][s] = this->m_order[LR][t - k][s + k];
+                        this->m_order[LR][t][s].replace(this->m_order[LR][t][s].find("'#'"), 3, this->m_order[LR][k][s]);
                     }
                     //std::cout<<"[Extended window LR: " << t << "]\t" << s << " ... " << s + t - 1 << " - cost: " << this->m_cost[LR][k][s] + this->m_cost[LR][t - k][s + k] << " (" << this->m_cost[LR][k][s] << ", " << this->m_cost[LR][t - k][s + k] << ")" <<std::endl;
                     //std::cout<<"\t"<<this->m_cost[LR][6][0]<<std::endl;
@@ -75,7 +82,13 @@ void TwoSidedDeltaDim<delta, dir, tt_dim>::compute_splits() {
                     cost_t cost = this->m_cost[RL][t - k][s] + this->m_cost[RL][k][s + t - k];
                     if(cost < this->m_cost[RL][t][s]) {
                         this->m_cost[RL][t][s] = cost;
-                        this->m_order[RL][t][s] = this->m_order[RL][t - k][s] + ", " + this->m_order[RL][k][s + t - k];
+
+                        // Update the order of the splits by concatenating
+                        // the two recursive results (left part assumes that
+                        // the right part is already contracted - denoted by #,
+                        // and now we are inserting the exact order to yield it)
+                        this->m_order[RL][t][s] = this->m_order[RL][t - k][s];
+                        this->m_order[RL][t][s].replace(this->m_order[RL][t][s].find("'#'"), 3, this->m_order[RL][k][s + t - k]);
                     }
                     //std::cout<<"[Extended window RL: " << t << "]\t" << s << " ... " << s + t - 1 << " - cost: " << this->m_cost[RL][t - k][s] + this->m_cost[RL][k][s + t - k] << " (" << this->m_cost[RL][t - k][s] << ", " << this->m_cost[RL][k][s + t - k] << ")" <<std::endl;
                 }
@@ -167,7 +180,7 @@ cost_t TwoSidedDeltaDim<delta, dir, tt_dim>::call_solve(){
             // Update the best cost
             if(total_cost < this->best_cost) {
                 this->best_cost = total_cost;
-                this->best_order_str = this->m_order[LR][split][0] + ", " + this->m_order[RL][dim - split][split];
+                this->best_order_str = "(" + this->m_order[LR][split][0] + ", " + this->m_order[RL][dim - split][split] + ")";
             }
         }
     }

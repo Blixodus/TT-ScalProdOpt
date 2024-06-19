@@ -15,7 +15,7 @@ std::pair<cost_t, std::string> CotengraOptimalWrapper::solve(const int dim_min, 
     // Call the Cotengra wrapper script to solve the subpart of the network
     // using the optimal algorithm from the Cotengra library
     auto python_script = py::module::import("cotengra_wrapper");
-    auto resultobj = python_script.attr("cotengra_wrapper_solve")(m_network->m_filename, dim_min, dim_max, (int)direction);
+    auto resultobj = python_script.attr("cotengra_wrapper_solve")(m_network->m_filename, dim_min, dim_max, m_network->dimension, (int)direction);
     auto result = resultobj.cast<py::tuple>();
 
     return make_pair(result[0].cast<cost_t>(), result[1].cast<std::string>());
