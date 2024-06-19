@@ -23,7 +23,7 @@ struct Network{
 
     //Edge list
     //std::vector<edge_t> edge_list;
-    std::vector<std::pair<vertexID_t, vertexID_t>> edge_list;
+    vector_vertex_pair_t edge_list;
 
     //density
     float density=0.;

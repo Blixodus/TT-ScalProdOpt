@@ -187,6 +187,14 @@ cost_t TwoSidedDeltaDim<delta, dir, tt_dim>::call_solve(){
 
     std::cout<<this->best_order_str<<std::endl;
 
+    vector_vertex_pair_t order{{0, 6}, {0, 7}, {0, 1}, {0, 8}, {0, 2}, {0, 3}, {0, 9}, {10, 11}, {0, 10}, {0, 4}, {0, 5}};
+    //vector_vertex_pair_t order{{0, 3}, {0, 4}, {0, 1}, {2, 5}, {0, 2}};
+
+    cost_t verify_cost = compute_order(*this->m_network, order);
+
+    std::cout<<"Best cost: "<<this->best_cost<<std::endl;
+    std::cout<<"Verification cost: "<<verify_cost<<std::endl;
+
     return this->best_cost;
 }
 
