@@ -8,6 +8,8 @@ import multiprocessing
 import threading
 import configparser
 
+import pandas as pd
+
 lock = threading.Lock()
 result_file = None
 
@@ -33,13 +35,6 @@ def run_program(algorithm, input_file, dmax=None):
             cost = float(line.split(":")[1])
         if "Best order" in line:
             order = line.split(":")[1]
-
-    tokens = re.split("\W+|_", input_file)
-    size = tokens[-3]
-    instance = tokens[-2]
-    ex_time = end_time - start_time
-
-    print(f"{algorithm};{int(size)};{int(instance)};{input_file};{cost};{ex_time}")
 
     return cost, end_time - start_time, order
 
@@ -83,19 +78,78 @@ def generate_contraction_list(contraction_tree):
 
     return contraction_list, min(ids)
 
-algorithm = "TwoSidedDeltaDim"
-file = "/home/pdominik/Tensor_experiments/OptiTenseurs/instances/test/uniform_all2/instance_006_01.txt"
-dmax = 4
-cost, ex_time, order_str = run_program(algorithm=algorithm, input_file=file, dmax=dmax)
+# Parse configuration file and initialize variables
+if len(sys.argv) > 1:
+    config_file = sys.argv[1]
+    if not os.path.exists(config_file):
+        exit("Error! Provided configuration file does not exist.")
+else:
+    exit("Error! No configuration file provided.")
 
-# Retrieve the flat list of contractions
-contraction_recursive = ast.literal_eval(order_str)
-contraction_flat, _ = generate_contraction_list(contraction_recursive)
+config = configparser.ConfigParser()
+config.read(config_file)
 
-# Calculate the cost of the contraction order
-cost_validation = run_validation(input_file=file, order=contraction_flat)
-print(f"Validation cost: {cost_validation}")
-print(f"OptiTenseurs cost: {cost}")
+test_dir = config['Tests']['test_dir']
+files = os.listdir(test_dir)
+files = [os.path.join(test_dir, file) for file in files]
+files.sort()
+
+algorithms = []
+result_file = f"{config['Input']['input_dir']}/{config['Input']['input_prefix']}"
+
+if len(sys.argv) > 2:
+    algorithms = [sys.argv[2]]
+    result_file += f"_{sys.argv[2]}"
+result_file += "_validation.txt"
+
+dmax = None
+if len(sys.argv) > 3:
+    dmax = sys.argv[3]
+    result_file = f"{config['Input']['input_dir']}/{config['Input']['input_prefix']}_{sys.argv[2]}_{sys.argv[3]}_validation.txt"
+
+# Load the file with the exact results
+exact_results = pd.read_csv(f"{config['Input']['input_dir']}/{config['Input']['input_prefix']}_optimal.txt", sep=';')
+
+# Write the header to the output file
+output_file = open(result_file, 'a')
+output_file.write(f"Algorithm;Size;Instance;Test_file;Cost;Validated_cost;Execution_time;Result\n")
+
+for algorithm in algorithms:
+    for file in files:
+        # Run the algorithm on the input file
+        cost, ex_time, order_str = run_program(algorithm=algorithm, input_file=file, dmax=dmax)
+
+        # Retrieve the flat list of contractions
+        contraction_recursive = ast.literal_eval(order_str)
+        contraction_flat, _ = generate_contraction_list(contraction_recursive)
+
+        # Calculate the cost of the contraction order
+        cost_validation = run_validation(input_file=file, order=contraction_flat)
+        
+        # Save the result to the output file
+        tokens = re.split("\W+|_", file)
+        size = tokens[-3]
+        instance = tokens[-2]
+
+        result = "OK"
+        summary = "✅"
+
+        # Check if the reported cost is equal to the validated cost
+        if cost != cost_validation:
+            result = "NOT_EQUAL"
+            summary = "❌"
+
+        # Check if the reported cost is greater or equal to the exact cost
+        if cost < exact_results[(exact_results['Size'] == int(size)) & (exact_results['Instance'] == int(instance))]['Cost'].values[0]:
+            result = "LESS_THAN_EXACT"
+            summary = "❌"
+
+        output_str = f"{algorithm};{int(size)};{int(instance)};{file};{cost};{cost_validation};{ex_time};{result}\n"
+        output_file.write(output_str)
+        print(output_str, summary)
+    
+output_file.close()
+        
 
 
 
