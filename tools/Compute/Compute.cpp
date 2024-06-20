@@ -137,6 +137,9 @@ cost_t Cost_cpt::contract(vertex_pair_t edge){
     vertexID_t e1 = rep(edge.first);
     vertexID_t e2 = rep(edge.second);
 
+    // We always keep smaller node as representative of the contracted edge
+    if(e1 > e2) std::swap(e1, e2);
+
     if(e1 != e2){
         cost_t res = m_adjacence_matrix[n_vertex*e1 + e2];
         for(vertexID_t j = 0; j < n_vertex; j++){
@@ -155,11 +158,7 @@ cost_t Cost_cpt::contract(vertex_pair_t edge){
             m_adjacence_matrix[n_vertex*j + e1] = m_adjacence_matrix[n_vertex*e1 + j];
         }
 
-        if(e1 < e2) {
-            m_corr_list[e2] = e1;
-        } else {
-            m_corr_list[e1] = e2;
-        }
+        //std::cout<< "Contracting " << edge.first << " (" << e1 << ")" << " and " << edge.second << "(" << e2 << ")" << " with c0st: " << res << std::endl;
 
         return res;
     }else{
