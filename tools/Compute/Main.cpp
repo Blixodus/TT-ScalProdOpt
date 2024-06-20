@@ -1,9 +1,19 @@
 #include "Compute.hpp"
 
 int main(int argc, char* argv[]){
-    std::string calc_file;
+    std::string network_file;
+    std::cin>>network_file;
+    Network network(network_file);
 
-    calc_file = (argc<2 ? "test.txt" : argv[1]);
+    int edge_list_size;
+    vector_vertex_pair_t order;
+    std::cin>>edge_list_size;
+    for(int i = 0; i < edge_list_size; i++) {
+        int vertex1, vertex2;
+        std::cin>>vertex1>>vertex2;
+        order.push_back({vertex1, vertex2});
+    }
 
-    import_calc_file(calc_file);
+    std::cout<<"Cost : "<<compute_order(network, order)<<std::endl;
+    return 0;
 }

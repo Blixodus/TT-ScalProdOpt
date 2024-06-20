@@ -56,7 +56,7 @@ void import_calc_file(string& calc_file){
  */
 cost_t compute_order(std::string& filename, vector_edgeID_t& order_list){
     Network network(filename);
-    compute_order(network, order_list);
+    return compute_order(network, order_list);
 }
 
 /**
@@ -73,11 +73,27 @@ cost_t compute_order(Network& network, vector_edgeID_t& order_list){
         return 0;
     }
 
-    Cost_cpt c_cpt(network, order_list);
+    Cost_cpt c_cpt(network);
 
     cost_t cost = 0;
     for(edgeID_t i : order_list){
         cost += c_cpt.contract(i);
+    }
+    return cost;
+}
+
+cost_t compute_order(Network& network, vector_vertex_pair_t& order_list){
+
+    if(order_list.size() > network.n_edge){
+        std::cout << "[WARNING] Too many edges given, skipping order" << std::endl;
+        return 0;
+    }
+
+    Cost_cpt c_cpt(network);
+
+    cost_t cost = 0;
+    for(vertex_pair_t e : order_list){
+        cost += c_cpt.contract(e);
     }
     return cost;
 }
@@ -111,6 +127,40 @@ cost_t Cost_cpt::contract(edgeID_t edge){
             m_adjacence_matrix[n_vertex*j + e1] = m_adjacence_matrix[n_vertex*e1 + j];
         }
         m_corr_list[e2] = e1;
+        return res;
+    }else{
+        return 0;
+    }
+}
+
+cost_t Cost_cpt::contract(vertex_pair_t edge){
+    vertexID_t e1 = rep(edge.first);
+    vertexID_t e2 = rep(edge.second);
+
+    if(e1 != e2){
+        cost_t res = m_adjacence_matrix[n_vertex*e1 + e2];
+        for(vertexID_t j = 0; j < n_vertex; j++){
+            if(e1 != j){
+                res *= max((weight_t) 1, m_adjacence_matrix[n_vertex*e2 + j]);
+            }
+            if(e2 != j){ 
+                res *= max((weight_t) 1, m_adjacence_matrix[n_vertex*e1 + j]);
+            }
+        }
+
+        for(vertexID_t j = 0; j < n_vertex; j++){
+            m_adjacence_matrix[n_vertex*e1 + j] *= m_adjacence_matrix[n_vertex*e2 + j];
+            m_adjacence_matrix[n_vertex*e2 + j] = 0;
+            m_adjacence_matrix[n_vertex*j + e2] = 0;
+            m_adjacence_matrix[n_vertex*j + e1] = m_adjacence_matrix[n_vertex*e1 + j];
+        }
+
+        if(e1 < e2) {
+            m_corr_list[e2] = e1;
+        } else {
+            m_corr_list[e1] = e2;
+        }
+
         return res;
     }else{
         return 0;

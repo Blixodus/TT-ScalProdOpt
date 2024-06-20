@@ -21,9 +21,6 @@ class TwoSidedDeltaDim : public Algorithm{
     // Exact solver for the subproblems (Cotengra optimal algorithm)
     CotengraOptimalWrapper m_exact_solver;
 
-    // Best contraction order
-    std::string best_order_str;
-
     // Constructors
     TwoSidedDeltaDim(){}
     TwoSidedDeltaDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
