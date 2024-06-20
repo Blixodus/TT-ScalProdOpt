@@ -99,8 +99,10 @@ void display_infos(Algorithm& solver){
     if(!solver.best_order.empty()){
         std::cout << "Best order : ";
         solver.display_order();
+    } else if(solver.best_order_str != ""){
+        std::cout << "Best order : " << solver.best_order_str << '\n';
     }
-    std::cout << std::scientific << "Temps : " << solver.time.count()  << "s" << '\n';
+    std::cout << std::scientific << "Execution time : " << solver.time.count()  << "s" << '\n';
     std::cout << "--------------" << std::endl;
 }
 

@@ -60,6 +60,7 @@ class Algorithm{
 
     //The current best order
     vector_edgeID_t best_order;
+    std::string best_order_str;
 
     //Final time
     chrono::duration<double> time = std::chrono::duration<double>(0);
@@ -130,8 +131,10 @@ void execfile(T& solver, Network& network){
     if(!solver.best_order.empty()){
         std::cout << "Best order : ";
         solver.display_order();
+    } else if(solver.best_order_str != ""){
+        std::cout << "Best order : " << solver.best_order_str << '\n';
     }
-    std::cout << std::scientific << "Temps : " << solver.time.count()  << "s" << '\n';
+    std::cout << std::scientific << "Execution time : " << solver.time.count()  << "s" << '\n';
     std::cout << "--------------" << std::endl;
 }
 

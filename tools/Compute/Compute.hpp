@@ -12,19 +12,21 @@
 void import_calc_file(std::string& calc_file);
 
 cost_t compute_order(std::string& filename, vector_edgeID_t& _order_list);
+cost_t compute_order(Network& network, vector_vertex_pair_t& order_list);
 cost_t compute_order(Network& network, vector_edgeID_t& order_list);
 
 struct Cost_cpt{
     public:
     vertexID_t n_vertex;
-    std::vector<std::pair<vertexID_t, vertexID_t>> m_edge_list;
+    vector_vertex_pair_t m_edge_list;
     matrix_weight_t m_adjacence_matrix;
     vector_vertexID_t m_corr_list;
 
     cost_t contract(edgeID_t edge);
+    cost_t contract(vertex_pair_t edge);
     vertexID_t rep(vertexID_t vertex);
 
-    Cost_cpt(Network& network, vector_edgeID_t& order_list) : 
+    Cost_cpt(Network& network) : 
     n_vertex(network.n_vertex),
     m_edge_list(network.edge_list),
     m_adjacence_matrix(network.adjacence_matrix)
