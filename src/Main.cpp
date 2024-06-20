@@ -68,7 +68,6 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
             return new Shuffle(dictionary);
             break;
         case TWOSIDEDDELTADIM:
-            std::cout<<"!!!!!!"<<delta<<std::endl;
             if(delta == 3) return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
             else if(delta == 4) return new TwoSidedDeltaDim<4, ALL, 2>(dictionary);
             else return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);

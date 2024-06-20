@@ -181,7 +181,7 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
     #print(contraction_list)
 
     contraction_list_renamed = rename_nodes_from_ctg(tree.flat_tree(), 2, dim, dim_min, input_node_included)
-    print(contraction_list_renamed)
+    #print(contraction_list_renamed)
 
     #tree2 = ctg.array_contract_tree(inputs, output, sizes_dict, optimize=tree.flat_tree())
     #print(tree2.contraction_cost())
