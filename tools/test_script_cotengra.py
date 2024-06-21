@@ -15,7 +15,7 @@ lock = threading.Lock()
 result_file = None
 
 def benchmark(algorithm, input_file):
-    inputs, output, sizes_dict = import_tensor_train(input_file)
+    inputs, output, sizes_dict, _ = import_tensor_train(input_file)
 
     tokens = re.split("\W+|_", input_file)
     size = int(tokens[-3])
