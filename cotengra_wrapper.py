@@ -45,33 +45,35 @@ def generate_contraction_list(contraction_tree):
         
 
 def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
-    inputs, output, sizes_dict, input_node_included = import_tensor_train(input_file, dim_min, dim_max + 1, reversed)
+    inputs, output, sizes_dict, input_node_included = import_tensor_train(input_file, dim_min, dim_max, reversed)
 
     #print(inputs, output, sizes_dict)
 
     #fig, ax = ctg.HyperGraph(inputs, output, sizes_dict).plot()
-    #fig.savefig("graph_4.pdf")
+    #fig.savefig("graph_2d.pdf")
     tree = ctg.array_contract_tree(inputs, output, sizes_dict, optimize='optimal')
 
     #fig, ax = tree.plot_rubberband()
-    #fig.savefig("tree_4.pdf")
+    #fig.savefig("tree_2d.pdf")
 
     #print(tree.flat_tree())
     #contraction_list, _ = generate_contraction_list(tree.flat_tree())
     #print(contraction_list)
 
-    contraction_list_renamed = rename_nodes_from_ctg(tree.flat_tree(), 2, dim, dim_min, input_node_included)
+    #contraction_list_renamed = rename_nodes_from_ctg(tree.flat_tree(), 2, dim, dim_min, input_node_included)
     #print(contraction_list_renamed)
 
     #tree2 = ctg.array_contract_tree(inputs, output, sizes_dict, optimize=tree.flat_tree())
     #print(tree2.contraction_cost())
 
-    path_str = str(contraction_list_renamed)
+    path_str = tree.flat_tree(); #str(contraction_list_renamed)
     #print(path_str)
+
+    #print(tree.flat_tree())
 
     #print(sizes_dict, output)
     #print("[Cotengra wrapper PY]", input_file, dim_min, "...", dim_max, tree.contraction_cost() * outer_edges_cost, tree.contraction_cost(), outer_edges_cost)
     
     return (tree.contraction_cost(), path_str)
 
-#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs/instances/test/uniform_all2/instance_006_01.txt", 0, 5, 6, False))
+print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs_2d/instances/test/xAxt/instance_004_001.txt", 1, 2, 4, True))
