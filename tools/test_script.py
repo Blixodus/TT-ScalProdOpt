@@ -18,7 +18,9 @@ def run_program(algorithm, input_file, dmax=None):
     if dmax is not None:
         dmax_str = f"dmax {dmax}"
 
-    args = f"source ~/.xmake/profile && cd /home/pdominik/Tensor_experiments/OptiTenseurs_dev && xmake run -w . OptiTenseurs -a \"main_alg {algorithm} {dmax_str}\" -f {input_file}"
+    tt_dim_str = f"tt_dim 3"
+
+    args = f"source ~/.xmake/profile && cd /home/pdominik/Tensor_experiments/OptiTenseurs_2d && xmake run -w . OptiTenseurs -a \"main_alg {algorithm} {tt_dim_str} {dmax_str}\" -f {input_file}"
     print(args)
 
     start_time = time.time()

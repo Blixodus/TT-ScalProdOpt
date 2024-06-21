@@ -75,7 +75,10 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
     #tree2 = ctg.array_contract_tree(inputs, output, sizes_dict, optimize=tree.flat_tree())
     #print(tree2.contraction_cost())
 
-    path_str = str(rename_nodes_with_input_node(tree.flat_tree())) #str(contraction_list_renamed)
+    contraction_tree = tree.flat_tree()
+    if input_node_included:
+        contraction_tree = rename_nodes_with_input_node(contraction_tree)
+    path_str = str(contraction_tree) #str(contraction_list_renamed)
     #print(path_str)
 
     #print(tree.flat_tree())
