@@ -28,25 +28,30 @@ struct Network2D {
     vector<cost_t> m_egde_weight;
 
     // Constructors
+    Network2D(){}
     Network2D(std::string file) {
         // Initialize the filename
         this->m_filename = file;
 
         // Open the network file
+        //std::cout<<"!"<<std::endl;
         std::ifstream ifile(this->m_filename);
+        //std::cout<<"!!"<<std::endl;
 
         if(!ifile) {
             std::cerr << "Could not open file : " << file << " at Network initialization" << std::endl;
-            exit(-1);
+            exit(-2);
         } else {
-            printf("Instantiating network : '%s'\n", file.data());
+            std::cout<<"Instantiating network : " << file << std::endl;
         }
 
         // Parse tensor train from file
+        //std::cout<<"!!!"<<std::endl;
         std::string line;
         int vertex1, vertex2, weight;
         while(getline(ifile, line)) {
             istringstream flux(&line[2]);
+            //std::cout << line << std::endl;
             switch(line[0]) {
                 case 'd':
                     // Parse characteristics of the network
@@ -75,13 +80,14 @@ struct Network2D {
         std::cout << "TT dimension " << tt_dim << std::endl;
         std::cout << "Dimension " << this->dimension << std::endl;
 
-        for(int i = 0; i < this->m_egde_weight.size(); i++) {
+        /*for(int i = 0; i < this->m_egde_weight.size(); i++) {
             std::cout << this->m_egde_weight[i] << " ";
         }
-        std::cout << std::endl;
+        std::cout << std::endl;*/
 
         // Close the file
         ifile.close();
+        //std::cout<<"Finished\n"<<std::endl;
     }
 
     // Utility functions

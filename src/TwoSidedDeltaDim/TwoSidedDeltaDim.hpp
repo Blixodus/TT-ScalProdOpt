@@ -26,11 +26,13 @@ class TwoSidedDeltaDim : public Algorithm {
     CotengraOptimalWrapper m_exact_solver;
 
     // Generalized network information
-    Network2D<tt_dim>* m_network;
+    Network2D<tt_dim> m_network_2d;
 
     // Constructors
     TwoSidedDeltaDim(){}
-    TwoSidedDeltaDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
+    TwoSidedDeltaDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary) {
+        std::cout<<"Created object. " << std::endl;
+    }
 
     // Initializers
     void init(Network& network) {
@@ -40,7 +42,8 @@ class TwoSidedDeltaDim : public Algorithm {
         this->n_vertex = network.n_vertex;
 
         // Initialize network 2D
-        this->m_network = new Network2D<tt_dim>(network.m_filename);
+        std::cout<<"Instantiating network 2D: " << std::endl;
+        this->m_network_2d = Network2D<tt_dim>(network.m_filename);
 
         // Initialize the memoization tables
         for(int type = 0; type < 2; type++) {
@@ -184,7 +187,7 @@ class TwoSidedDeltaDim : public Algorithm {
                 // (results of the two subproblems) 
                 cost_t cost_connect = 1;
                 for(int i = 0; i < tt_dim; i++) {
-                    cost_connect *= (*this->m_network)[i, split - 1] * (*this->m_network)[i, split];
+                    cost_connect *= this->m_network_2d[i, split - 1] * this->m_network_2d[i, split];
                 }
 
                 // Calculate the total cost of the split
