@@ -150,7 +150,7 @@ void launch_exec(T& solver, Network& network){
             pthread_cancel(tid);
             solver.best_cost = -1;
             std::cout << "Timed out." << std::endl;
-            exit(-1);
+            exit(-3);
         }else{
             //Results export
             export_entry(result_file, solver, network, csv_separator);

@@ -40,6 +40,9 @@ Network::Network(std::string file){
 
     std::string line;
     int vertex1, vertex2, weight;
+
+    int tt_dim = 2; // (backward compatibility)
+
     while(getline(ifile, line)){
         istringstream flux(&line[2]);
         switch(line[0]){
@@ -49,9 +52,17 @@ Network::Network(std::string file){
             case 'd':
                 //characteristics of the network
                 dimension = atoi(&line[2]);
-                n_vertex = dimension*2;
+                n_vertex = dimension * tt_dim;
                 n_edge = 3*dimension - 2;
 
+                //defining the size of the adjacence matrix
+                adjacence_matrix.resize(n_vertex*n_vertex, 1);
+            break;
+            case 't':
+                tt_dim = atoi(&line[2]);
+                n_vertex = dimension * tt_dim;
+                n_edge = (tt_dim - 1) * dimension + tt_dim * (dimension - 1);
+                
                 //defining the size of the adjacence matrix
                 adjacence_matrix.resize(n_vertex*n_vertex, 1);
             break;
@@ -76,6 +87,7 @@ Network::Network(std::string file){
             break;
         }
     }
+    ifile.close();
 
     //getting the average weight
     density/=n_edge;
