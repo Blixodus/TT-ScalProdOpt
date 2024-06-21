@@ -22,6 +22,15 @@ def rename_nodes_from_ctg(contraction_tree, tt_dim, dim, dmin, input_node_includ
         return (rename_nodes_from_ctg(contraction_tree[0], tt_dim, dim, dmin, input_node_included), rename_nodes_from_ctg(contraction_tree[1], tt_dim, dim, dmin, input_node_included))
     else:
         return node_id_from_ctg(contraction_tree, tt_dim, dim, dmin, input_node_included)
+    
+def rename_nodes_with_input_node(contraction_tree):
+    if isinstance(contraction_tree, tuple):
+        return (rename_nodes_with_input_node(contraction_tree[0]), rename_nodes_with_input_node(contraction_tree[1]))
+    else:
+        if contraction_tree == 0:
+            return '#'
+        else:
+            return contraction_tree - 1
 
 def generate_contraction_list(contraction_tree):
     if len(contraction_tree) > 2:
@@ -66,7 +75,7 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
     #tree2 = ctg.array_contract_tree(inputs, output, sizes_dict, optimize=tree.flat_tree())
     #print(tree2.contraction_cost())
 
-    path_str = tree.flat_tree(); #str(contraction_list_renamed)
+    path_str = str(rename_nodes_with_input_node(tree.flat_tree())) #str(contraction_list_renamed)
     #print(path_str)
 
     #print(tree.flat_tree())
@@ -76,4 +85,4 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
     
     return (tree.contraction_cost(), path_str)
 
-print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs_2d/instances/test/xAxt/instance_004_001.txt", 1, 2, 4, True))
+#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs_2d/instances/test/xAxt/instance_004_001.txt", 1, 2, 4, True))
