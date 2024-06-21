@@ -7,13 +7,14 @@
 #ifndef TWOSIDEDDELTADIM_HPP
 #define TWOSIDEDDELTADIM_HPP
 #include "../Components/Components.hpp"
+#include "../Components/Network2D.hpp"
 #include "../CotengraOptimalWrapper/CotengraOptimalWrapper.hpp"
 
 #define COST first
 #define ORDER second
 
 template <size_t delta = 3, split_direction_e dir = ALL, size_t tt_dim = 2>
-class TwoSidedDeltaDim : public Algorithm{
+class TwoSidedDeltaDim : public Algorithm {
     public:
     // The memoization table for the costs of each state
     std::vector<std::vector<cost_t>> m_cost[2];
@@ -23,6 +24,9 @@ class TwoSidedDeltaDim : public Algorithm{
 
     // Exact solver for the subproblems (Cotengra optimal algorithm)
     CotengraOptimalWrapper m_exact_solver;
+
+    // Generalized network information
+    Network2D<tt_dim>* m_network;
 
     // Constructors
     TwoSidedDeltaDim(){}
@@ -34,6 +38,9 @@ class TwoSidedDeltaDim : public Algorithm{
         this->set_limit_dim(network.dimension);
         this->dim = network.dimension;
         this->n_vertex = network.n_vertex;
+
+        // Initialize network 2D
+        this->m_network = new Network2D<tt_dim>(network.m_filename);
 
         // Initialize the memoization tables
         for(int type = 0; type < 2; type++) {
@@ -175,8 +182,10 @@ class TwoSidedDeltaDim : public Algorithm{
 
                 // Compute the cost of contracting the final two nodes together
                 // (results of the two subproblems) 
-                cost_t cost_connect = this->m_network->adjacence_matrix[(split - 1) * this->n_vertex + split] *
-                                    this->m_network->adjacence_matrix[((split - 1) + this->n_vertex/2) * n_vertex + (split + n_vertex/2)];
+                cost_t cost_connect = 1;
+                for(int i = 0; i < tt_dim; i++) {
+                    cost_connect *= (*this->m_network)[i, split - 1] * (*this->m_network)[i, split];
+                }
 
                 // Calculate the total cost of the split
                 cost_t total_cost = cost_left + cost_right + cost_connect;

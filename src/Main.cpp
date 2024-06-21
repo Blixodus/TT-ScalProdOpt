@@ -42,12 +42,17 @@ void init_algos(std::vector<std::map<std::string, std::any>> dict_list){
 Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
     std::string algo_name(std::any_cast<std::string>(dictionary["main_alg"]));
     int delta = 0;
+    int tt_dim = 0;
 
     if(dictionary.find("delta") != dictionary.end()){
         delta = std::stoi(std::any_cast<string>(dictionary["delta"]));
     } else if(dictionary.find("dmax") != dictionary.end()){
         // Backward compatibility
         delta = std::any_cast<int>(dictionary["dmax"]);
+    }
+
+    if(dictionary.find("tt_dim") != dictionary.end()) {
+        tt_dim = std::stoi(std::any_cast<string>(dictionary["tt_dim"]));
     }
 
     if(ALGO_MAP.find(algo_name) == ALGO_MAP.end()){return nullptr;}
@@ -68,9 +73,16 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
             return new Shuffle(dictionary);
             break;
         case TWOSIDEDDELTADIM:
-            if(delta == 3) return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
-            else if(delta == 4) return new TwoSidedDeltaDim<4, ALL, 2>(dictionary);
-            else return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
+            if(tt_dim == 3)
+            {
+                if(delta == 3) return new TwoSidedDeltaDim<3, ALL, 3>(dictionary);
+                else if(delta == 4) return new TwoSidedDeltaDim<4, ALL, 3>(dictionary);
+                else return new TwoSidedDeltaDim<3, ALL, 3>(dictionary);
+            } else {
+                if(delta == 3) return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
+                else if(delta == 4) return new TwoSidedDeltaDim<4, ALL, 2>(dictionary);
+                else return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
+            }
             break;
         case COTENGRAOPTIMALWRAPPER:
             return new CotengraOptimalWrapper(dictionary);
