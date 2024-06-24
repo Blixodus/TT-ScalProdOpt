@@ -21,7 +21,7 @@ def run_program(algorithm, input_file, dmax=None):
     if dmax is not None:
         dmax_str = f"dmax {dmax}"
 
-    args = f"source ~/.xmake/profile && cd /home/pdominik/Tensor_experiments/OptiTenseurs_dev && xmake run -w . OptiTenseurs -a \"main_alg {algorithm} {dmax_str}\" -f {input_file}"
+    args = f"source ~/.xmake/profile && cd /home/pdominik/Tensor_experiments/OptiTenseurs_2d && xmake run -w . OptiTenseurs -a \"main_alg {algorithm} tt_dim 3 {dmax_str}\" -f {input_file}"
     print(args)
 
     start_time = time.time()
@@ -38,18 +38,20 @@ def run_program(algorithm, input_file, dmax=None):
 
     return cost, end_time - start_time, order
 
-def run_validation(input_file, order):
+def run_validation(tt_dim, input_file, order):
     global result_file
     global lock
 
-    args = f"source ~/.xmake/profile && cd /home/pdominik/Tensor_experiments/OptiTenseurs_dev && xmake run -w . Compute"
-    inputs = f"{input_file}\n{len(order)}\n"
+    args = f"source ~/.xmake/profile && cd /home/pdominik/Tensor_experiments/OptiTenseurs_2d && xmake run -w . Compute"
+    inputs = f"{tt_dim}\n{input_file}\n{len(order)}\n"
     for contraction in order:
         inputs += f"{contraction[0]} {contraction[1]}\n"
 
     start_time = time.time()
     result = subprocess.run(args=args, input=inputs, capture_output=True, text=True, shell=True)
     end_time = time.time()
+
+    print(result.stdout)
 
     cost = 0
     for line in result.stdout.split("\n"):
@@ -124,7 +126,7 @@ for algorithm in algorithms:
         contraction_flat, _ = generate_contraction_list(contraction_recursive)
 
         # Calculate the cost of the contraction order
-        cost_validation = run_validation(input_file=file, order=contraction_flat)
+        cost_validation = run_validation(tt_dim=3, input_file=file, order=contraction_flat)
         
         # Save the result to the output file
         tokens = re.split("\W+|_", file)
@@ -147,6 +149,7 @@ for algorithm in algorithms:
         output_str = f"{algorithm};{int(size)};{int(instance)};{file};{cost};{cost_validation};{ex_time};{result}\n"
         output_file.write(output_str)
         print(output_str, summary)
+        break
     
 output_file.close()
         

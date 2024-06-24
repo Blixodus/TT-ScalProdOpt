@@ -66,6 +66,9 @@ if __name__ == '__main__':
     with open(result_file, 'a') as output_file:
         output_file.write(f"Algorithm;Size;Instance;Test_file;Cost;Execution_time\n")
 
+    if algorithms[0] == "hyper-greedy" or algorithms[0] == "hyper-kahypar":
+        parallel = False
+
     if not parallel:
         print("Sequential execution")
         for algorithm in algorithms:

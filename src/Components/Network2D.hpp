@@ -110,6 +110,22 @@ struct Network2D {
         //std::cout<<"Edge: " << nodeA<<" "<<nodeB<<" "<<index<<std::endl;
         return this->m_egde_weight[index];
     }
+
+    // Retrieve cost of the edge between two arbitrary nodes (for verification)
+    // It handles the cases when two nodes are not adjacent, and provides
+    // additional checks which are unnecessary in the computational code.
+    cost_t operator[](int nodeA, int nodeB, bool dummy_arg) {
+        // Fix order of nodes 
+        if(nodeA > nodeB) std::swap(nodeA, nodeB);
+
+        // Check if the nodes are adjacent and return the weight of edge
+        // between them, or 0 otherwise
+        if(nodeB - nodeA == 1 || nodeB - nodeA == this->dimension) {
+            return (*this)[nodeA, nodeB];
+        }
+            
+        return 0;
+    }
 };
 
 #endif
