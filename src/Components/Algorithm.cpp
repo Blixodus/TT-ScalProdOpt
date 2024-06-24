@@ -52,21 +52,7 @@ std::string Algorithm::best_order_as_string() const{
  * @return const int 
  */
 const int Algorithm::verify() {
-    if(to_test)
-    {
-        cost_t true_cost = compute_order(*m_network, best_order);
-
-        if(best_cost == true_cost)
-        {
-            printf("Check passed.\n");
-        }
-        else
-        {
-            std::cout << "Found " << best_cost << " while true value is " << true_cost << " for order (" << best_order_as_string() << ")" << std::endl;
-            // printf("Found %d while true value is %d for order (%s)\n", best_cost, true_cost, best_order_as_string().data());
-            return 1;
-        }
-    }
+    // DEPRECATED - We have changed the method of storing and veryfying solution
     return 0;
 }
 

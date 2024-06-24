@@ -5,38 +5,42 @@ add_links("python3.11")
 
 target("GreedyEdgeSort")
     set_kind("binary")
-    add_files("src/Components/*.cpp", "src/GreedyEdgeSort/*.cpp", "tools/Compute/Compute.cpp")
+    add_files("src/Components/*.cpp", "src/GreedyEdgeSort/*.cpp")
 
 target("AllEdgeByEdge")
     set_kind("binary")
-    add_files("src/AllEdgeByEdge/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp")
+    add_files("src/AllEdgeByEdge/*.cpp", "src/Components/*.cpp")
 
 target("AllSplits")
     set_kind("binary")
-    add_files("src/AllSplits/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp")
+    add_files("src/AllSplits/*.cpp", "src/Components/*.cpp")
     
 target("ConvexSplits")
     set_kind("binary")
-    add_files("src/ConvexSplits/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp")
+    add_files("src/ConvexSplits/*.cpp", "src/Components/*.cpp")
 
 target("OneSidedOneDim")
     set_kind("binary")
-    add_files("src/OneSidedOneDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp")
+    add_files("src/OneSidedOneDim/*.cpp", "src/Components/*.cpp")
 
 target("TwoSidedDeltaDim")
     set_kind("binary")
-    add_files("src/TwoSidedDeltaDim/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp", "src/CotengraOptimalWrapper/CotengraOptimalWrapper.cpp")
+    add_files("src/TwoSidedDeltaDim/*.cpp", "src/Components/*.cpp", "src/CotengraOptimalWrapper/CotengraOptimalWrapper.cpp")
 
 target("CotengraOptimalWrapper")
     set_kind("binary")
-    add_files("src/CotengraOptimalWrapper/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp")
+    add_files("src/CotengraOptimalWrapper/*.cpp", "src/Components/*.cpp")
 
 target("CotengraOptimalWrapper")
     set_kind("binary")
-    add_files("src/CotengraOptimalWrapper/*.cpp", "src/Components/*.cpp", "tools/Compute/Compute.cpp")
+    add_files("src/CotengraOptimalWrapper/*.cpp", "src/Components/*.cpp")
+
+target("Compute")
+    set_kind("binary")
+    add_files("tools/Compute/*.cpp", "src/Components/*.cpp")
 
 target("OptiTenseurs")
     set_kind("binary")
-    add_files("src/**/*.cpp", "tools/Compute/Compute.cpp", "tools/Argparser/*.cpp", "tools/Export/Export.cpp")
+    add_files("src/**/*.cpp", "tools/Argparser/*.cpp", "tools/Export/Export.cpp")
     remove_files("src/**/Main.cpp|src/Main.cpp")
     add_files("src/Main.cpp")
