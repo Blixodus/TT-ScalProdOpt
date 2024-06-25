@@ -24,7 +24,7 @@ def benchmark(algorithm, input_file):
     #if algorithm == 'hyper-kahypar' and size > 19:
     #    return None
     if algorithm == 'cgreedy':
-        algorithm = CGreedy(seed=1, minimize="size", max_repeats=1024, max_time=1.0, progbar=True, threshold_optimal=12, threads=0)
+        algorithm = CGreedy(seed=1, minimize="flops", max_repeats=1024, max_time=1.0, progbar=True, threshold_optimal=12, threads=0)
 
     start_time = time.time()
     tree = ctg.array_contract_tree(inputs, output, sizes_dict, optimize=algorithm)

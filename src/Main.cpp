@@ -225,5 +225,7 @@ int main(int argc, char* argv[]){
     std::sort(main_network_list.begin(), main_network_list.end(), 
     [](Network n1, Network n2){return n1.dimension < n2.dimension;});
 
+    std::cout<<"CHECKPOINT BEFORE EXECUTING" << std::endl << std::flush;
+
     exec_all_on_all();
 }
