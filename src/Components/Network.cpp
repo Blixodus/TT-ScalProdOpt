@@ -20,7 +20,8 @@ void Network::sort_edges(){
  * @param file a file containing a network
  */
 Network::Network(std::string file){
-    m_filename= file;
+    m_filename = file;
+    return; // TODO: debug the issue with tt_dim>2 files
 
     std::ifstream ifile;
 
@@ -67,21 +68,26 @@ Network::Network(std::string file){
                 adjacence_matrix.resize(n_vertex*n_vertex, 1);
             break;
             case 'e':
-                //grabing the edge
-                flux >> vertex1 >> vertex2 >> weight;
-                {
-                int v1 = min(vertex1, vertex2);
-                int v2 = max(vertex1, vertex2);
-                //adding the edge to the list
-                //edge_list.push_back(edge_t(vertex1, vertex2, weight));
-                edge_list.push_back(std::make_pair(v1, v2));
-                }
+                if(tt_dim == 2) {
+                    //grabing the edge
+                    std::cout<<"! ";
+                    flux >> vertex1 >> vertex2 >> weight;
+                    {
+                    int v1 = min(vertex1, vertex2);
+                    int v2 = max(vertex1, vertex2);
+                    //adding the edge to the list
+                    //edge_list.push_back(edge_t(vertex1, vertex2, weight));
+                    edge_list.push_back(std::make_pair(v1, v2));
+                    }
 
-                //updating the adjacence matrix
-                adjacence_matrix[n_vertex*vertex1 + vertex2] = weight;
-                adjacence_matrix[n_vertex*vertex2 + vertex1] = weight;
-                //accumulating the weights
-                density+=weight;
+                    //updating the adjacence matrix
+                    adjacence_matrix[n_vertex*vertex1 + vertex2] = weight;
+                    adjacence_matrix[n_vertex*vertex2 + vertex1] = weight;
+                    //accumulating the weights
+                    density+=weight;
+
+                    std::cout<<"!!"<<std::endl;
+                }
             break;
             default:
             break;

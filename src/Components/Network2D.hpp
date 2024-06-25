@@ -42,7 +42,7 @@ struct Network2D {
             std::cerr << "Could not open file : " << file << " at Network initialization" << std::endl;
             exit(-2);
         } else {
-            std::cout<<"Instantiating network : " << file << std::endl;
+            std::cout<<"Instantiating network 2D : " << file << std::endl;
         }
 
         // Parse tensor train from file
@@ -108,6 +108,7 @@ struct Network2D {
         const int index = row * (2 * this->dimension - 1) + offset + column;
 
         //std::cout<<"Edge: " << nodeA<<" "<<nodeB<<" "<<index<<std::endl;
+        assert(index < this->m_egde_weight.size());
         return this->m_egde_weight[index];
     }
 

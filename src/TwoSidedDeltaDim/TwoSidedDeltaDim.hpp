@@ -36,16 +36,15 @@ class TwoSidedDeltaDim : public Algorithm {
 
     // Initializers
     void init(Network& network) {
-        // Initialize network
-        this->set_limit_dim(network.dimension);
-        this->dim = network.dimension;
-        this->n_vertex = network.n_vertex;
-
         // Initialize network 2D
         std::cout<<"Instantiating network 2D: " << std::endl;
         this->m_network_2d = Network2D<tt_dim>(network.m_filename);
 
+        this->dim = this->m_network_2d.dimension;
+        this->n_vertex = this->m_network_2d.n_vertex;
+
         // Initialize the memoization tables
+        std::cout<<"Instantiating memoization: " << std::endl;
         for(int type = 0; type < 2; type++) {
             this->m_cost[type].resize(this->dim + 1);
             this->m_order[type].resize(this->dim + 1);
@@ -63,6 +62,8 @@ class TwoSidedDeltaDim : public Algorithm {
 
         // Initialize the exact solver
         this->m_exact_solver.init(network);
+
+        std::cout<<"Finished initialization of alg! " << std::endl;
     }
     
     // Computation functions
