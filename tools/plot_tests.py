@@ -17,71 +17,11 @@ from alive_progress import alive_bar
 from Scripts.naming import get_algorithm_name, get_dir, get_test_filename, get_result_filename
 from Scripts.import_file import import_tensor_train
 
-
-# ------------------------------- Utility functions --------------------------------
-def run_algorithm_cpp(algorithm, test_filename, result_file, tt_dim, dimension, instance, delta):
-    # Prepare command line arguments
-    delta_str = ""
-    if delta is not None:
-        delta = f"delta {delta}"
-
-    tt_dim_str = f"tt_dim {tt_dim}"
-
-    args = f"source ~/.xmake/profile && xmake run -w . OptiTenseurs -a \"main_alg {algorithm} {tt_dim_str} {delta_str}\" -f {test_filename}"
-
-    # Run the C++ program and retrieve output of the algorithm
-    result = subprocess.run(args=args, capture_output=True, text=True, shell=True)
-
-    # Parse cost of the contraction and execution time of the algorithm
-    cost = 0
-    execution_time = 0.0
-    for line in result.stdout.split("\n"):
-        if line.startswith("Best cost"):
-            cost = float(line.split(":")[-1])
-        if line.startswith("Execution time"):
-            execution_time = float(line.split(":")[-1][:-1])
-
-    # Write results to file
-    output_str = f"{algorithm};{dimension};{instance};{test_filename};{cost};{execution_time}\n"
-    result_file.write(output_str)
-    #print("\t\t", output_str, end='')
-
-
-def run_algorithm_python(algorithm, test_filename, result_file, tt_dim, dimension, instance):
-    # Import tensor train from file
-    inputs, output, sizes_dict, _ = import_tensor_train(test_filename)
-
-    # Initialize the cgreedy object (which is not part of cotengra)
-    algorithm_str = algorithm
-    if algorithm == 'cgreedy':
-        algorithm = CGreedy(seed=1, minimize="flops", max_repeats=1024, max_time=1.0, progbar=False, threshold_optimal=12, threads=1)
-    elif algorithm == 'hyper-greedy':
-        algorithm = ctg.HyperOptimizer(methods=["greedy"], minimize="flops", parallel=False)
-
-    # Run the algorithm and retrieve the output
-    start_time = time.time()
-    tree = ctg.array_contract_tree(inputs, output, sizes_dict, optimize=algorithm)
-    end_time = time.time()
-
-    # Calculate cost and execution time
-    cost = tree.contraction_cost()
-    execution_time = end_time - start_time
-
-    # Write results to file
-    output_str = f"{algorithm_str};{dimension};{instance};{test_filename};{cost};{execution_time}\n"
-    result_file.write(output_str)
-    #print("\t\t", output_str, end='')
-
-
-# Wrapper function to run computations for given test using either
-# C++ (our algorithms), or Python (cotengra and other algorithms)
-def run_algorithm(algorithm, test_filename, result_file, tt_dim, dimension, instance, delta):
-    if algorithm in ['OneSidedOneDim', 'TwoSidedDeltaDim']:
-        run_algorithm_cpp(algorithm, test_filename, result_file, tt_dim, dimension, instance, delta)
-    else:
-        run_algorithm_python(algorithm, test_filename, result_file, tt_dim, dimension, instance)
-
+# ------------------------------- Plot function --------------------------------
 def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, plot_dir_path, nb_instances):
+    completed_successfully = True
+    error_message = ""
+
     # Import CSV files with results
     results = {}
     algorithms = []
@@ -95,6 +35,8 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
         result_filename = get_result_filename(result_dir_path, algorithm_tuple[0], algorithm_tuple[1])
         if not os.path.exists(result_filename):
             print(f"[Error ❌] File {result_filename} does not exist. Algorithm {algorithm} will be skipped.")
+            completed_successfully = False
+            error_message += f"missing file ({algorithm}\t"
             continue
         else:
             algorithms.append(algorithm)
@@ -109,6 +51,16 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
             if len(results[algorithm].loc[(results[algorithm]['Size'] == size)]) != nb_instances:
                 print(f"[Warning ❗] In import of file {result_filename} dropped size {size} due to missing instances.", )
                 results[algorithm] = results[algorithm].loc[(results[algorithm]['Size'] != size)]
+                if algorithm != 'optimal':
+                    completed_successfully = False
+                    error_message += f"missing instances ({algorithm}\t"
+                else:
+                    completed_successfully = False
+                    error_message += f"missing optimal instances\t"
+        
+        if algorithm == 'optimal' and max(sizes) < 30:
+            completed_successfully = False
+            error_message += f"missing optimal sizes {max(sizes)}/30\t"
 
     # Normalize the results using results from given normalization algorithm
     if normalization_algorithm in results:
@@ -133,6 +85,8 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
         plt.close()
     else:
         print(f"[Warning ❗] Normalization algorithm {normalization_algorithm} not found. Skipping normalization plot.")
+        completed_successfully = False
+        error_message += "normalization algorithm missing\t"
 
     # Plot the mean execution time
     for algorithm in algorithms:
@@ -149,6 +103,7 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
     plt.close()
 
     print(f"[Plot ✅] Plot generation for test case {result_dir_path} \t ({plot_dir_path}) \t completed.")
+    return (plot_dir_path, completed_successfully, error_message)
 
 # ------------------------------- Main function --------------------------------
 if __name__ == "__main__":
@@ -177,10 +132,13 @@ if __name__ == "__main__":
     types = config['General']['types'].split(',')
     rank_types = config['General']['rank_types'].split(',')
 
-    # Retrieve list of algorithms to run
+    # Retrieve list of algorithms to plot
     algorithms = config['Algorithms']['algorithms'].split(',')
     deltas = [int(delta) for delta in config['Algorithms']['deltas'].split(',')]
     print(deltas)
+
+    # Retrieve normalization algorithm
+    normalization_algorithm = (config['Plots']['normalization_algorithm'], config['Plots']['normalization_delta'])
 
     # Plotting of each test case
     cores = min(int(config['Plots']['max_cores']), multiprocessing.cpu_count() // 2)
@@ -208,15 +166,19 @@ if __name__ == "__main__":
 
                     plot_algorithms = []
                     for algorithm in algorithms:
-                        if algorithm != "TwoSidedDeltaDim1123":
+                        if algorithm != "TwoSidedDeltaDim":
                             plot_algorithms.append((algorithm, None))
                         else:
                             for delta in deltas:
                                 plot_algorithms.append((algorithm, delta))
-                    normalization_algorithm = ("TwoSidedDeltaDim", None)
                     parallel_input.append((plot_algorithms, normalization_algorithm, result_dir_path, plot_dir_path, nb_instances))
 
 
     # Execute tasks in parallel
     print(f"Executing plot generation in parallel using {cores} cores")
-    pool.starmap(plot_test_case, parallel_input)
+    execution_results = pool.starmap(plot_test_case, parallel_input)
+    for result in execution_results:
+        if result[1] == True:
+            print(f"🟢 Test case {result[0]}")
+        else:
+            print(f"🟡 Test case {result[0]}: {result[2]}")
