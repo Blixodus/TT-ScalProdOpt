@@ -88,4 +88,4 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
     
     return (tree.contraction_cost(), path_str)
 
-#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs_2d/instances/test/xAxt/instance_004_001.txt", 1, 2, 4, True))
+#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/Tests2/xxT/increasing/low/d_004_v_038.txt", 0, 3, 4, False))
