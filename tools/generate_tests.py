@@ -42,14 +42,20 @@ def compute_naive_cost_t3(size, dims_X, dims_Xt, rank_X, rank_Xt, rank_A, revers
 
     return cost_naive
 
+# ----------------------------- Utility functions ------------------------------
+def cumulative_product_bounded(values, start, bound):
+    result = 1
+    for i in range(start, len(values)):
+        result *= values[i]
+        if result >= bound:
+            return bound
+    return result
 
 # ------------------------ Generation of test instance -------------------------
-def generate_instance(file, type, tt_dim, dimension, y_eq_xT, ranks_gen, dims_gen, rounded):
+def generate_instance(file, type, tt_dim, dimension, y_eq_xT, ranks_gen, dims_gen, max_val, rounded):
     # Generate dimensions and ranks
     dims  = [[int(dims_gen(i * dimension + j)) for j in range(dimension)] for i in range(tt_dim - 1)]
-    ranks = [[int(ranks_gen(i * dimension + j)) for j in range(dimension)] for i in range(tt_dim)]
-
-    
+    ranks = [[int(ranks_gen(i * (dimension - 1) + j)) for j in range(dimension - 1)] for i in range(tt_dim)]
 
     # For increasing case sort the values to have increasing ranks towards middle
     if type == "increasing":
@@ -66,33 +72,25 @@ def generate_instance(file, type, tt_dim, dimension, y_eq_xT, ranks_gen, dims_ge
     for i in range(len(ranks)):
         ranks[i] = [1] + ranks[i] + [1]
     
+    # Cumulative product of dimensions
+    cumulative_dims = [[cumulative_product_bounded(dims[t], i, max_val) for i in range(1, dimension + 1)] for t in range(tt_dim - 1)]
+
+    # Rounding of TT to reflect stucture generated during SVD decomposition
+    if rounded:
+        for t in range(tt_dim):
+            for i in range(1, dimension):
+                if t == 0:
+                    ranks[t][i] = min(ranks[t][i], ranks[t][i - 1] * dims[t][i - 1] * cumulative_dims[t][i - 1])
+                elif t == tt_dim - 1:
+                    ranks[t][i] = min(ranks[t][i], ranks[t][i - 1] * dims[t - 1][i - 1] * cumulative_dims[t - 1][i - 1])
+                else:
+                    ranks[t][i] = min(ranks[t][i], ranks[t][i - 1] * dims[t][i - 1] * cumulative_dims[t][i - 1] * ranks[t][i - 1] * dims[t - 1][i - 1] * cumulative_dims[t - 1][i - 1])
 
     # For y=xT case, set the last tensor train to transpose of the first
     if y_eq_xT:
         ranks[-1] = ranks[0][::-1]
         if tt_dim > 2:
             dims[-1] = dims[0][::-1]
-    
-    # "Rounding" of TT
-    if(rounded):
-        for t in range(tt_dim):
-            for i in range(dimension-1):
-                if t == 0:
-                    ranks[t][i+1] = min(ranks[t][i+1], ranks[t][i] * dims[t][i])
-                elif t == tt_dim - 1:
-                    ranks[t][i+1] = min(ranks[t][i+1], ranks[t][i] * dims[t - 1][i])
-                else:
-                    ranks[t][i+1] = min(ranks[t][i+1], ranks[t][i] * dims[t - 1][i] * dims[t][i])
-
-            for i in range(dimension-1):
-                if t == 0:
-                    ranks[t][-i-2] = min(ranks[t][-i-2], ranks[t][-i-1] * dims[t][-i-1])
-                elif t == tt_dim - 1:
-                    ranks[t][-i-2] = min(ranks[t][-i-2], ranks[t][-i-1] * dims[t - 1][-i-1])
-                else:
-                    ranks[t][-i-2] = min(ranks[t][-i-2], ranks[t][-i-1] * dims[t - 1][i] * dims[t][-i-1])
-
-
 
     # Compute naive approach cost
     cost_naive_LR = 0
@@ -211,6 +209,7 @@ if __name__ == "__main__":
                         for instance in range(1, nb_instances + 1):
                             filename = get_test_filename(dir, dimension, instance)
                             test_file = open(filename, "w")
-                            generate_instance(test_file, type, tt_dim, dimension, y_eq_xT, ranks_gen, dims_gen, True)
+                            generate_instance(test_file, type, tt_dim, dimension, y_eq_xT, ranks_gen, dims_gen, max_rank, True)
                             test_file.close()
+                    
         

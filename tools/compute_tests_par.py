@@ -187,7 +187,5 @@ if __name__ == "__main__":
 
 
     # Execute tasks in parallel
-    #for input in parallel_input:
-    #    print(input)
     print(f"Executing test cases in parallel using {cores} cores")
     pool.starmap(run_algorithm_on_test_case, parallel_input)
