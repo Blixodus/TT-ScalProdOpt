@@ -9,16 +9,20 @@ import configparser
 import cotengra as ctg
 from cgreedy import CGreedy
 
+from alive_progress import alive_bar
+
 from Scripts.naming import get_dir, get_test_filename, get_result_filename
 from Scripts.import_file import import_tensor_train
 
+file_lock = {}
+single_file_lock = multiprocessing.Lock()
 
 # ------------------------------- Utility functions --------------------------------
-def run_algorithm_cpp(algorithm, test_filename, result_file, tt_dim, dimension, instance, delta):
+def run_algorithm_cpp(algorithm, test_filename, tt_dim, delta):
     # Prepare command line arguments
     delta_str = ""
     if delta is not None:
-        delta = f"delta {delta}"
+        delta_str = f"delta {delta}"
 
     tt_dim_str = f"tt_dim {tt_dim}"
 
@@ -36,13 +40,11 @@ def run_algorithm_cpp(algorithm, test_filename, result_file, tt_dim, dimension, 
         if line.startswith("Execution time"):
             execution_time = float(line.split(":")[-1][:-1])
 
-    # Write results to file
-    output_str = f"{algorithm};{dimension};{instance};{test_filename};{cost};{execution_time}\n"
-    result_file.write(output_str)
-    #print("\t\t", output_str, end='')
+    # Return results
+    return cost, execution_time
 
 
-def run_algorithm_python(algorithm, test_filename, result_file, tt_dim, dimension, instance):
+def run_algorithm_python(algorithm, test_filename):
     # Import tensor train from file
     inputs, output, sizes_dict, _ = import_tensor_train(test_filename)
 
@@ -62,13 +64,10 @@ def run_algorithm_python(algorithm, test_filename, result_file, tt_dim, dimensio
     cost = tree.contraction_cost()
     execution_time = end_time - start_time
 
-    # Write results to file
-    output_str = f"{algorithm_str};{dimension};{instance};{test_filename};{cost};{execution_time}\n"
-    result_file.write(output_str)
-    #print("\t\t", output_str, end='')
+    # Return results
+    return cost, execution_time
 
-
-def run_algorithm_naive(algorithm, test_filename, result_file, tt_dim, dimension, instance):
+def run_algorithm_naive(test_filename):
     # Open test file and read lines
     with open(test_filename, 'r') as text_file:
         lines = text_file.readlines()
@@ -83,45 +82,61 @@ def run_algorithm_naive(algorithm, test_filename, result_file, tt_dim, dimension
         cost = min(naive_costs)
         execution_time = 0.0
 
-        # Write results to file
-        output_str = f"{algorithm};{dimension};{instance};{test_filename};{cost};{execution_time}\n"
-        result_file.write(output_str)
+        # Return results
+        return cost, execution_time
 
 
 # Wrapper function to run computations for given test using either
 # C++ (our algorithms), or Python (cotengra and other algorithms)
-def run_algorithm(algorithm, test_filename, result_file, tt_dim, dimension, instance, delta):
+def run_algorithm(algorithm, test_filename, tt_dim, delta):
     if algorithm in ['OneSidedOneDim', 'TwoSidedDeltaDim']:
-        run_algorithm_cpp(algorithm, test_filename, result_file, tt_dim, dimension, instance, delta)
+        return run_algorithm_cpp(algorithm, test_filename, tt_dim, delta)
     elif algorithm == 'naive':
-        run_algorithm_naive(algorithm, test_filename, result_file, tt_dim, dimension, instance)
+        return run_algorithm_naive(test_filename)
     else:
-        run_algorithm_python(algorithm, test_filename, result_file, tt_dim, dimension, instance)
+        return run_algorithm_python(algorithm, test_filename)
 
 
-def run_algorithm_on_test_case(algorithm, test_dir_path, result_dir_path, max_size, tt_dim, delta):
+def run_algorithm_on_test_case(input):
+    # Unpack the input arguments
+    algorithm, test_filename, result_filename, tt_dim, delta, dimension, instance = input[0]
+
+    # Run the algorith on the test case
+    cost, execution_time = run_algorithm(algorithm, test_filename, tt_dim, delta)
+    output_str = f"{algorithm};{dimension};{instance};{test_filename};{cost};{execution_time}\n"
+
+    # Save the results to the result file
+    single_file_lock.acquire()
+    with open(result_filename, 'a') as result_file:
+        result_file.write(output_str)
+    single_file_lock.release()
+
+
+def generate_arguments_for_test_case(algorithm, test_dir_path, result_dir_path, min_size, max_size, max_size_optimal, tt_dim, delta):
+    global file_lock
+
+    # Prepare the lock for the result file
     result_filename = get_result_filename(result_dir_path, algorithm, delta)
-    delta_str = "" if delta is None else str(delta)
+    file_lock[result_filename] = multiprocessing.Lock()
 
-    print(f"[Test case 🔵] {test_dir_path} \t {algorithm} {delta_str} \t starting...")
-    
-    with open(result_filename, 'w') as result_file:
-        result_file.write(f"Algorithm;Size;Instance;Test_file;Cost;Execution_time\n")
+    # Prepare header of result file if we start with the first test case
+    if not os.path.exists(result_filename):
+        with open(result_filename, 'w') as result_file:
+            result_file.write(f"Algorithm;Size;Instance;Test_file;Cost;Execution_time\n")
 
-        max_size_local = max_size
-        if algorithm == "optimal":
-            max_size_local = 30
+    # Prepare max size for optimal algorithm (which we may not run for large sizes)
+    if algorithm == "optimal":
+        max_size = min(max_size, max_size_optimal)
 
-        for dimension in range(3, max_size_local + 1):
-            for instance in range(1, nb_instances + 1):
-                test_filename = get_test_filename(test_dir_path, dimension, instance)
-                run_algorithm(algorithm, test_filename, result_file, tt_dim, dimension, instance, delta)
+    # Prepare arguments for each test case
+    arguments = []
+    for dimension in range(min_size, max_size + 1):
+        for instance in range(1, nb_instances + 1):
+            test_filename = get_test_filename(test_dir_path, dimension, instance)
+            arguments.append([(algorithm, test_filename, result_filename, tt_dim, delta, dimension, instance)])
 
-            # Show progress information
-            print(f"[Test case ⏳] {test_dir_path} \t {algorithm} {delta_str} \t - dimension {dimension}/{max_size_local}.")
+    return arguments
 
-
-    print(f"[Test case ✅] {test_dir_path} \t {algorithm} {delta_str} \t completed.")
 
 # ------------------------------- Main function --------------------------------
 if __name__ == "__main__":
@@ -143,7 +158,9 @@ if __name__ == "__main__":
 
     # Retrieve test cases parameters
     tt_dims = [int(tt_dim) for tt_dim in config['General']['tt_dims'].split(',')]
-    max_size = int(config['Tests']['max_size'])
+    min_size = int(config['Results']['min_size'])
+    max_size = int(config['Results']['max_size'])
+    max_size_optimal = int(config['Results']['max_size_optimal'])
     nb_instances = int(config['Tests']['nb_instances'])
 
     types = config['General']['types'].split(',')
@@ -180,12 +197,15 @@ if __name__ == "__main__":
                     for algorithm in algorithms:
                         if algorithm != "TwoSidedDeltaDim":
                             delta = None
-                            parallel_input.append((algorithm, test_dir_path, result_dir_path, max_size, tt_dim, None))
+                            parallel_input += generate_arguments_for_test_case(algorithm, test_dir_path, result_dir_path, min_size, max_size, max_size_optimal, tt_dim, None)
                         else:
                             for delta in deltas:
-                                parallel_input.append((algorithm, test_dir_path, result_dir_path, max_size, tt_dim, delta))
+                                parallel_input += generate_arguments_for_test_case(algorithm, test_dir_path, result_dir_path, min_size, max_size, max_size_optimal, tt_dim, delta)
 
 
     # Execute tasks in parallel
     print(f"Executing test cases in parallel using {cores} cores")
-    pool.starmap(run_algorithm_on_test_case, parallel_input)
+    #pool.starmap(run_algorithm_on_test_case, parallel_input)
+    with alive_bar(len(parallel_input)) as bar:
+        for i in pool.imap_unordered(run_algorithm_on_test_case, parallel_input):
+            bar()
