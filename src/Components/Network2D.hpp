@@ -119,6 +119,11 @@ struct Network2D {
         // Fix order of nodes 
         if(nodeA > nodeB) std::swap(nodeA, nodeB);
 
+        // Check if subsequent nodes are in the same row
+        if (nodeB - nodeA == 1 && nodeA / this->dimension != nodeB / this->dimension) {
+            return 0;
+        }
+
         // Check if the nodes are adjacent and return the weight of edge
         // between them, or 0 otherwise
         if(nodeB - nodeA == 1 || nodeB - nodeA == this->dimension) {
