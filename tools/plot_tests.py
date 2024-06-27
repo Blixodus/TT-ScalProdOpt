@@ -1,3 +1,4 @@
+import ast
 import multiprocessing
 import os
 import sys
@@ -14,7 +15,7 @@ from cgreedy import CGreedy
 
 from alive_progress import alive_bar
 
-from Scripts.naming import get_algorithm_name, get_dir, get_test_filename, get_result_filename
+from Scripts.naming import get_algorithm_name, get_dir, get_dir_ratio, get_test_filename, get_result_filename
 from Scripts.import_file import import_tensor_train
 
 # ------------------------------- Plot function --------------------------------
@@ -105,6 +106,74 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
     print(f"[Plot ✅] Plot generation for test case {result_dir_path} \t ({plot_dir_path}) \t completed.")
     return (plot_dir_path, completed_successfully, error_message)
 
+def plot_ratio(ratio_list, plot_algorithms, normalization_algorithm, result_dir_path, plot_dir_path):
+    completed_successfully = True
+    error_message = ""
+
+    # Import CSV files with results
+    results = {}
+    algorithms = []
+    normalization_algorithm = get_algorithm_name(normalization_algorithm[0], normalization_algorithm[1])
+
+    for algorithm_tuple in plot_algorithms:
+        # Prepare algorithm name for plot
+        algorithm = get_algorithm_name(algorithm_tuple[0], algorithm_tuple[1])
+        algorithms.append(algorithm)
+
+        for rank_const, dim_const in ratio_list:
+            # Import the results from file
+            local_dir_path = get_dir_ratio(result_dir_path, rank_const, dim_const)
+            result_filename = get_result_filename(local_dir_path, algorithm_tuple[0], algorithm_tuple[1])
+            if not os.path.exists(result_filename):
+                print(f"[Error ❌] File {result_filename} does not exist. Algorithm {algorithm} will be skipped.")
+                completed_successfully = False
+                error_message += f"missing file ({algorithm}\t"
+                continue
+            
+            print(result_filename)
+            df = pd.read_csv(result_filename, sep=';')
+            df['Ratio'] = dim_const / rank_const
+            if algorithm in results:
+                results[algorithm] = pd.concat([results[algorithm], df], ignore_index=True)
+            else:
+                results[algorithm] = df
+
+    # Normalize the results using results from given normalization algorithm
+    if normalization_algorithm in results:
+        results_cmp = {}
+        for algorithm in algorithms:
+            results_cmp[algorithm] = results[algorithm].merge(results[normalization_algorithm], on=['Ratio', 'Size', 'Instance'], how='left', sort=False, suffixes=(None, '_Norm'))
+            results_cmp[algorithm]['Normalized_cost'] = results_cmp[algorithm]['Cost'] / results_cmp[algorithm]['Cost_Norm']
+
+        # Plot the normalized contraction cost for each size
+        print(results_cmp[algorithms[0]]['Size'].unique())
+        for size in results_cmp[algorithms[0]]['Size'].unique():
+            for algorithm in algorithms:
+                print(size, algorithm)
+                sns.lineplot(data=results_cmp[algorithm].loc[(results_cmp[algorithm]['Size'] == size)], x="Ratio", y="Normalized_cost", label=algorithm)
+            plt.xlabel('Ratio (dim_const / rank_const)')
+            plt.ylabel('Normalized contraction cost')
+            plt.title(f'Comparison of the contraction cost (size = {size})')
+            plt.legend(loc='upper right')
+            plt.xscale('log')
+
+            os.makedirs(f'{plot_dir_path}/ratio_test/{size}', exist_ok=True)
+            print(f"{plot_dir_path}/ratio_test/{size}")
+
+            plt.savefig(f'{plot_dir_path}/ratio_test/{size}/contraction_cost_normalized.pdf')
+
+            plt.axis([None, None, 0.95, 1.25])
+            plt.savefig(f'{plot_dir_path}/ratio_test/{size}/contraction_cost_normalized_zoom.pdf')
+
+            plt.close()
+    else:
+        print(f"[Warning ❗] Normalization algorithm {normalization_algorithm} not found. Skipping normalization plot.")
+        completed_successfully = False
+        error_message += "normalization algorithm missing\t"
+
+    print(f"[Plot ✅] Plot generation for test case {result_dir_path} \t ({plot_dir_path}) \t completed.")
+    return (plot_dir_path, completed_successfully, error_message)
+
 # ------------------------------- Main function --------------------------------
 if __name__ == "__main__":
     # Load configuration file
@@ -154,6 +223,9 @@ if __name__ == "__main__":
 
         for y_eq_xT in y_cases:
             for type in types:
+                if type == "ratio" and y_eq_xT:
+                    continue
+
                 for rank_type in rank_types:
                     # Prepare directory for input files and output plots
                     test_dir_path = get_dir(test_dir, tt_dim, y_eq_xT, type, rank_type)
@@ -171,7 +243,14 @@ if __name__ == "__main__":
                         else:
                             for delta in deltas:
                                 plot_algorithms.append((algorithm, delta))
-                    parallel_input.append((plot_algorithms, normalization_algorithm, result_dir_path, plot_dir_path, nb_instances))
+
+                    if type != 'ratio':
+                        parallel_input.append((plot_algorithms, normalization_algorithm, result_dir_path, plot_dir_path, nb_instances))
+                    else:
+                        ratio_list = ast.literal_eval(config['General']['ratio_list'])
+                        for rank_const, dim_const in ratio_list:
+                            parallel_input.append((plot_algorithms, normalization_algorithm, get_dir_ratio(result_dir_path, rank_const, dim_const),  get_dir_ratio(plot_dir_path, rank_const, dim_const), nb_instances))
+                        plot_ratio(ratio_list, plot_algorithms, normalization_algorithm, result_dir_path, plot_dir_path)
 
 
     # Execute tasks in parallel
