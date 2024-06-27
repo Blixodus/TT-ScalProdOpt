@@ -61,7 +61,7 @@ class TwoSidedDeltaDim : public Algorithm {
         this->best_cost = std::numeric_limits<cost_t>::max();
 
         // Initialize the exact solver
-        this->m_exact_solver.init(network);
+        this->m_exact_solver.init(this->m_network_2d.m_filename, this->m_network_2d.dimension);
 
         std::cout<<"Finished initialization of alg! " << std::endl;
     }
@@ -79,6 +79,7 @@ class TwoSidedDeltaDim : public Algorithm {
                     std::pair<cost_t, std::string> optimal_result = m_exact_solver.solve(s, s + t - 1, LR);
                     this->m_cost[LR][t][s] = optimal_result.COST;
                     this->m_order[LR][t][s] = optimal_result.ORDER;
+                    //std::cout<<"Order optimal s="<<s<<" t="<<t<<" \t : \t " << this->m_order[LR][t][s]<<std::endl;
                 }
             }
 
@@ -104,6 +105,8 @@ class TwoSidedDeltaDim : public Algorithm {
                             // and now we are inserting the exact order to yield it)
                             this->m_order[LR][t][s] = this->m_order[LR][t - k][s + k];
                             this->m_order[LR][t][s].replace(this->m_order[LR][t][s].find("'#'"), 3, this->m_order[LR][k][s]);
+
+                            //std::cout<<"Order s="<<s<<" t="<<t<<" k="<<k<<" \t : \t " << this->m_order[LR][k][s]<<";\t"<<this->m_order[LR][t - k][s + k]<<";\t"<<this->m_order[LR][t][s]<<std::endl;
                         }
                     }
                 }

@@ -28,6 +28,8 @@ def run_program(algorithm, input_file, dmax=None):
     result = subprocess.run(args=args, capture_output=True, text=True, shell=True)
     end_time = time.time()
 
+    print(result.stdout)
+
     cost = 0
     order = ""
     for line in result.stdout.split("\n"):
