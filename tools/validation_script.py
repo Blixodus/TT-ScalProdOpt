@@ -113,7 +113,7 @@ if len(sys.argv) > 3:
 exact_results = pd.read_csv(f"{config['Input']['input_dir']}/{config['Input']['input_prefix']}_optimal.txt", sep=';')
 
 # Write the header to the output file
-output_file = open(result_file, 'a')
+output_file = open(result_file, 'w')
 output_file.write(f"Algorithm;Size;Instance;Test_file;Cost;Validated_cost;Execution_time;Result\n")
 
 for algorithm in algorithms:
@@ -124,6 +124,7 @@ for algorithm in algorithms:
         # Retrieve the flat list of contractions
         contraction_recursive = ast.literal_eval(order_str)
         contraction_flat, _ = generate_contraction_list(contraction_recursive)
+        print(contraction_recursive)
 
         # Calculate the cost of the contraction order
         cost_validation = run_validation(tt_dim=3, input_file=file, order=contraction_flat)
@@ -149,11 +150,5 @@ for algorithm in algorithms:
         output_str = f"{algorithm};{int(size)};{int(instance)};{file};{cost};{cost_validation};{ex_time};{result}\n"
         output_file.write(output_str)
         print(output_str, summary)
-        break
     
 output_file.close()
-        
-
-
-
-        

@@ -42,23 +42,52 @@ class Cost_cpt {
         // We always keep smaller node as representative of the contracted edge
         if(v1 > v2) std::swap(v1, v2);
 
-        if(v1 != v1) {
-            cost_t result = this->m_network[v1, v2];
+        //std::cout<<"\t"<<v1<<" "<<v2<<endl;
+        if(v1 != v2) {
+            cost_t result = this->m_adjacence_matrix[v1][v2];
+            //std::cout<<"\t\t"<<result<<endl;
             for(vertexID_t j = 0; j < this->m_network.n_vertex; j++) {
                 if(v1 != j) {
+                    //std::cout<<"\t\t\t"<<v2<<" "<<j<<" "<<m_adjacence_matrix[v2][j]<<endl;
                     result *= max((weight_t) 1, m_adjacence_matrix[v2][j]);
                 }
                 if(v2 != j) { 
+                    //std::cout<<"\t\t\t"<<v1<<" "<<j<<" "<<m_adjacence_matrix[v1][j]<<endl;
                     result *= max((weight_t) 1, m_adjacence_matrix[v1][j]);
+                }
+                //std::cout<<"\t\t"<<j<<" "<<result<<endl;
+            }
+
+            /*for(vertexID_t i = 0; i < this->m_network.n_vertex; i++) {
+                for(vertexID_t j = 0; j < this->m_network.n_vertex; j++) {
+                    std::cout<<"AM: "<<i<<" "<<j<<" "<<m_adjacence_matrix[i][j]<<endl;
+                }
+            }*/
+
+            for(vertexID_t j = 0; j < this->m_network.n_vertex; j++) {
+                if(j != v1 && j != v2) {
+                    // Create edge between v1' and j if there was an edge between v2 and j
+                    if(m_adjacence_matrix[v1][j] == 0 && m_adjacence_matrix[v2][j] > 0) {
+                        m_adjacence_matrix[v1][j] = 1;
+                    }
+
+                    // Include cost of the edge between v2 and j in the edge between v1' and j
+                    if(m_adjacence_matrix[v2][j] > 0) {
+                        m_adjacence_matrix[v1][j] *= m_adjacence_matrix[v2][j];
+                    }
+                    
+                    // Remove vertex v2 from the network
+                    m_adjacence_matrix[v2][j] = 0;
+                    m_adjacence_matrix[j][v2] = 0;
+
+                    // Ensure symmetry of the adjacence matrix
+                    m_adjacence_matrix[j][v1] = m_adjacence_matrix[v1][j];
                 }
             }
 
-            for(vertexID_t j = 0; j < this->m_network.n_vertex; j++) {
-                m_adjacence_matrix[v1][j] *= m_adjacence_matrix[v2][j];
-                m_adjacence_matrix[v2][j] = 0;
-                m_adjacence_matrix[j][v2] = 0;
-                m_adjacence_matrix[j][v1] = m_adjacence_matrix[v1][j];
-            }
+            // Remove edge between v1 and v2
+            m_adjacence_matrix[v1][v2] = 0;
+            m_adjacence_matrix[v2][v1] = 0;
 
             return result;
         }
@@ -77,7 +106,9 @@ class Cost_cpt {
         // operation to obtain the total cost of given order
         cost_t cost = 0;
         for(vertex_pair_t edge : this->m_order){
-            cost += this->contract(edge);
+            cost_t contraction_cost = this->contract(edge);
+            cost += contraction_cost;
+            //std::cout<<"Contracting "<<edge.first<<" and "<<edge.second<<" cost : "<<contraction_cost<<std::endl;
         }
         return cost;
     }
