@@ -1,3 +1,4 @@
+import ast
 import multiprocessing
 import os
 import re
@@ -11,7 +12,7 @@ from cgreedy import CGreedy
 
 from alive_progress import alive_bar
 
-from Scripts.naming import get_dir, get_test_filename, get_result_filename
+from Scripts.naming import get_dir, get_dir_ratio, get_test_filename, get_result_filename
 from Scripts.import_file import import_tensor_train
 
 file_lock = {}
@@ -112,7 +113,7 @@ def run_algorithm_on_test_case(input):
     single_file_lock.release()
 
 
-def generate_arguments_for_test_case(algorithm, test_dir_path, result_dir_path, min_size, max_size, max_size_optimal, tt_dim, delta):
+def generate_arguments_for_test_case(type, algorithm, test_dir_path, result_dir_path, min_size, max_size, step_size, max_size_optimal, tt_dim, delta):
     global file_lock
 
     # Prepare the lock for the result file
@@ -130,10 +131,29 @@ def generate_arguments_for_test_case(algorithm, test_dir_path, result_dir_path, 
 
     # Prepare arguments for each test case
     arguments = []
-    for dimension in range(min_size, max_size + 1):
-        for instance in range(1, nb_instances + 1):
-            test_filename = get_test_filename(test_dir_path, dimension, instance)
-            arguments.append([(algorithm, test_filename, result_filename, tt_dim, delta, dimension, instance)])
+    if type != "ratio":
+        for dimension in range(min_size, max_size + 1):
+            for instance in range(1, nb_instances + 1):
+                test_filename = get_test_filename(test_dir_path, dimension, instance)
+                arguments.append([(algorithm, test_filename, result_filename, tt_dim, delta, dimension, instance)])
+    else:
+        ratio_list = ast.literal_eval(config['General']['ratio_list'])
+        for rank_const, dim_const in ratio_list:
+            ratio_test_dir = get_dir_ratio(test_dir_path, rank_const, dim_const)
+            ratio_result_dir = get_dir_ratio(result_dir_path, rank_const, dim_const)
+            result_filename = get_result_filename(ratio_result_dir, algorithm, delta)
+
+            if not os.path.exists(result_filename):
+                with open(result_filename, 'w') as result_file:
+                    result_file.write(f"Algorithm;Size;Instance;Test_file;Cost;Execution_time\n")
+
+            for dimension in range(min_size, max_size + 1, step_size):
+                for instance in range(1, nb_instances + 1):
+                    test_filename = get_test_filename(ratio_test_dir, dimension, instance)
+                    arguments.append([(algorithm, test_filename, result_filename, tt_dim, delta, dimension, instance)])
+
+            rank_const *= 2
+            dim_const //= 2
 
     return arguments
 
@@ -160,6 +180,7 @@ if __name__ == "__main__":
     tt_dims = [int(tt_dim) for tt_dim in config['General']['tt_dims'].split(',')]
     min_size = int(config['Results']['min_size'])
     max_size = int(config['Results']['max_size'])
+    step_size = int(config['Results']['step_size'])
     max_size_optimal = int(config['Results']['max_size_optimal'])
     nb_instances = int(config['Tests']['nb_instances'])
 
@@ -185,6 +206,9 @@ if __name__ == "__main__":
 
         for y_eq_xT in y_cases:
             for type in types:
+                if type == "ratio" and y_eq_xT:
+                    continue
+
                 for rank_type in rank_types:
                     # Prepare directory for result files
                     test_dir_path = get_dir(test_dir, tt_dim, y_eq_xT, type, rank_type)
@@ -197,15 +221,15 @@ if __name__ == "__main__":
                     for algorithm in algorithms:
                         if algorithm != "TwoSidedDeltaDim":
                             delta = None
-                            parallel_input += generate_arguments_for_test_case(algorithm, test_dir_path, result_dir_path, min_size, max_size, max_size_optimal, tt_dim, None)
+                            parallel_input += generate_arguments_for_test_case(type, algorithm, test_dir_path, result_dir_path, min_size, max_size, step_size, max_size_optimal, tt_dim, None)
                         else:
                             for delta in deltas:
-                                parallel_input += generate_arguments_for_test_case(algorithm, test_dir_path, result_dir_path, min_size, max_size, max_size_optimal, tt_dim, delta)
+                                parallel_input += generate_arguments_for_test_case(type, algorithm, test_dir_path, result_dir_path, min_size, max_size, step_size, max_size_optimal, tt_dim, delta)
 
 
     # Execute tasks in parallel
     print(f"Executing test cases in parallel using {cores} cores")
-    #pool.starmap(run_algorithm_on_test_case, parallel_input)
+    print(parallel_input)
     with alive_bar(len(parallel_input)) as bar:
         for i in pool.imap_unordered(run_algorithm_on_test_case, parallel_input):
             bar()
