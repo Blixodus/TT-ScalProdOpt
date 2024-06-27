@@ -6,31 +6,27 @@ import cotengra as ctg
 from tools.Scripts.import_file import import_tensor_train
 
 
-def node_id_from_ctg(node_id, tt_dim, dim, dmin, input_node_included):
-    if input_node_included:
-        if node_id == 0:
-            return '#'
-        else:
-            node_id -= 1
+def node_id_from_ctg(node_id, dim, dmin, dmax):
+    len = dmax - dmin + 1
+    row = node_id // len
+    column = node_id % len + dmin
 
-    column = node_id // tt_dim
-    row = node_id % tt_dim
-    return row * dim + dmin + column
+    #print(node_id, "--->", row, column, row * dim + column)
+    return row * dim + column
 
-def rename_nodes_from_ctg(contraction_tree, tt_dim, dim, dmin, input_node_included):
+
+def rename_nodes(contraction_tree, dim, dmin, dmax, input_node_included):
     if isinstance(contraction_tree, tuple):
-        return (rename_nodes_from_ctg(contraction_tree[0], tt_dim, dim, dmin, input_node_included), rename_nodes_from_ctg(contraction_tree[1], tt_dim, dim, dmin, input_node_included))
+        return (rename_nodes(contraction_tree[0], dim, dmin, dmax, input_node_included), rename_nodes(contraction_tree[1], dim, dmin, dmax, input_node_included))
     else:
-        return node_id_from_ctg(contraction_tree, tt_dim, dim, dmin, input_node_included)
-    
-def rename_nodes_with_input_node(contraction_tree):
-    if isinstance(contraction_tree, tuple):
-        return (rename_nodes_with_input_node(contraction_tree[0]), rename_nodes_with_input_node(contraction_tree[1]))
-    else:
-        if contraction_tree == 0:
-            return '#'
+        if not input_node_included:
+            return node_id_from_ctg(contraction_tree, dim, dmin, dmax)
         else:
-            return contraction_tree - 1
+            if contraction_tree == 0:
+                return '#'
+            else:
+                return node_id_from_ctg(contraction_tree - 1, dim, dmin, dmax)
+
 
 def generate_contraction_list(contraction_tree):
     if len(contraction_tree) > 2:
@@ -76,8 +72,9 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
     #print(tree2.contraction_cost())
 
     contraction_tree = tree.flat_tree()
-    if input_node_included:
-        contraction_tree = rename_nodes_with_input_node(contraction_tree)
+    #print(contraction_tree)
+    contraction_tree = rename_nodes(contraction_tree, dim, dim_min, dim_max, input_node_included)
+    #print(contraction_tree)
     path_str = str(contraction_tree) #str(contraction_list_renamed)
     #print(path_str)
 
@@ -86,6 +83,7 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
     #print(sizes_dict, output)
     #print("[Cotengra wrapper PY]", input_file, dim_min, "...", dim_max, tree.contraction_cost() * outer_edges_cost, tree.contraction_cost(), outer_edges_cost)
     
+    #print("[Cotengra wrapper PY]", input_file, dim_min, "...", dim_max, dim, tree.contraction_cost(), path_str)
     return (tree.contraction_cost(), path_str)
 
-#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/Tests2/xxT/increasing/low/d_004_v_038.txt", 0, 3, 4, False))
+#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs_2d/instances/test/xAxt/instance_005_001.txt", 1, 4, 5, False))
