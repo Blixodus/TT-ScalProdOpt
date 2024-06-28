@@ -30,21 +30,17 @@ class TwoSidedDeltaDim : public Algorithm {
 
     // Constructors
     TwoSidedDeltaDim(){}
-    TwoSidedDeltaDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary) {
-        std::cout<<"Created object. " << std::endl;
-    }
+    TwoSidedDeltaDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary) {}
 
     // Initializers
     void init(Network& network) {
         // Initialize network 2D
-        std::cout<<"Instantiating network 2D: " << std::endl;
         this->m_network_2d = Network2D<tt_dim>(network.m_filename);
 
         this->dim = this->m_network_2d.dimension;
         this->n_vertex = this->m_network_2d.n_vertex;
 
         // Initialize the memoization tables
-        std::cout<<"Instantiating memoization: " << std::endl;
         for(int type = 0; type < 2; type++) {
             this->m_cost[type].resize(this->dim + 1);
             this->m_order[type].resize(this->dim + 1);
@@ -62,8 +58,6 @@ class TwoSidedDeltaDim : public Algorithm {
 
         // Initialize the exact solver
         this->m_exact_solver.init(this->m_network_2d.m_filename, this->m_network_2d.dimension);
-
-        std::cout<<"Finished initialization of alg! " << std::endl;
     }
     
     // Computation functions
@@ -79,7 +73,6 @@ class TwoSidedDeltaDim : public Algorithm {
                     std::pair<cost_t, std::string> optimal_result = m_exact_solver.solve(s, s + t - 1, LR);
                     this->m_cost[LR][t][s] = optimal_result.COST;
                     this->m_order[LR][t][s] = optimal_result.ORDER;
-                    //std::cout<<"Order optimal s="<<s<<" t="<<t<<" \t : \t " << this->m_order[LR][t][s]<<std::endl;
                 }
             }
 
@@ -92,8 +85,6 @@ class TwoSidedDeltaDim : public Algorithm {
                 for(int s = 0; s < (this->dim - t + 1); s++) {
                     // Solve the window [s, s+t-1] by splitting it into two subproblems
                     for(int k = 1; k <= delta; k++) {
-                        //if(this->m_cost[LR][k][s] != std::numeric_limits<cost_t>::max() &&
-                        //   this->m_cost[LR][t - k][s + k] != std::numeric_limits<cost_t>::max()) {
                         cost_t cost = this->m_cost[LR][k][s] + this->m_cost[LR][t - k][s + k];
                         if(cost < this->m_cost[LR][t][s]) {
                             // Update the cost of the window [s, s+t-1]
@@ -105,8 +96,6 @@ class TwoSidedDeltaDim : public Algorithm {
                             // and now we are inserting the exact order to yield it)
                             this->m_order[LR][t][s] = this->m_order[LR][t - k][s + k];
                             this->m_order[LR][t][s].replace(this->m_order[LR][t][s].find("'#'"), 3, this->m_order[LR][k][s]);
-
-                            //std::cout<<"Order s="<<s<<" t="<<t<<" k="<<k<<" \t : \t " << this->m_order[LR][k][s]<<";\t"<<this->m_order[LR][t - k][s + k]<<";\t"<<this->m_order[LR][t][s]<<std::endl;
                         }
                     }
                 }
@@ -196,8 +185,6 @@ class TwoSidedDeltaDim : public Algorithm {
 
                 // Calculate the total cost of the split
                 cost_t total_cost = cost_left + cost_right + cost_connect;
-
-                //std::cout<<"[Split " << split << "] Cost: " << total_cost << " <--- " << cost_left << " + " << cost_right << " + " << cost_connect << std::endl;
 
                 // Update the best cost
                 if(total_cost < this->best_cost) {
