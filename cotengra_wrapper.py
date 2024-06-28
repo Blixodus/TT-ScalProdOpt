@@ -86,4 +86,4 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
     #print("[Cotengra wrapper PY]", input_file, dim_min, "...", dim_max, dim, tree.contraction_cost(), path_str)
     return (tree.contraction_cost(), path_str)
 
-#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/OptiTenseurs_2d/instances/test/xAxt/instance_005_001.txt", 1, 4, 5, False))
+#print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/Tests2/xy/random/high/d_006_v_008.txt", 0, 5, 6, False))

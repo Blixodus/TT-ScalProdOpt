@@ -180,7 +180,7 @@ class TwoSidedDeltaDim : public Algorithm {
         // Include the cost of starting from both sides of TT
         if constexpr(dir & ALL) {
             // Iterate over all the possible starting splits
-            for(int split = 1; split < dim - 1; split++) {
+            for(int split = 1; split < this->dim; split++) {
                 // Retrieve the cost of the left part
                 cost_t cost_left = this->m_cost[LR][split][0];
 
@@ -190,12 +190,14 @@ class TwoSidedDeltaDim : public Algorithm {
                 // Compute the cost of contracting the final two nodes together
                 // (results of the two subproblems) 
                 cost_t cost_connect = 1;
-                for(int i = 0; i < tt_dim; i++) {
-                    cost_connect *= this->m_network_2d[i, split - 1] * this->m_network_2d[i, split];
+                for(int row = 0; row < tt_dim; row++) {
+                    cost_connect *= this->m_network_2d[row * this->dim + (split - 1), row * this->dim + split];
                 }
 
                 // Calculate the total cost of the split
                 cost_t total_cost = cost_left + cost_right + cost_connect;
+
+                //std::cout<<"[Split " << split << "] Cost: " << total_cost << " <--- " << cost_left << " + " << cost_right << " + " << cost_connect << std::endl;
 
                 // Update the best cost
                 if(total_cost < this->best_cost) {
