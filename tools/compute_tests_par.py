@@ -184,7 +184,10 @@ def generate_arguments_for_test_case(type, algorithm, test_dir_path, result_dir_
     # Prepare header of result file if we start with the first test case
     if not os.path.exists(result_filename):
         with open(result_filename, 'w') as result_file:
-            result_file.write(f"Algorithm;Size;Instance;Test_file;Cost;Execution_time\n")
+            if not validate_results:
+                result_file.write(f"Algorithm;Size;Instance;Test_file;Cost;Execution_time;Order\n")
+            else:
+                result_file.write(f"Algorithm;Size;Instance;Test_file;Cost;Execution_time;Order;Validated_cost;Validation_result\n")
 
     # Prepare max size for optimal algorithm (which we may not run for large sizes)
     if algorithm == "optimal":
@@ -207,7 +210,7 @@ def generate_arguments_for_test_case(type, algorithm, test_dir_path, result_dir_
             if not os.path.exists(result_filename):
                 with open(result_filename, 'w') as result_file:
                     if not validate_results:
-                        result_file.write(f"Algorithm;Size;Instance;Test_file;Cost;Execution_time\n")
+                        result_file.write(f"Algorithm;Size;Instance;Test_file;Cost;Execution_time;Order\n")
                     else:
                         result_file.write(f"Algorithm;Size;Instance;Test_file;Cost;Execution_time;Validated_cost;Validation_result\n")
 
