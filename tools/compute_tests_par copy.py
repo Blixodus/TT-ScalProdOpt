@@ -73,23 +73,27 @@ def run_algorithm_python(algorithm, test_filename):
     return cost, execution_time, order
 
 
-def run_algorithm_naive(test_filename):
-    # Open test file and read lines
-    with open(test_filename, 'r') as text_file:
-        lines = text_file.readlines()
+def run_algorithm_naive(test_filename, tt_dim, dim):
+    def node_id(row, column):
+        return row * dim + column
 
-        # Locate the naive cost(s) of contracting the tensor train
-        naive_costs = []
-        for line in lines:
-            if line.startswith('c'):
-                cost = int(re.split('\W+', line)[3])
-                naive_costs.append(cost)
+    # Define naive order using approach specific to either 2 or 3 TT-dim
+    order = None
+    if tt_dim == 2:
+        order = (node_id(0, 0), node_id(1, 0))
+        for i in range(1, dim):
+            order = (order, node_id(0, i))
 
-        cost = min(naive_costs)
-        execution_time = 0.0
+        
+    elif tt_dim == 3:
+        order = ((0))
+        fo
 
-        # Return results
-        return cost, execution_time, "naive_order_TBD"
+    else:
+        return 0, 0.0, "Naive order not supported for {tt_dim} TT-dim."
+
+    # Return results
+    return cost, execution_time, "naive_order_TBD"
 
 
 # Wrapper function to run computations for given test using either
