@@ -40,6 +40,8 @@ def compute_naive_cost_t3(size, dims_X, dims_Xt, rank_X, rank_Xt, rank_A, revers
         dims_X[i + 1] *= rank_X[i + 1]
         dims_Xt[i + 1] *= rank_Xt[i + 1]
 
+    cost_naive += dims_X[size - 1] * dims_Xt[size - 1] + dims_Xt[size - 1]
+
     return cost_naive
 
 # ----------------------------- Utility functions ------------------------------
@@ -182,9 +184,11 @@ if __name__ == "__main__":
                     # Determine max rank based on rank type
                     max_rank = 0
                     if rank_type == 'low':
-                        max_rank = 10
-                    elif rank_type == 'high':
+                        max_rank = 50
+                    elif rank_type == 'medium':
                         max_rank = 200
+                    elif rank_type == 'high':
+                        max_rank = 1000
                     else:
                         exit(f"Error! Invalid rank type {rank_type}.")
 
@@ -195,7 +199,7 @@ if __name__ == "__main__":
                     if type in ["increasing", "quantized"]:
                         dims_gen  = lambda x : 2
                     elif type in ["random"]:
-                        dims_gen  = lambda x : rand.integers(low=2, high=11)
+                        dims_gen  = lambda x : rand.integers(low=2, high=51)
                     else:
                         exit(f"Error! Invalid type {type}.")
 
