@@ -86,4 +86,19 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
     #print("[Cotengra wrapper PY]", input_file, dim_min, "...", dim_max, dim, tree.contraction_cost(), path_str)
     return (tree.contraction_cost(), path_str)
 
+
+def cotengra_wrapper_solve_with_args(algorithm, inputs, output, sizes_dict, dim, dim_min, dim_max, input_node_included):
+    #print(algorithm, inputs, output, sizes_dict, dim, dim_min, dim_max, input_node_included)
+
+    # Compute the contraction ordering for given arguments
+    tree = ctg.array_contract_tree(inputs, output, sizes_dict, optimize=algorithm)
+
+    # Rename the nodes to match the original tensor train
+    contraction_tree = tree.flat_tree()
+    contraction_tree = rename_nodes(contraction_tree, dim, dim_min, dim_max, input_node_included)
+    path_str = str(contraction_tree)
+
+    return (tree.contraction_cost(), path_str)
+
+
 #print(cotengra_wrapper_solve("/home/pdominik/Tensor_experiments/Tests2/xy/random/high/d_006_v_008.txt", 0, 5, 6, False))

@@ -105,7 +105,7 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
             }
             break;
         case COTENGRAOPTIMALWRAPPER:
-            return new CotengraOptimalWrapper(dictionary);
+            return new CotengraWrapper<2>(dictionary);
             break;
         default:
             std::cerr << "Unknown algorithm '" << algo_name << "'" << std::endl;
