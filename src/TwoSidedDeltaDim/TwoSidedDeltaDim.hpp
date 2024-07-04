@@ -8,7 +8,7 @@
 #define TWOSIDEDDELTADIM_HPP
 #include "../Components/Components.hpp"
 #include "../Components/Network2D.hpp"
-#include "../CotengraOptimalWrapper/CotengraOptimalWrapper.hpp"
+#include "../CotengraWrapper/CotengraWrapper.hpp"
 
 #define COST first
 #define ORDER second
@@ -23,7 +23,7 @@ class TwoSidedDeltaDim : public Algorithm {
     std::vector<std::vector<std::string>> m_order[2];
 
     // Exact solver for the subproblems (Cotengra optimal algorithm)
-    CotengraOptimalWrapper m_exact_solver;
+    CotengraWrapper<tt_dim> m_exact_solver;
 
     // Generalized network information
     Network2D<tt_dim> m_network_2d;
@@ -57,7 +57,7 @@ class TwoSidedDeltaDim : public Algorithm {
         this->best_cost = std::numeric_limits<cost_t>::max();
 
         // Initialize the exact solver
-        this->m_exact_solver.init(this->m_network_2d.m_filename, this->m_network_2d.dimension);
+        this->m_exact_solver.init(this->m_network_2d);
     }
     
     // Computation functions

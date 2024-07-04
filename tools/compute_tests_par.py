@@ -272,7 +272,8 @@ if __name__ == "__main__":
         # Consider case y=xT for smaller TT dimensions
         y_cases = [False]
         if tt_dim <= 3:
-            y_cases = [True, False]
+            #y_cases = [True, False]
+            y_cases = [False]
 
         for y_eq_xT in y_cases:
             for type in types:

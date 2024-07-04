@@ -11,7 +11,7 @@
 #include "OneSidedOneDim/OneSidedOneDim.hpp"
 #include "Shuffle/Shuffle.hpp"
 #include "TwoSidedDeltaDim/TwoSidedDeltaDim.hpp"
-#include "CotengraOptimalWrapper/CotengraOptimalWrapper.hpp"
+#include "CotengraWrapper/CotengraWrapper.hpp"
 #include "../tools/Export/Export.hpp"
 
 #include <algorithm>

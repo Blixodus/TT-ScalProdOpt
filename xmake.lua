@@ -25,15 +25,11 @@ target("OneSidedOneDim")
 
 target("TwoSidedDeltaDim")
     set_kind("binary")
-    add_files("src/TwoSidedDeltaDim/*.cpp", "src/Components/*.cpp", "src/CotengraOptimalWrapper/CotengraOptimalWrapper.cpp")
+    add_files("src/TwoSidedDeltaDim/*.cpp", "src/Components/*.cpp")
 
-target("CotengraOptimalWrapper")
+target("CotengraWrapper")
     set_kind("binary")
-    add_files("src/CotengraOptimalWrapper/*.cpp", "src/Components/*.cpp")
-
-target("CotengraOptimalWrapper")
-    set_kind("binary")
-    add_files("src/CotengraOptimalWrapper/*.cpp", "src/Components/*.cpp")
+    add_files("src/CotengraWrapper/*.cpp", "src/Components/*.cpp")
 
 target("Compute")
     set_kind("binary")
