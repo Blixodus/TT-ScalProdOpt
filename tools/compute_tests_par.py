@@ -20,15 +20,19 @@ single_file_lock = multiprocessing.Lock()
 validate_results = False
 
 # ------------------------------- Utility functions --------------------------------
-def run_algorithm_cpp(algorithm, test_filename, tt_dim, delta):
+def run_algorithm_cpp(algorithm, test_filename, tt_dim, delta, ctg_algorithm=None):
     # Prepare command line arguments
     delta_str = ""
     if delta is not None:
         delta_str = f"delta {delta}"
 
+    ctg_algorithm_str = ""
+    if ctg_algorithm is not None:
+        ctg_algorithm_str = f"ctg_algorithm {ctg_algorithm}"
+
     tt_dim_str = f"tt_dim {tt_dim}"
 
-    args = f"source ~/.xmake/profile && xmake run -w . OptiTenseurs -a \"main_alg {algorithm} {tt_dim_str} {delta_str}\" -f {test_filename}"
+    args = f"source ~/.xmake/profile && xmake run -w . OptiTenseurs -a \"main_alg {algorithm} {ctg_algorithm_str} {tt_dim_str} {delta_str}\" -f {test_filename}"
 
     # Run the C++ program and retrieve output of the algorithm
     result = subprocess.run(args=args, capture_output=True, text=True, shell=True)
@@ -100,7 +104,7 @@ def run_algorithm(algorithm, test_filename, tt_dim, delta):
     elif algorithm == 'naive':
         return run_algorithm_naive(test_filename)
     else:
-        return run_algorithm_python(algorithm, test_filename)
+        return run_algorithm_cpp("CotengraWrapper", test_filename, tt_dim, None, algorithm)
     
 
 def generate_contraction_list(contraction_tree):

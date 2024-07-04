@@ -104,8 +104,15 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
                 return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
             }
             break;
-        case COTENGRAOPTIMALWRAPPER:
-            return new CotengraWrapper<2>(dictionary);
+        case COTENGRAWRAPPER:
+            if(tt_dim == 2) {
+                return new CotengraWrapper<2>(dictionary);
+            } else if(tt_dim == 3) {
+                return new CotengraWrapper<3>(dictionary);
+            } else {
+                std::cout<<"Warning! Using default tt_dim value of 2. Please add tt_dim to template in Main.cpp in order to use it."<<std::endl;
+                return new CotengraWrapper<2>(dictionary);
+            }
             break;
         default:
             std::cerr << "Unknown algorithm '" << algo_name << "'" << std::endl;

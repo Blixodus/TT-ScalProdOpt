@@ -48,11 +48,21 @@ class CotengraWrapper : public Algorithm {
     public:
     // Constructors
     CotengraWrapper(){}
-    CotengraWrapper(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
+    CotengraWrapper(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){
+        // Set the algorithm Cotengra algorithm to use
+        if(param_dictionary.find("ctg_algorithm") != param_dictionary.end()) {
+            std::cout<<"Cotengra using algorithm "<<std::any_cast<std::string>(param_dictionary["ctg_algorithm"])<<std::endl;
+            this->algorithm = std::any_cast<std::string>(param_dictionary["ctg_algorithm"]);
+        }
+    }
 
     // Initializers
     void init(Network& network) {
-        // Deprecated
+        // Initialize network 2D
+        this->m_network_2d = Network2D<tt_dim>(network.m_filename);
+
+        // Initialize wrapper using the network
+        this->init(this->m_network_2d);
     }
 
     void init(Network2D<tt_dim>& network) {
@@ -79,9 +89,6 @@ class CotengraWrapper : public Algorithm {
 
                     if(x >= 0 && x < tt_dim && y >= 0 && y < this->m_network_2d.dimension && this->m_edge_symbols.count({this->m_node_ids[row][column], this->m_node_ids[x][y]}) == 0) {
                         wchar_t symbol = get_symbol(symbol_count);
-                        if(symbol == L'a') {
-                            std::cout<<"!!!"<<symbol_count<<" "<<row<<" "<<column<<" "<<x<<" "<<y<<" "<<this->m_network_2d[this->m_node_ids[row][column], this->m_node_ids[x][y], true]<<std::endl;
-                        }
                         this->m_edge_symbols[{this->m_node_ids[row][column], this->m_node_ids[x][y]}] = symbol;
                         this->m_edge_symbols[{this->m_node_ids[x][y], this->m_node_ids[row][column]}] = symbol;
                         this->m_weights[symbol] = this->m_network_2d[this->m_node_ids[row][column], this->m_node_ids[x][y], true];
@@ -158,7 +165,11 @@ class CotengraWrapper : public Algorithm {
 
     // Solvers
     cost_t call_solve() {
-        return solve(0, this->m_network_2d.dimension - 1, LR).first;
+        auto result = solve(0, this->m_network_2d.dimension - 1, LR);
+        this->best_cost = result.first;
+        this->best_order_str = result.second;
+
+        return this->best_cost;
     }
 
     std::pair<cost_t, std::string> solve(const int dim_min, const int dim_max, const result_direction_e direction) {

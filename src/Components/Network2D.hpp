@@ -46,7 +46,6 @@ struct Network2D {
         }
 
         // Parse tensor train from file
-        //std::cout<<"!!!"<<std::endl;
         std::string line;
         int vertex1, vertex2, weight;
         while(getline(ifile, line)) {
