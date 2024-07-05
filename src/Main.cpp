@@ -72,6 +72,9 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
         case SHUFFLE:
             return new Shuffle(dictionary);
             break;
+        case ONESIDEDONEDIM:
+            return new OneSidedOneDim(dictionary);
+            break;
         case TWOSIDEDDELTADIM:
             if(tt_dim == 3) {
                 if(delta == 3) return new TwoSidedDeltaDim<3, ALL, 3>(dictionary);
@@ -83,7 +86,7 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
                 else if(delta == 9) return new TwoSidedDeltaDim<9, ALL, 3>(dictionary);
                 else if(delta == 10) return new TwoSidedDeltaDim<10, ALL, 3>(dictionary);
                 else {
-                    std::cout<<"Warning! Using default delta value of 3. Please add delta to template in Main.cpp in order to use it."<<std::endl;
+                    std::cerr<<"[Warning] Using default delta value of 3. Please add delta to template in Main.cpp in order to use it."<<std::endl;
                     return new TwoSidedDeltaDim<3, ALL, 3>(dictionary);
                 }
             } else if (tt_dim == 2) {
@@ -96,11 +99,11 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
                 else if(delta == 9) return new TwoSidedDeltaDim<9, ALL, 2>(dictionary);
                 else if(delta == 10) return new TwoSidedDeltaDim<10, ALL, 2>(dictionary);
                 else {
-                    std::cout<<"Warning! Using default delta value of 3. Please add delta to template in Main.cpp in order to use it."<<std::endl;
+                    std::cerr<<"[Warning] Using default delta value of 3. Please add delta to template in Main.cpp in order to use it."<<std::endl;
                     return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
                 }
             } else {
-                std::cout<<"Warning! Using default tt_dim value of 2. Please add tt_dim to template in Main.cpp in order to use it."<<std::endl;
+                std::cerr<<"[Warning] Using default tt_dim value of 2. Please add tt_dim to template in Main.cpp in order to use it."<<std::endl;
                 return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
             }
             break;
@@ -110,12 +113,12 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
             } else if(tt_dim == 3) {
                 return new CotengraWrapper<3>(dictionary);
             } else {
-                std::cout<<"Warning! Using default tt_dim value of 2. Please add tt_dim to template in Main.cpp in order to use it."<<std::endl;
+                std::cerr<<"[Warning] Using default tt_dim value of 2. Please add tt_dim to template in Main.cpp in order to use it."<<std::endl;
                 return new CotengraWrapper<2>(dictionary);
             }
             break;
         default:
-            std::cerr << "Unknown algorithm '" << algo_name << "'" << std::endl;
+            std::cerr<<"[Error] Unknown algorithm '"<<algo_name<<"'"<<std::endl;
             return nullptr;
             break;
     }

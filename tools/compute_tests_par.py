@@ -22,23 +22,31 @@ validate_results = False
 # ------------------------------- Utility functions --------------------------------
 def run_algorithm_cpp(algorithm, test_filename, tt_dim, delta, ctg_algorithm=None):
     # Prepare command line arguments
-    delta_str = ""
+    algorithm_arguments = f"main_alg {algorithm}"
+
+    if tt_dim is not None:
+        algorithm_arguments += f" tt_dim {tt_dim}"
+
     if delta is not None:
-        delta_str = f"delta {delta}"
+        algorithm_arguments += f" delta {delta}"
 
-    ctg_algorithm_str = ""
     if ctg_algorithm is not None:
-        ctg_algorithm_str = f"ctg_algorithm {ctg_algorithm}"
+        algorithm_arguments += f" ctg_algorithm {ctg_algorithm}"
 
-    tt_dim_str = f"tt_dim {tt_dim}"
-
-    args = f"source ~/.xmake/profile && xmake run -w . OptiTenseurs -a \"main_alg {algorithm} {ctg_algorithm_str} {tt_dim_str} {delta_str}\" -f {test_filename}"
+    args = f"source ~/.xmake/profile && xmake run -w . OptiTenseurs -a \"{algorithm_arguments}\" -f {test_filename}"
 
     # Run the C++ program and retrieve output of the algorithm
     result = subprocess.run(args=args, capture_output=True, text=True, shell=True)
 
+    # Print the stderr output of the algorithm to inform about warning or errors
+    if result.stderr:
+        print(f"🚨 Algorithm {algorithm} returned warnings and/or errors on {test_filename}.")
+        print("Args: ", args)
+        print(result.stderr)
+
     # Parse cost of the contraction and execution time of the algorithm
     cost = 0
+    order = ""
     execution_time = 0.0
     for line in result.stdout.split("\n"):
         if line.startswith("Best cost"):
@@ -57,7 +65,6 @@ def run_algorithm_python(algorithm, test_filename):
     inputs, output, sizes_dict, _ = import_tensor_train(test_filename)
 
     # Initialize the cgreedy object (which is not part of cotengra)
-    algorithm_str = algorithm
     if algorithm == 'cgreedy':
         algorithm = CGreedy(seed=1, minimize="flops", max_repeats=1024, max_time=1.0, progbar=False, threshold_optimal=12, threads=1)
     elif algorithm == 'hyper-greedy':
@@ -261,7 +268,6 @@ if __name__ == "__main__":
     # Retrieve list of algorithms to run
     algorithms = config['Algorithms']['algorithms'].split(',')
     deltas = [int(delta) for delta in config['Algorithms']['deltas'].split(',')]
-    print(deltas)
 
     # Retrieve flag for validation of the results
     validate_results = int(config['Results']['validate_order'])
@@ -303,7 +309,6 @@ if __name__ == "__main__":
 
     # Execute tasks in parallel
     print(f"Executing test cases in parallel using {cores} cores")
-    #print(parallel_input)
     with alive_bar(len(parallel_input)) as bar:
         for i in pool.imap_unordered(run_algorithm_on_test_case, parallel_input):
             bar()

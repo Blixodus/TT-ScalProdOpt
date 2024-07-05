@@ -33,7 +33,7 @@ Network::Network(std::string file){
 
     // std::ifstream ifile("instances/" + file);
     if(!ifile){
-        std::cerr << "Could not open file : " << file << " at Network initialization" << std::endl;
+        std::cerr << "[Error] Could not open file : " << file << " at Network initialization" << std::endl;
         exit(-1);
     }else{
         printf("Instantiating network : '%s'\n", file.data());
@@ -70,7 +70,6 @@ Network::Network(std::string file){
             case 'e':
                 if(tt_dim == 2) {
                     //grabing the edge
-                    std::cout<<"! ";
                     flux >> vertex1 >> vertex2 >> weight;
                     {
                     int v1 = min(vertex1, vertex2);
@@ -85,8 +84,6 @@ Network::Network(std::string file){
                     adjacence_matrix[n_vertex*vertex2 + vertex1] = weight;
                     //accumulating the weights
                     density+=weight;
-
-                    std::cout<<"!!"<<std::endl;
                 }
             break;
             default:

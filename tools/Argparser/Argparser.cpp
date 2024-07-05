@@ -28,7 +28,7 @@ void Argparser::sort_entries(){
                 break;
                 case OUTPUT:
                     if(!output_file.empty()){
-                        std::cerr << "Redefinition of output file" << std::endl;
+                        std::cerr << "[Error] Redefinition of output file" << std::endl;
                         break;
                     }else{
                         output_file = arg;
@@ -131,7 +131,7 @@ void cast_proper(std::map<std::string, std::any>& map, std::string key, std::str
             map[key] = val;
             break;
         default:
-            std::cerr << "Unrecognised key : '" << key << "'" << std::endl;
+            std::cerr << "[Warning] Unrecognised key : '" << key << "'" << std::endl;
             break;
     }
 }

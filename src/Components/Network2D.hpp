@@ -10,21 +10,16 @@
  */
 template <size_t tt_dim = 2>
 struct Network2D {
-    //dimension
+    // Network information
     dim_t dimension;
-
-    //size in edges
-    edgeID_t n_edge;
-
-    //size in nodes
-    vertexID_t n_vertex;
-
-    //density
-    float density=0.;
+    edgeID_t n_edge; // number of edges
+    vertexID_t n_vertex; // number of nodes
 
     // Filename the network was imported from
     std::string m_filename;
 
+    // Container for storing the edge weights
+    // e.g. rrr|dddd#rrr|dddd...
     vector<cost_t> m_egde_weight;
 
     // Constructors
@@ -47,7 +42,7 @@ struct Network2D {
 
         // Parse tensor train from file
         std::string line;
-        int vertex1, vertex2, weight;
+        int vertex1, vertex2, weight, file_tt_dim;
         while(getline(ifile, line)) {
             istringstream flux(&line[2]);
             //std::cout << line << std::endl;
@@ -60,6 +55,14 @@ struct Network2D {
 
                     // Initialize the edge weight vector
                     this->m_egde_weight.resize(this->n_edge, 1);
+                break;
+                case 't':
+                    // Parse tt_dim from file (to double check provided runtime parameter)
+                    file_tt_dim = atoi(&line[2]);
+                    if(file_tt_dim != tt_dim) {
+                        std::cerr << "[Error] Mismatch in tt_dim between file (" << file_tt_dim << ") and runtime parameter (" << tt_dim << ")." << std::endl;
+                        exit(-2);
+                    }
                 break;
                 case 'e':
                     // Parse the edge
@@ -79,14 +82,8 @@ struct Network2D {
         std::cout << "TT dimension " << tt_dim << std::endl;
         std::cout << "Dimension " << this->dimension << std::endl;
 
-        /*for(int i = 0; i < this->m_egde_weight.size(); i++) {
-            std::cout << this->m_egde_weight[i] << " ";
-        }
-        std::cout << std::endl;*/
-
         // Close the file
         ifile.close();
-        //std::cout<<"Finished\n"<<std::endl;
     }
 
     // Utility functions

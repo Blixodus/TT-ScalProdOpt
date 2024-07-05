@@ -90,7 +90,7 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
 
 
 def cotengra_wrapper_solve_with_args(algorithm, inputs, output, sizes_dict, dim, dim_min, dim_max, input_node_included):
-    #print(algorithm, inputs, output, sizes_dict, dim, dim_min, dim_max, input_node_included)
+    #print(inputs, output, sizes_dict)
 
     # Compute the contraction ordering for given arguments
     if algorithm == 'cgreedy':
@@ -104,6 +104,7 @@ def cotengra_wrapper_solve_with_args(algorithm, inputs, output, sizes_dict, dim,
     contraction_tree = rename_nodes(contraction_tree, dim, dim_min, dim_max, input_node_included)
     path_str = str(contraction_tree)
 
+    #print(tree.contraction_cost(), path_str)
     return (tree.contraction_cost(), path_str)
 
 
