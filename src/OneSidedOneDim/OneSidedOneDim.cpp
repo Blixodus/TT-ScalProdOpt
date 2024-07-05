@@ -230,9 +230,12 @@ void OneSidedOneDim::get_order(int s, int k){
 }
 
 void OneSidedOneDim::init(Network& network){
-    set_limit_dim(network.dimension);
-    dim = network.dimension;
-    n_vertex = network.n_vertex;
+    // Initialize network 2D
+    this->m_network_2d = Network2D<2>(network.m_filename);
+
+    set_limit_dim(this->m_network_2d.dimension);
+    this->dim = this->m_network_2d.dimension;
+    this->n_vertex = this->m_network_2d.n_vertex;
 
     m_adjacence_matrix.clear();
     m_ext_cost_tab.clear();
@@ -251,17 +254,20 @@ void OneSidedOneDim::init(Network& network){
     m_order_by_dim.resize(n_vertex*n_vertex/4, {-1, -1});
     m_central_ref.resize(n_vertex/2, -1);
 
-    for(const auto& [v1, v2] : network.edge_list){
-        weight_t w = network.adjacence_matrix[n_vertex*v1 + v2];
+    // Initialize the weight tables
+    for(int v1 = 0; v1 < this->m_network_2d.n_vertex; v1++) {
+        for(int v2 = v1 + 1; v2 < this->m_network_2d.n_vertex; v2++) {
+            weight_t w = this->m_network_2d[v1, v2, true];
 
-        m_ext_cost_tab[v1] *= w;
-        m_ext_cost_tab[v2] *= w;
+            m_ext_cost_tab[v1] *= w;
+            m_ext_cost_tab[v2] *= w;
 
-        m_adjacence_matrix[n_vertex*v1 + v2] = w;
-        m_adjacence_matrix[n_vertex*v2 + v1] = w;
+            m_adjacence_matrix[n_vertex*v1 + v2] = w;
+            m_adjacence_matrix[n_vertex*v2 + v1] = w;
 
-        m_adjacence_matrix[n_vertex*n_vertex + v1] *= w;
-        m_adjacence_matrix[n_vertex*n_vertex + v2] *= w;
+            m_adjacence_matrix[n_vertex*n_vertex + v1] *= w;
+            m_adjacence_matrix[n_vertex*n_vertex + v2] *= w;
+        }
     }
 }
 

@@ -11,6 +11,10 @@
 #include "../Components/Algorithm.hpp"
 
 class OneSidedOneDim : public Algorithm{
+    private:
+    // Generalized network information
+    Network2D<2> m_network_2d;
+
     public:
 
     //size : n_vertex
