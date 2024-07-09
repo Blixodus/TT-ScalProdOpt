@@ -18,6 +18,23 @@ from alive_progress import alive_bar
 from Scripts.naming import get_algorithm_name, get_dir, get_dir_ratio, get_test_filename, get_result_filename
 from Scripts.import_file import import_tensor_train
 
+# ----------------------------- Utility functions ------------------------------
+def get_label(algorithm):
+    label_dict = {
+        'optimal': 'Optimal',
+        'hyper-greedy': 'Hyper-Greedy',
+        'cgreedy': 'Cgreedy',
+        'naive': "Naive",
+        'OneSidedOneDim': "1-sided 1-dim"
+    }
+
+    if algorithm in label_dict:
+        return label_dict[algorithm]
+    elif algorithm.startswith('TwoSidedDeltaDim'):
+        return f"2-sided Δ-dim (Δ={algorithm.split('_')[1]})"
+    else:
+        return algorithm
+
 # ------------------------------- Plot function --------------------------------
 def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, plot_dir_path, nb_instances):
     completed_successfully = True
@@ -72,7 +89,7 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
 
         # Plot the normalized contraction cost
         for algorithm in algorithms:
-            sns.lineplot(data=results_cmp[algorithm], x="Size", y="Normalized_cost", label=algorithm)
+            sns.lineplot(data=results_cmp[algorithm], x="Size", y="Normalized_cost", label=get_label(algorithm))
         plt.xlabel('Size of the dataset')
         plt.ylabel('Contraction cost (mean of 50 instances)')
         plt.title('Comparison of the contraction cost (normalized to 2SΔD)')
@@ -94,7 +111,7 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
         line = '--'
         if algorithm == 'optimal':
             line = 'r+'
-        plt.plot(results[algorithm].groupby('Size')['Execution_time'].mean(), line, label=algorithm)
+        plt.plot(results[algorithm].groupby('Size')['Execution_time'].mean(), line, label=get_label(algorithm))
     plt.xlabel('Size of the dataset')
     plt.ylabel('Execution time [s] (mean of 50 instances)')
     plt.title('Comparison of the execution time')
