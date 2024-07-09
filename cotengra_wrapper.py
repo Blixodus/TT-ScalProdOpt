@@ -91,12 +91,15 @@ def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
 
 def cotengra_wrapper_solve_with_args(algorithm, inputs, output, sizes_dict, dim, dim_min, dim_max, input_node_included):
     #print(inputs, output, sizes_dict)
+    print("Called with", algorithm, inputs, output, sizes_dict, dim, dim_min, dim_max, input_node_included)
 
     # Compute the contraction ordering for given arguments
     if algorithm == 'cgreedy':
         algorithm = CGreedy(seed=1, minimize="flops", max_repeats=1024, max_time=1.0, progbar=False, threshold_optimal=12, threads=1)
     elif algorithm == 'hyper-greedy':
         algorithm = ctg.HyperOptimizer(methods=["greedy"], minimize="flops", parallel=False)
+    elif algorithm == 'hyper-kahypar':
+        algorithm = ctg.HyperOptimizer(methods=["kahypar"], minimize="flops", parallel=False)
     tree = ctg.array_contract_tree(inputs, output, sizes_dict, optimize=algorithm)
 
     # Rename the nodes to match the original tensor train

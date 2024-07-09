@@ -69,6 +69,8 @@ def run_algorithm_python(algorithm, test_filename):
         algorithm = CGreedy(seed=1, minimize="flops", max_repeats=1024, max_time=1.0, progbar=False, threshold_optimal=12, threads=1)
     elif algorithm == 'hyper-greedy':
         algorithm = ctg.HyperOptimizer(methods=["greedy"], minimize="flops", parallel=False)
+    elif algorithm == 'hyper-kahypar':
+        algorithm = ctg.HyperOptimizer(methods=["kahypar"], minimize="flops", parallel=False)
 
     # Run the algorithm and retrieve the output
     start_time = time.time()
