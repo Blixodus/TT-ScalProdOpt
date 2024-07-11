@@ -87,32 +87,47 @@ def run_algorithm_python(algorithm, test_filename):
     return cost, execution_time, order
 
 
-def run_algorithm_naive(test_filename):
-    # Open test file and read lines
-    with open(test_filename, 'r') as text_file:
-        lines = text_file.readlines()
+def run_algorithm_naive(test_filename, tt_dim, dim):
+    if tt_dim == 2:
+        # Parse naive cost from test file
+        with open(test_filename, 'r') as text_file:
+            lines = text_file.readlines()
 
-        # Locate the naive cost(s) of contracting the tensor train
-        naive_costs = []
-        for line in lines:
-            if line.startswith('c'):
-                cost = float(re.split('\W+', line)[3])
-                naive_costs.append(cost)
+            # Locate the naive cost(s) of contracting the tensor train
+            naive_costs = []
+            for line in lines:
+                if line.startswith('c'):
+                    cost = float(re.split('\W+', line)[3])
+                    naive_costs.append(cost)
 
-        cost = min(naive_costs)
-        execution_time = 0.0
+            cost = min(naive_costs)
 
-        # Return results
-        return cost, execution_time, "naive_order_TBD"
+            # Return results
+            return cost, 0.0, "naive_order_TBD"
+    elif tt_dim == 3:
+        # Generate naive order and evaluate its cost
+        order = []
+        for i in range(dim):
+            order.append((i, dim + i))
+            order.append((i, 2 * dim + i))
+            if i < dim - 1:
+                order.append((i, dim + (i + 1)))
+
+        # Retrieve cost of naive order 
+        cost = run_validation_on_test_case(tt_dim, test_filename, order)
+
+        return cost, 0.0, "naive_order_TBD"
+    else:
+        exit(f"Error! Naive algorithm is not implemented for given tensor train dimension {tt_dim}.")
 
 
 # Wrapper function to run computations for given test using either
 # C++ (our algorithms), or Python (cotengra and other algorithms)
-def run_algorithm(algorithm, test_filename, tt_dim, delta):
+def run_algorithm(algorithm, test_filename, tt_dim, dim, delta):
     if algorithm in ['OneSidedOneDim', 'TwoSidedDeltaDim']:
         return run_algorithm_cpp(algorithm, test_filename, tt_dim, delta)
     elif algorithm == 'naive':
-        return run_algorithm_naive(test_filename)
+        return run_algorithm_naive(test_filename, tt_dim, dim)
     else:
         return run_algorithm_cpp("CotengraWrapper", test_filename, tt_dim, None, algorithm)
 
@@ -146,7 +161,7 @@ def run_algorithm_on_test_case(input):
     algorithm, test_filename, result_filename, tt_dim, delta, dimension, instance = input[0]
 
     # Run the algorith on the test case
-    cost, execution_time, order = run_algorithm(algorithm, test_filename, tt_dim, delta)
+    cost, execution_time, order = run_algorithm(algorithm, test_filename, tt_dim, dimension, delta)
     output_str = f"{algorithm};{dimension};{instance};{test_filename};{cost};{execution_time};{order}"
 
     # Validate the contraction cost for given order if requested
