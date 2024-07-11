@@ -13,8 +13,15 @@ def node_id_from_ctg(node_id, dim, dmin, dmax):
     row = node_id // len
     column = node_id % len + dmin
 
-    #print(node_id, "--->", row, column, row * dim + column)
     return row * dim + column
+
+
+def node_id_from_ctg_ij(node_id, dim, i_min, j_min, i_max, j_max):
+    upper_length = i_max - i_min + 1
+    if node_id < upper_length:
+        return node_id + i_min
+    else:
+        return (node_id - upper_length) + dim + j_min
 
 
 def rename_nodes(contraction_tree, dim, dmin, dmax, input_node_included):
@@ -28,6 +35,19 @@ def rename_nodes(contraction_tree, dim, dmin, dmax, input_node_included):
                 return '#'
             else:
                 return node_id_from_ctg(contraction_tree - 1, dim, dmin, dmax)
+            
+
+def rename_nodes_ij(contraction_tree, dim, i_min, j_min, i_max, j_max, input_node_included):
+    if isinstance(contraction_tree, tuple):
+        return (rename_nodes(contraction_tree[0], dim, i_min, j_min, i_max, j_max, input_node_included), rename_nodes(contraction_tree[1], dim, i_min, j_min, i_max, j_max, input_node_included))
+    else:
+        if not input_node_included:
+            return node_id_from_ctg_ij(contraction_tree, dim, i_min, j_min, i_max, j_max)
+        else:
+            if contraction_tree == 0:
+                return '#'
+            else:
+                return node_id_from_ctg_ij(contraction_tree - 1, dim, i_min, j_min, i_max, j_max)
 
 
 def generate_contraction_list(contraction_tree):
@@ -49,44 +69,6 @@ def generate_contraction_list(contraction_tree):
         contraction_list.append((ids[i], ids[i + 1]))
 
     return contraction_list, min(ids)
-        
-
-def cotengra_wrapper_solve(input_file, dim_min, dim_max, dim, reversed):
-    inputs, output, sizes_dict, input_node_included = import_tensor_train(input_file, dim_min, dim_max, reversed)
-
-    #print(inputs, output, sizes_dict)
-
-    #fig, ax = ctg.HyperGraph(inputs, output, sizes_dict).plot()
-    #fig.savefig("graph_2d.pdf")
-    tree = ctg.array_contract_tree(inputs, output, sizes_dict, optimize='optimal')
-
-    #fig, ax = tree.plot_rubberband()
-    #fig.savefig("tree_2d.pdf")
-
-    #print(tree.flat_tree())
-    #contraction_list, _ = generate_contraction_list(tree.flat_tree())
-    #print(contraction_list)
-
-    #contraction_list_renamed = rename_nodes_from_ctg(tree.flat_tree(), 2, dim, dim_min, input_node_included)
-    #print(contraction_list_renamed)
-
-    #tree2 = ctg.array_contract_tree(inputs, output, sizes_dict, optimize=tree.flat_tree())
-    #print(tree2.contraction_cost())
-
-    contraction_tree = tree.flat_tree()
-    #print(contraction_tree)
-    contraction_tree = rename_nodes(contraction_tree, dim, dim_min, dim_max, input_node_included)
-    #print(contraction_tree)
-    path_str = str(contraction_tree) #str(contraction_list_renamed)
-    #print(path_str)
-
-    #print(tree.flat_tree())
-
-    #print(sizes_dict, output)
-    #print("[Cotengra wrapper PY]", input_file, dim_min, "...", dim_max, tree.contraction_cost() * outer_edges_cost, tree.contraction_cost(), outer_edges_cost)
-    
-    #print("[Cotengra wrapper PY]", input_file, dim_min, "...", dim_max, dim, tree.contraction_cost(), path_str)
-    return (tree.contraction_cost(), path_str)
 
 
 def cotengra_wrapper_solve_with_args(algorithm, inputs, output, sizes_dict, dim, dim_min, dim_max, input_node_included):
@@ -115,6 +97,38 @@ def cotengra_wrapper_solve_with_args(algorithm, inputs, output, sizes_dict, dim,
     # Rename the nodes to match the original tensor train
     contraction_tree = tree.flat_tree()
     contraction_tree = rename_nodes(contraction_tree, dim, dim_min, dim_max, input_node_included)
+    path_str = str(contraction_tree)
+
+    #print(tree.contraction_cost(), path_str)
+    return (int(tree.contraction_cost()), path_str)
+
+
+def cotengra_wrapper_solve_ij(algorithm, inputs, output, sizes_dict, dim, i_min, j_min, i_max, j_max, input_node_included):
+    # Compute the contraction ordering for given arguments
+    algorithm_str = algorithm
+    if algorithm == 'cgreedy':
+        algorithm = CGreedy(seed=1, minimize="flops", max_repeats=1024, max_time=1.0, progbar=False, threshold_optimal=12, threads=1)
+    elif algorithm == 'hyper-greedy':
+        algorithm = ctg.HyperOptimizer(methods=["greedy"], minimize="flops", parallel=False)
+    elif algorithm == 'hyper-kahypar':
+        algorithm = ctg.HyperOptimizer(methods=["kahypar"], minimize="flops", parallel=False)
+    elif algorithm == 'quickbb-2':
+        algorithm = ctg.QuickBBOptimizer()
+    elif algorithm == 'flowcutter':
+        algorithm = ctg.FlowCutterOptimizer()
+
+    if ctg.__version__ != "0.2.0":
+        tree = ctg.array_contract_tree(inputs, output, sizes_dict, optimize=algorithm)
+    else:
+        if algorithm_str == 'quickbb-2' or algorithm_str == 'flowcutter':
+            inputs = [set(node_indices_str) for node_indices_str in inputs]
+            tree = algorithm.build_tree(inputs, output, sizes_dict)
+        else:
+            tree = algorithm.search(inputs, output, sizes_dict)
+
+    # Rename the nodes to match the original tensor train
+    contraction_tree = tree.flat_tree()
+    contraction_tree = rename_nodes_ij(contraction_tree, dim, i_min, j_min, i_max, j_max, input_node_included)
     path_str = str(contraction_tree)
 
     #print(tree.contraction_cost(), path_str)

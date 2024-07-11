@@ -48,11 +48,6 @@ class CotengraWrapper : public Algorithm {
         return (wchar_t)i;
     }
 
-    // Generate input arguments for Cotengra solver
-    // input: list of strings representing the input nodes and their edges
-    // output: string representing edges of the output node
-    // weights: map of edge symbols and their weights
-    // input_node_included: boolean indicating if the input node is included in the input list
     void generate_subproblem(const int dim_min, const int dim_max, const result_direction_e direction, std::vector<std::wstring>& input, std::wstring& output, std::map<wchar_t, cost_t>& weights, bool& input_node_included) {
         // Generate the input node (representing the part of TT which is already
         // contracted prior to this subproblem) and the output node (representing 
@@ -106,6 +101,107 @@ class CotengraWrapper : public Algorithm {
                     int x = i + move_x[k];
                     int y = j + move_y[k];
                     if(x >= 0 && x < tt_dim && y >= max(0, dim_min - 1) && y <= min(this->m_network_2d.dimension - 1, dim_max + 1)) {
+                        wchar_t symbol = this->m_edge_symbols[{this->m_node_ids[i][j], this->m_node_ids[x][y]}];
+                        edges += symbol;
+                        weights[symbol] = this->m_weights[symbol];
+                    }
+                }
+                input.push_back(edges);
+            }
+        }
+    }
+
+        void generate_subproblem(const int i_min, const int j_min, const int i_max, const int j_max, const result_direction_e direction, std::vector<std::wstring>& input, std::wstring& output, std::map<wchar_t, cost_t>& weights, bool& input_node_included) {
+        // Generate the input node (representing the part of TT which is already
+        // contracted prior to this subproblem) and the output node (representing 
+        // the part of TT which is result of this computation)
+
+        // Add outer edges from the left size to include them in the cost
+        std::wstring left_edges;
+
+        if(i_min > 0) {
+            // Upper rank edge
+            wchar_t symbol = this->m_edge_symbols[{this->m_node_ids[0][i_min - 1], this->m_node_ids[0][i_min]}];
+            left_edges += symbol;
+            weights[symbol] = this->m_weights[symbol];
+        }
+
+        if(j_min > 0) {
+            // Lower rank edge
+            wchar_t symbol = this->m_edge_symbols[{this->m_node_ids[1][j_min - 1], this->m_node_ids[1][j_min]}];
+            left_edges += symbol;
+            weights[symbol] = this->m_weights[symbol];
+        }
+
+        if(i_min != j_min) {
+            // Mode edges
+            for(int i = min(i_min, j_min); i < max(i_min, j_min); i++) {
+                wchar_t symbol = this->m_edge_symbols[{this->m_node_ids[0][i], this->m_node_ids[1][i]}];
+                left_edges += symbol;
+                weights[symbol] = this->m_weights[symbol];
+            }
+        }
+
+        if(left_edges != L"") {
+            if(direction == LR) {
+                input.push_back(left_edges);
+                input_node_included = true;
+            } else {
+                output += left_edges;
+            }
+        }
+
+        // Add outer edges from the right size to include them in the cost
+        std::wstring right_edges;
+
+        if(i_max + 1 < this->m_network_2d.dimension) {
+            // Upper rank edge
+            wchar_t symbol = this->m_edge_symbols[{this->m_node_ids[0][i_max], this->m_node_ids[0][i_max + 1]}];
+            right_edges += symbol;
+            weights[symbol] = this->m_weights[symbol];
+        }
+
+        if(j_max + 1 < this->m_network_2d.dimension) {
+            // Lower rank edge
+            wchar_t symbol = this->m_edge_symbols[{this->m_node_ids[1][j_max], this->m_node_ids[1][j_max + 1]}];
+            right_edges += symbol;
+            weights[symbol] = this->m_weights[symbol];
+        }
+
+        if(i_max != j_max) {
+            // Mode edges
+            for(int i = min(i_max, j_max) + 1; i <= max(i_max, j_max); i++) {
+                wchar_t symbol = this->m_edge_symbols[{this->m_node_ids[0][i], this->m_node_ids[1][i]}];
+                right_edges += symbol;
+                weights[symbol] = this->m_weights[symbol];
+            }
+        }
+
+        if(right_edges != L"") {
+            if(direction == LR) {
+                output += right_edges;
+            } else {
+                input.push_back(right_edges);
+                input_node_included = true;
+            }
+        }
+    
+        // Set the upper left/right, middle and lower left/right indices
+        //   |
+        // --O--
+        //   |
+        int move_x[] = {0, 1, 0, -1};
+        int move_y[] = {1, 0, -1, 0};
+
+        for(int i = 0; i < tt_dim; i++) {
+            const int dim_min = (i == 0) ? i_min : j_min;
+            const int dim_max = (i == 0) ? i_max : j_max;
+            for(int j = dim_min; j <= dim_max; j++) {
+                std::wstring edges;
+                for(int k = 0; k < 4; k++) {
+                    int x = i + move_x[k];
+                    int y = j + move_y[k];
+                    if((x == 0 && y >= i_min && y <= i_max) || (x == 1 && y >= j_min && y >= j_max)) {
                         wchar_t symbol = this->m_edge_symbols[{this->m_node_ids[i][j], this->m_node_ids[x][y]}];
                         edges += symbol;
                         weights[symbol] = this->m_weights[symbol];
@@ -208,6 +304,26 @@ class CotengraWrapper : public Algorithm {
 
         auto python_script = py::module::import("cotengra_wrapper");
         auto resultobj = python_script.attr("cotengra_wrapper_solve_with_args")(this->algorithm, inputs, output, weights, dim, dim_min, dim_max, input_node_included);
+        auto result = resultobj.cast<py::tuple>();
+
+        return make_pair(result[0].cast<cost_t>(), result[1].cast<std::string>());
+    }
+
+    std::pair<cost_t, std::string> solve(const int i_min, const int j_min, const int i_max, const int j_max, const result_direction_e direction) {
+        // Prepare input, output, sizes_dict arguments for calling Cotengra on
+        // requested subpart of the network
+        std::vector<std::wstring> inputs;
+        std::wstring output;
+        std::map<wchar_t, cost_t> weights;
+        bool input_node_included = false;
+        generate_subproblem(i_min, j_min, i_max, j_max, direction, inputs, output, weights, input_node_included);
+
+        // Call the Cotengra wrapper script to solve the subpart of the network
+        // using the optimal algorithm from the Cotengra library
+        int dim = this->m_network_2d.dimension;
+
+        auto python_script = py::module::import("cotengra_wrapper");
+        auto resultobj = python_script.attr("cotengra_wrapper_solve_ij")(this->algorithm, inputs, output, weights, dim, i_min, j_min, i_max, j_max, input_node_included);
         auto result = resultobj.cast<py::tuple>();
 
         return make_pair(result[0].cast<cost_t>(), result[1].cast<std::string>());
