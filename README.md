@@ -1,3 +1,59 @@
+# Exploring optimal contraction strategies for fast vector scalar product in Tensor-Train format
+
+# Algorithms
+
+
+## Tensor-Train network format
+
+## Contraction orderding format
+In the implementation of the $1-sided$ $1-dim$ and $2-sided$ $\Delta-dim$ algorithms, we have opted for the recursive definition of the final contraction order, as it provides an elegant and unambiguous way to define the order of each contraction and resulting tensor.
+
+![Contraction ordering example](./docs/Ordering_example.png)
+
+For example for contraction presented above, the order returned by our algorithm would be defined as `((((0, 1), (3, 4)), 2), 5)`, which can be represented in form of list of nodes to be contracted as `[(0, 1), (3, 4), (0, 3), (0, 2), (0, 5)]` (assuming that node with lower id represents the result of each contraction). 
+
+We have provided the script to flatten the recursive order definition:
+`tools/flat_order.py`.
+
+
+# Preparing the environment
+
+### Cloning the repository
+In order to clone the repository, use the git client of your choosing, for example:
+```
+https://github.com/Blixodus/OptiTenseurs.git
+```
+
+### Cloning the external dependencies
+Our project relies on [pybind11](https://github.com/pybind/pybind11) library, in order to launch Python interpreter from C++ code, therefore after cloning the repository, the submodules needs to be initialized using the following commands:
+
+```
+git submodule init
+git submodule update
+```
+
+### Initializing build system
+
+
+### Preparing Python environment and dependencies
+
+
+## Compilation
+In order to compile the project along with all available algorithms and tools, use the following command:
+```
+xmake b
+```
+
+## Usage
+
+
+
+
+
+
+# Preparing repository for usage
+
+
 # OptiTenseurs
 The goal of this project is to implement algorithms capable of finding the best order of contraction of any tensor train, given the size of each vertex's dimension.
 
