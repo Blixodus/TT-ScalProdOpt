@@ -13,6 +13,7 @@ from cgreedy import CGreedy
 from alive_progress import alive_bar
 
 from Scripts.naming import get_dir, get_dir_ratio, get_test_filename, get_result_filename
+from Scripts.contraction_list import generate_contraction_list
 from Scripts.import_file import import_tensor_train
 
 file_lock = {}
@@ -114,27 +115,6 @@ def run_algorithm(algorithm, test_filename, tt_dim, delta):
         return run_algorithm_naive(test_filename)
     else:
         return run_algorithm_cpp("CotengraWrapper", test_filename, tt_dim, None, algorithm)
-    
-
-def generate_contraction_list(contraction_tree):
-    if len(contraction_tree) > 2:
-        exit("Error! The contraction tree is not binary.")
-    
-    contraction_list = []
-    ids = []
-
-    for i in range(len(contraction_tree)):
-        if isinstance(contraction_tree[i], tuple):
-            local_list, min_id = generate_contraction_list(contraction_tree[i])
-            ids.append(min_id)
-            contraction_list += local_list
-        else:
-            ids.append(contraction_tree[i])
-
-    for i in range(len(ids) - 1):
-        contraction_list.append((ids[i], ids[i + 1]))
-
-    return contraction_list, min(ids)
 
 
 def run_validation_on_test_case(tt_dim, test_filename, order):
