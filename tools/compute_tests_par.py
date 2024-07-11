@@ -95,7 +95,7 @@ def run_algorithm_naive(test_filename):
         naive_costs = []
         for line in lines:
             if line.startswith('c'):
-                cost = int(re.split('\W+', line)[3])
+                cost = float(re.split('\W+', line)[3])
                 naive_costs.append(cost)
 
         cost = min(naive_costs)
@@ -148,12 +148,14 @@ def run_validation_on_test_case(tt_dim, test_filename, order):
 
     # Run the C++ validator and retrieve the output
     result = subprocess.run(args=args, input=inputs, capture_output=True, text=True, shell=True)
+    print(result.stderr)
 
     # Parse cost of the contraction and execution time of the algorithm
     cost = 0
     for line in result.stdout.split("\n"):
         if line.startswith("Cost"):
             cost = float(line.split(":")[-1])
+            break
 
     # Return result
     return cost

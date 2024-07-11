@@ -21,13 +21,20 @@ int main(int argc, char* argv[]){
 
     // Calculate the cost of given contraction order
     cost_t cost = 0;
-    if(tt_dim == 3) {
-        Cost_cpt<3> cost_calc(network_file, order);
-        cost = cost_calc.compute_order_cost();
-    } else {
+    if(tt_dim == 2) {
         Cost_cpt<2> cost_calc(network_file, order);
         cost = cost_calc.compute_order_cost();
+    } else if(tt_dim == 3) {
+        Cost_cpt<3> cost_calc(network_file, order);
+        cost = cost_calc.compute_order_cost();
+    } else if(tt_dim == 4) {
+        Cost_cpt<4> cost_calc(network_file, order);
+        cost = cost_calc.compute_order_cost();
+    } else {
+        std::cerr<<"[Error] Unsupported tt_dim value. Please add tt_dim to template in tools/Compute/Main.cpp in order to use it."<<std::endl;
+        cost = -1;
     }
+
 
     std::cout<<"Cost : "<<cost<<std::endl;
     return 0;

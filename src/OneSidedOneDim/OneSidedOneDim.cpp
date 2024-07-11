@@ -258,15 +258,16 @@ void OneSidedOneDim::init(Network& network){
     for(int v1 = 0; v1 < this->m_network_2d.n_vertex; v1++) {
         for(int v2 = v1 + 1; v2 < this->m_network_2d.n_vertex; v2++) {
             weight_t w = this->m_network_2d[v1, v2, true];
+            if(w != 0) {
+                m_ext_cost_tab[v1] *= w;
+                m_ext_cost_tab[v2] *= w;
 
-            m_ext_cost_tab[v1] *= w;
-            m_ext_cost_tab[v2] *= w;
+                m_adjacence_matrix[n_vertex*v1 + v2] = w;
+                m_adjacence_matrix[n_vertex*v2 + v1] = w;
 
-            m_adjacence_matrix[n_vertex*v1 + v2] = w;
-            m_adjacence_matrix[n_vertex*v2 + v1] = w;
-
-            m_adjacence_matrix[n_vertex*n_vertex + v1] *= w;
-            m_adjacence_matrix[n_vertex*n_vertex + v2] *= w;
+                m_adjacence_matrix[n_vertex*n_vertex + v1] *= w;
+                m_adjacence_matrix[n_vertex*n_vertex + v2] *= w;
+            }
         }
     }
 }
