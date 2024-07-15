@@ -13,7 +13,7 @@
 class OneSidedOneDim : public Algorithm{
     private:
     // Generalized network information
-    Network2D<2> m_network_2d;
+    Network<2> m_network_2d;
 
     public:
 
@@ -51,8 +51,8 @@ class OneSidedOneDim : public Algorithm{
     OneSidedOneDim(){}
     OneSidedOneDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
-    // Initializers 
-    void init(Network& network);
+    // Initializer
+    void init(std::string filename);
 
     // Solvers
     cost_t solve();

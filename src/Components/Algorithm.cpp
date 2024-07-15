@@ -67,17 +67,3 @@ void Algorithm::set_limit_dim(int limit){
     dmax = (refdmax <= 0) ? limit : std::min(std::max(1, refdmax), limit);
     dmin = std::min(std::max(1, refdmin), dmax);
 }
-
-/**
- * @brief Initializes the starting solution
- * 
- * @param network 
- */
-void Algorithm::set_start_sol(Network& network){
-    if(start_sol != nullptr){
-        execfile_no_display(*start_sol, network);
-        best_cost = start_sol->best_cost;
-        best_order = start_sol->best_order;
-        time += start_sol->time;
-    }
-}

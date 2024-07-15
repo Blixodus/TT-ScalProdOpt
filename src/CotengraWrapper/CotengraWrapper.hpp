@@ -20,7 +20,7 @@ class CotengraWrapper : public Algorithm {
     std::string algorithm = "optimal";
 
     // Generalized network information
-    Network2D<tt_dim> m_network_2d;
+    Network<tt_dim> m_network;
 
     std::vector<vertexID_t> m_node_ids[tt_dim]; // 2D grid of node ids for given row and column
     std::map<std::pair<vertexID_t, vertexID_t>, wchar_t> m_edge_symbols; // map of edge symbols
@@ -71,7 +71,7 @@ class CotengraWrapper : public Algorithm {
         }
 
         // Add outer edges from the right size to include them in the cost
-        if(dim_max + 1 < this->m_network_2d.dimension) {
+        if(dim_max + 1 < this->m_network.dimension) {
             std::wstring edges;
             for(int i = 0; i < tt_dim; i++) {
                 wchar_t symbol = this->m_edge_symbols[{this->m_node_ids[i][dim_max], this->m_node_ids[i][dim_max + 1]}];
@@ -100,7 +100,7 @@ class CotengraWrapper : public Algorithm {
                 for(int k = 0; k < 4; k++) {
                     int x = i + move_x[k];
                     int y = j + move_y[k];
-                    if(x >= 0 && x < tt_dim && y >= max(0, dim_min - 1) && y <= min(this->m_network_2d.dimension - 1, dim_max + 1)) {
+                    if(x >= 0 && x < tt_dim && y >= max(0, dim_min - 1) && y <= min(this->m_network.dimension - 1, dim_max + 1)) {
                         wchar_t symbol = this->m_edge_symbols[{this->m_node_ids[i][j], this->m_node_ids[x][y]}];
                         edges += symbol;
                         weights[symbol] = this->m_weights[symbol];
@@ -154,14 +154,14 @@ class CotengraWrapper : public Algorithm {
         // Add outer edges from the right size to include them in the cost
         std::wstring right_edges;
 
-        if(i_max + 1 < this->m_network_2d.dimension) {
+        if(i_max + 1 < this->m_network.dimension) {
             // Upper rank edge
             wchar_t symbol = this->m_edge_symbols[{this->m_node_ids[0][i_max], this->m_node_ids[0][i_max + 1]}];
             right_edges += symbol;
             weights[symbol] = this->m_weights[symbol];
         }
 
-        if(j_max + 1 < this->m_network_2d.dimension) {
+        if(j_max + 1 < this->m_network.dimension) {
             // Lower rank edge
             wchar_t symbol = this->m_edge_symbols[{this->m_node_ids[1][j_max], this->m_node_ids[1][j_max + 1]}];
             right_edges += symbol;
@@ -223,23 +223,20 @@ class CotengraWrapper : public Algorithm {
         }
     }
 
-    // Initializers
-    void init(Network& network) {
-        // Initialize network 2D
-        this->m_network_2d = Network2D<tt_dim>(network.m_filename);
-
-        // Initialize wrapper using the network
-        this->init(this->m_network_2d);
+    // Initializer
+    void init(std::string filename) {
+        this->m_network = Network<tt_dim>(filename);
+        this->init(this->m_network);
     }
 
-    void init(Network2D<tt_dim>& network) {
+    void init(Network<tt_dim> network) {
         // Initialize network
-        this->m_network_2d = network;
+        this->m_network = network;
 
         // Generate node ids for each row and column
         for(int row = 0; row < tt_dim; row++) {
-            for(int column = 0; column < this->m_network_2d.dimension; column++) {
-                this->m_node_ids[row].push_back(row * this->m_network_2d.dimension + column);
+            for(int column = 0; column < this->m_network.dimension; column++) {
+                this->m_node_ids[row].push_back(row * this->m_network.dimension + column);
             }
         }
 
@@ -249,16 +246,16 @@ class CotengraWrapper : public Algorithm {
 
         int symbol_count = 0;
         for(int row = 0; row < tt_dim; row++) {
-            for(int column = 0; column < this->m_network_2d.dimension; column++) {
+            for(int column = 0; column < this->m_network.dimension; column++) {
                 for(int i = 0; i < 4; i++) {
                     int x = row + move_x[i];
                     int y = column + move_y[i];
 
-                    if(x >= 0 && x < tt_dim && y >= 0 && y < this->m_network_2d.dimension && this->m_edge_symbols.count({this->m_node_ids[row][column], this->m_node_ids[x][y]}) == 0) {
+                    if(x >= 0 && x < tt_dim && y >= 0 && y < this->m_network.dimension && this->m_edge_symbols.count({this->m_node_ids[row][column], this->m_node_ids[x][y]}) == 0) {
                         wchar_t symbol = get_symbol(symbol_count);
                         this->m_edge_symbols[{this->m_node_ids[row][column], this->m_node_ids[x][y]}] = symbol;
                         this->m_edge_symbols[{this->m_node_ids[x][y], this->m_node_ids[row][column]}] = symbol;
-                        this->m_weights_map[symbol] = this->m_network_2d[this->m_node_ids[row][column], this->m_node_ids[x][y], true];
+                        this->m_weights_map[symbol] = this->m_network[this->m_node_ids[row][column], this->m_node_ids[x][y], true];
                         symbol_count++;
                     }
                 }
@@ -282,7 +279,7 @@ class CotengraWrapper : public Algorithm {
 
     // Solvers
     cost_t call_solve() {
-        auto result = solve(0, this->m_network_2d.dimension - 1, LR);
+        auto result = solve(0, this->m_network.dimension - 1, LR);
         this->best_cost = result.first;
         this->best_order_str = result.second;
 
@@ -300,7 +297,7 @@ class CotengraWrapper : public Algorithm {
 
         // Call the Cotengra wrapper script to solve the subpart of the network
         // using the optimal algorithm from the Cotengra library
-        int dim = this->m_network_2d.dimension;
+        int dim = this->m_network.dimension;
 
         auto python_script = py::module::import("cotengra_wrapper");
         auto resultobj = python_script.attr("cotengra_wrapper_solve_with_args")(this->algorithm, inputs, output, weights, dim, dim_min, dim_max, input_node_included);
@@ -320,7 +317,7 @@ class CotengraWrapper : public Algorithm {
 
         // Call the Cotengra wrapper script to solve the subpart of the network
         // using the optimal algorithm from the Cotengra library
-        int dim = this->m_network_2d.dimension;
+        int dim = this->m_network.dimension;
 
         auto python_script = py::module::import("cotengra_wrapper");
         auto resultobj = python_script.attr("cotengra_wrapper_solve_ij")(this->algorithm, inputs, output, weights, dim, i_min, j_min, i_max, j_max, input_node_included);

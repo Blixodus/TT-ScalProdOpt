@@ -1,7 +1,7 @@
-#include "ConvexSplits.hpp"
+#include "TwoSidedDeltaDim.hpp"
 
 int main(int argc, char* argv[]){
-    ConvexSplits solver;
+    TwoSidedDeltaDim<4, ALL, 2> solver;
     const char* path;
     bool sf = true;
 
@@ -32,9 +32,9 @@ int main(int argc, char* argv[]){
     }
     if(sf){
         // display(path);
-        execfile<ConvexSplits>(solver, std::string(path));
+        execfile(solver, std::string(path));
     }else{
-        execdir<ConvexSplits>(solver, std::string(path));
+        execdir(solver, std::string(path));
     }
     return 0;
 }

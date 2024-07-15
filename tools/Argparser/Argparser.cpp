@@ -24,7 +24,7 @@ void Argparser::sort_entries(){
                     alg_entries_list.push_back(arg);
                 break;
                 case INSTANCES:
-                    file_entries_list.push_back(Network(arg));
+                    file_entries_list.push_back(arg);
                 break;
                 case OUTPUT:
                     if(!output_file.empty()){

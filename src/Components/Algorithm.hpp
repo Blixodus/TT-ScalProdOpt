@@ -14,14 +14,12 @@ namespace alg{
         {"main_alg", MAIN_ALG}, {"dmin", DMIN}, {"dmax", DMAX}, {"sub_alg", SUB_ALG},
         {"start_sol", START_SOL}, {"time", TIME}, {"test", TEST}
     };
-
-    
 }
 
 using namespace alg;
 
 template<class T>
-void execution_workflow(T& solver, Network& network);
+void execution_workflow(T& solver, std::string filename);
 
 /**
  * @brief general algorithm class
@@ -74,11 +72,7 @@ class Algorithm{
     //We can deactivate the algorithm in the execution queue once it times out
     bool still_up = true;
 
-    //TODO: make sure we cant modify the network
-    /*const*/ Network* m_network;
-
-    virtual void init(string file) {};
-    virtual void init(Network& network){};
+    virtual void init(std::string filename) {};
 
     Algorithm(){}
     Algorithm(std::map<std::string, std::any> map);
@@ -90,30 +84,25 @@ class Algorithm{
     std::string best_order_as_string() const;
 
     void set_limit_dim(dim_t max);
-    void set_network(Network& network){m_network = &network;}
-    void set_start_sol(Network& network);
     
-
     const int verify();
 };
 
 template<class T>
-void execution_workflow(T& solver, Network& network){
-    solver.init(network);
-    solver.set_network(network);
-    solver.set_start_sol(network);
+void execution_workflow(T& solver, std::string filename){
+    solver.init(filename);
 }
 
 /**
- * @brief Executes an algorithm on a network
+ * @brief Executes an algorithm on a network file
  * 
  * @tparam T 
  * @param solver 
  * @param network 
  */
 template<class T>
-void execfile(T& solver, Network& network){
-    execution_workflow(solver, network);
+void execfile(T& solver, std::string filename){
+    execution_workflow(solver, filename);
 
     if(solver.dmax > -1){
         std::cout << "Delta : " << solver.dmax << '\n';
@@ -139,15 +128,15 @@ void execfile(T& solver, Network& network){
 }
 
 /**
- * @brief Execute an algorithm on a network without displaying to standard output
+ * @brief Execute an algorithm on a network file without displaying to standard output
  * 
  * @tparam T 
  * @param solver 
  * @param network 
  */
 template<class T>
-void execfile_no_display(T& solver, Network& network){
-    execution_workflow(solver, network);
+void execfile_no_display(T& solver, std::string filename){
+    execution_workflow(solver, filename);
 
     auto start = std::chrono::high_resolution_clock::now();
     solver.best_cost = solver.call_solve();
@@ -157,19 +146,6 @@ void execfile_no_display(T& solver, Network& network){
     if(solver.to_test){
         solver.verify();
     }
-}
-
-/**
- * @brief Executes an algorithm on a network given as a filename
- * 
- * @tparam T 
- * @param solver 
- * @param file 
- */
-template<class T>
-void execfile(T& solver, std::string file, bool DISPLAY=true){
-    Network nw = Network(file);
-    DISPLAY ? execfile(solver, nw) : execfile_no_display(solver, nw);
 }
 
 /**
@@ -195,9 +171,7 @@ void execdir(T& solver, std::string dir){
     while(file != NULL){
         if(file->d_name[0] != '.'){
             std::string path = base + file->d_name;
-            // display(path);
-            Network nw = Network(std::string(path));
-            execfile<T>(solver, nw);
+            execfile<T>(solver, std::string(path));
         }
         file = readdir(dp);
     }

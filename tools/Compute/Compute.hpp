@@ -1,13 +1,13 @@
 #ifndef TEST_HPP
 #define TEST_HPP
 // #include "../../src/Components/Components.hpp"
-#include "../../src/Components/Network2D.hpp"
+#include "../../src/Components/Network.hpp"
 #include <fstream>
 
 template <size_t tt_dim = 2>
 class Cost_cpt {
     private:
-    Network2D<tt_dim> m_network;
+    Network<tt_dim> m_network;
     vector_vertex_pair_t m_order;
     vector_vertexID_t m_representative;
     std::vector<std::vector<weight_t>> m_adjacence_matrix;
@@ -28,24 +28,26 @@ class Cost_cpt {
         }
     }
 
-    const vertexID_t rep(vertexID_t vertex) {
-        while(this->m_representative[vertex] != -1) {
-            vertex = this->m_representative[vertex];
+    const vertexID_t rep(const vertexID_t vertex) {
+        vertexID_t v = vertex;
+        while(this->m_representative[v] != -1) {
+            v = this->m_representative[v];
         }
-        return vertex;
+        this->m_representative[vertex] = v;
+        return v;
     }
 
     cost_t contract(vertex_pair_t edge) {
         vertexID_t v1 = this->rep(edge.first);
         vertexID_t v2 = this->rep(edge.second);
+         std::cout<<"\t"<<edge.first<<" "<<v1<<" "<<edge.second<<" "<<v2<<endl;
 
         // We always keep smaller node as representative of the contracted edge
         if(v1 > v2) std::swap(v1, v2);
 
-        //std::cout<<"\t"<<v1<<" "<<v2<<endl;
         if(v1 != v2) {
             cost_t result = this->m_adjacence_matrix[v1][v2];
-            //std::cout<<"\t\t"<<result<<endl;
+            std::cout<<"\t\t"<<result<<endl;
             for(vertexID_t j = 0; j < this->m_network.n_vertex; j++) {
                 if(v1 != j) {
                     //std::cout<<"\t\t\t"<<v2<<" "<<j<<" "<<m_adjacence_matrix[v2][j]<<endl;
@@ -89,6 +91,9 @@ class Cost_cpt {
             m_adjacence_matrix[v1][v2] = 0;
             m_adjacence_matrix[v2][v1] = 0;
 
+            // Set representative of v2 to v1
+            this->m_representative[v2] = v1;
+
             return result;
         }
 
@@ -106,9 +111,10 @@ class Cost_cpt {
         // operation to obtain the total cost of given order
         cost_t cost = 0;
         for(vertex_pair_t edge : this->m_order){
+            std::cout<<"# Contracting "<<edge.first<<" and "<<edge.second<<std::endl;
             cost_t contraction_cost = this->contract(edge);
             cost += contraction_cost;
-            //std::cout<<"Contracting "<<edge.first<<" and "<<edge.second<<" cost : "<<contraction_cost<<std::endl;
+            std::cout<<"$ Contracting "<<edge.first<<" and "<<edge.second<<" cost : "<<contraction_cost<<std::endl;
         }
         return cost;
     }

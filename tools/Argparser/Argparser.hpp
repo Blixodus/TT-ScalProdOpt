@@ -41,7 +41,7 @@ struct Argparser{
     //list of param dictionaries, in the form of a list of string
     std::vector<std::string> alg_entries_list;
     //list of file entries
-    std::vector<Network> file_entries_list;
+    std::vector<std::string> file_entries_list;
     //output csv file
     std::string output_file;
 

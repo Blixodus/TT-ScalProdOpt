@@ -57,21 +57,6 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
 
     if(ALGO_MAP.find(algo_name) == ALGO_MAP.end()){return nullptr;}
     switch(ALGO_MAP[algo_name]){
-        case ALLSPLITS:
-            return new AllSplits(dictionary);
-            break;
-        case ALLEDGEBYEDGE:
-            return new AllEdgeByEdge(dictionary);
-            break;
-        case CONVEXSPLITS:
-            return new ConvexSplits(dictionary);
-            break;
-        case GREEDYEDGESORT:
-            return new GreedyEdgeSort(dictionary);
-            break;
-        case SHUFFLE:
-            return new Shuffle(dictionary);
-            break;
         case ONESIDEDONEDIM:
             return new OneSidedOneDim(dictionary);
             break;
@@ -169,7 +154,7 @@ void display_infos(Algorithm& solver){
  * @param solver
  */
 template<class T>
-void launch_exec(T& solver, Network& network){
+void launch_exec(T& solver, std::string network_file){
     int status;
     pid_t pid = fork();
     if(pid == 0){ //processus fils
@@ -177,8 +162,8 @@ void launch_exec(T& solver, Network& network){
         mutex mtx;
 
         // Thread that will carry the execution
-        std::thread t1([&solver, &cv, &network](){
-            execfile_no_display(solver, network);
+        std::thread t1([&solver, &cv, &network_file](){
+            execfile_no_display(solver, network_file);
             cv.notify_all();
         });
 
@@ -197,9 +182,6 @@ void launch_exec(T& solver, Network& network){
             std::cout << "Timed out." << std::endl;
             exit(-3);
         }else{
-            //Results export
-            export_entry(result_file, solver, network, csv_separator);
-
             //display
             display_infos(solver);
         }
@@ -216,25 +198,23 @@ void launch_exec(T& solver, Network& network){
 }
 
 template<class T>
-void launch_untimed_exec(T& solver, Network& network){
-    execfile_no_display(solver, network);
+void launch_untimed_exec(T& solver, std::string network_file){
+    execfile_no_display(solver, network_file);
     //display
     display_info(solver);
-
-    export_entry(result_file, solver, network, csv_separator);
 }
 
 /**
  * @brief Executes all algorithms on a single network
  * 
  */
-void exec_all_on_file(Network& network){
+void exec_all_on_file(std::string network_file){
     for(int i = 0; i < main_algorithm_list.size(); i++){ //auto& algo : main_algorithm_list){
         Algorithm* algo = main_algorithm_list[i];
         if(algo->still_up){
             // algo->init(network);
-            printf("Algo. %d (%s) : '%s' :\n", i, algo->algo_name.data(), network.m_filename.data());
-            launch_exec(*algo, network);
+            printf("Algo. %d (%s) : '%s' :\n", i, algo->algo_name.data());
+            launch_exec(*algo, network_file);
             // launch_untimed_exec(*algo, network);
         }
     }
@@ -247,8 +227,8 @@ void exec_all_on_file(Network& network){
  */
 void exec_all_on_all(){
     //iteration over the networks
-    for(auto& network : main_network_list){
-        exec_all_on_file(network);
+    for(auto& network_file : main_network_list){
+        exec_all_on_file(network_file);
     }
 }
 
@@ -257,18 +237,11 @@ int main(int argc, char* argv[]){
     //a list of maps for the algorithms, and a list of list for files
     Argparser parser(argc, argv);
 
-    //open the output file if exists
-    if(!parser.output_file.empty()){
-        result_file = open_output(parser.output_file);
-    }
-
     //fills main_algorithm_list with algorithms instantiated using the dictionary_list
     init_algos(parser.grab_dictionary_list());
 
     //sorted list of entries, from smallest to biggest
     main_network_list = parser.file_entries_list;
-    std::sort(main_network_list.begin(), main_network_list.end(), 
-    [](Network n1, Network n2){return n1.dimension < n2.dimension;});
 
     exec_all_on_all();
 }

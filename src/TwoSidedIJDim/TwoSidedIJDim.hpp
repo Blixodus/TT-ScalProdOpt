@@ -7,14 +7,14 @@
 #ifndef TWOSIDEDDELTADIM_HPP
 #define TWOSIDEDDELTADIM_HPP
 #include "../Components/Components.hpp"
-#include "../Components/Network.hpp"
+#include "../Components/Network2D.hpp"
 #include "../CotengraWrapper/CotengraWrapper.hpp"
 
 #define COST first
 #define ORDER second
 
 template <size_t delta = 3, split_direction_e dir = ALL, size_t tt_dim = 2>
-class TwoSidedDeltaDim : public Algorithm {
+class TwoSidedIJDim : public Algorithm {
     public:
     // The memoization table for the costs of each state
     std::vector<std::vector<cost_t>> m_cost[2];
@@ -35,7 +35,7 @@ class TwoSidedDeltaDim : public Algorithm {
     // Initializers
     void init(std::string filename) {
         // Initialize network 2D
-        this->m_network_2d = Network<tt_dim>(filename);
+        this->m_network_2d = Network2D<tt_dim>(filename);
 
         this->dim = this->m_network_2d.dimension;
         this->n_vertex = this->m_network_2d.n_vertex;

@@ -103,7 +103,7 @@ def run_algorithm_naive(test_filename, tt_dim, dim):
             cost = min(naive_costs)
 
             # Return results
-            return cost, 0.0, "naive_order_TBD"
+            return cost, 0.0, "naive_order_NA"
     elif tt_dim == 3:
         # Generate naive order and evaluate its cost
         order = []
@@ -113,10 +113,13 @@ def run_algorithm_naive(test_filename, tt_dim, dim):
             if i < dim - 1:
                 order.append((i, dim + (i + 1)))
 
-        # Retrieve cost of naive order 
+        # Retrieve cost of naive order
         cost = run_validation_on_test_case(tt_dim, test_filename, order)
+        if test_filename == "/home/pdominik/Tensor_experiments/Tests3/xAxT/random/low/d_003_v_037.txt":
+            print(order)
+            print(cost)
 
-        return cost, 0.0, "naive_order_TBD"
+        return cost, 0.0, "naive_order_NA"
     else:
         exit(f"Error! Naive algorithm is not implemented for given tensor train dimension {tt_dim}.")
 
@@ -143,6 +146,7 @@ def run_validation_on_test_case(tt_dim, test_filename, order):
 
     # Run the C++ validator and retrieve the output
     result = subprocess.run(args=args, input=inputs, capture_output=True, text=True, shell=True)
+    print(result.stdout)
     print(result.stderr)
 
     # Parse cost of the contraction and execution time of the algorithm
@@ -159,13 +163,15 @@ def run_validation_on_test_case(tt_dim, test_filename, order):
 def run_algorithm_on_test_case(input):
     # Unpack the input arguments
     algorithm, test_filename, result_filename, tt_dim, delta, dimension, instance = input[0]
+    if test_filename != "/home/pdominik/Tensor_experiments/Tests3/xAxT/random/low/d_003_v_037.txt":
+        return
 
     # Run the algorith on the test case
     cost, execution_time, order = run_algorithm(algorithm, test_filename, tt_dim, dimension, delta)
     output_str = f"{algorithm};{dimension};{instance};{test_filename};{cost};{execution_time};{order}"
 
     # Validate the contraction cost for given order if requested
-    if validate_results and order != "naive_order_TBD":
+    if validate_results and order != "naive_order_NA":
         contraction_recursive = ast.literal_eval(order)
         contraction_flat, _ = generate_contraction_list(contraction_recursive)
         cost_validation = run_validation_on_test_case(tt_dim, test_filename, contraction_flat)
@@ -174,7 +180,7 @@ def run_algorithm_on_test_case(input):
             result_validation = "Invalid"
             print(f"❌ Validation failed for {algorithm} on {test_filename}. Expected cost: {cost}, validated cost: {cost_validation}")
         output_str += f";{cost_validation};{result_validation}"
-    elif validate_results and order == "naive_order_TBD":
+    elif validate_results and order == "naive_order_NA":
         output_str += ";0;Correct"
 
     # Save the results to the result file

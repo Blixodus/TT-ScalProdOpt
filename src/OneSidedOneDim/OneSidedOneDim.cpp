@@ -229,9 +229,9 @@ void OneSidedOneDim::get_order(int s, int k){
     }
 }
 
-void OneSidedOneDim::init(Network& network){
+void OneSidedOneDim::init(std::string filename){
     // Initialize network 2D
-    this->m_network_2d = Network2D<2>(network.m_filename);
+    this->m_network_2d = Network<2>(filename);
 
     set_limit_dim(this->m_network_2d.dimension);
     this->dim = this->m_network_2d.dimension;
