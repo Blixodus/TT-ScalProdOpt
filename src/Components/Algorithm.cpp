@@ -34,19 +34,6 @@ Algorithm::Algorithm(std::map<std::string, std::any> map){
 }
 
 /**
- * @brief returns best_order as a string
- * 
- * @return std::string 
- */
-std::string Algorithm::best_order_as_string() const{
-    std::string sep = ", ";
-    std::stringstream result;
-    std::copy(best_order.begin(), best_order.end(), std::ostream_iterator<int>(result, sep.c_str()));
-
-    return result.str().erase(result.str().size()-sep.size());;
-}
-
-/**
  * @brief Compares the computed value with the real value we should get for a given order
  * 
  * @return const int 

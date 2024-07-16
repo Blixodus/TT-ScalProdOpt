@@ -80,9 +80,7 @@ class Algorithm{
     
     virtual cost_t call_solve() {return 0;};
     virtual void display_order() {};
-
-    std::string best_order_as_string() const;
-
+    
     void set_limit_dim(dim_t max);
     
     const int verify();

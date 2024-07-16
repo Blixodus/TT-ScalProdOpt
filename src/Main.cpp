@@ -13,6 +13,7 @@ void init_algos(std::vector<std::map<std::string, std::any>> dict_list){
         std::cout << "Instantiating : " << algo_name << std::endl;
         // Instantiate the right algorithm based on its name
         Algorithm* new_alg = instantiate(dict);
+        std::cout<<"!"<<std::endl;
         
         // Verify that the algorithm exists
         if(new_alg != nullptr){
@@ -211,11 +212,9 @@ void launch_untimed_exec(T& solver, std::string network_file){
 void exec_all_on_file(std::string network_file){
     for(int i = 0; i < main_algorithm_list.size(); i++){ //auto& algo : main_algorithm_list){
         Algorithm* algo = main_algorithm_list[i];
+        std::cout<<"!!!!"<<network_file<<" "<<i<<std::endl;
         if(algo->still_up){
-            // algo->init(network);
-            printf("Algo. %d (%s) : '%s' :\n", i, algo->algo_name.data());
             launch_exec(*algo, network_file);
-            // launch_untimed_exec(*algo, network);
         }
     }
 }
@@ -239,9 +238,11 @@ int main(int argc, char* argv[]){
 
     //fills main_algorithm_list with algorithms instantiated using the dictionary_list
     init_algos(parser.grab_dictionary_list());
+    std::cout<<"!!"<<std::endl;
 
     //sorted list of entries, from smallest to biggest
     main_network_list = parser.file_entries_list;
+    std::cout<<"!!!"<<std::endl;
 
     exec_all_on_all();
 }

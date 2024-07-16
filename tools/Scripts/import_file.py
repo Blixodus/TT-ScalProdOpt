@@ -12,12 +12,12 @@ def import_tensor_train(filename, dim_min=None, dim_max=None, reversed=False):
     tt_dim = 2 # for backward compatibility with older test cases
     for line in lines:
         if line.startswith('d'):
-            n = int(re.split('\W+', line)[1])
+            n = int(re.split(r'\W+', line)[1])
             break
     
     for line in lines:
         if line.startswith('t'):
-            tt_dim = int(re.split('\W+', line)[1])
+            tt_dim = int(re.split(r'\W+', line)[1])
             break
 
     if dim_min == None:

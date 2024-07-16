@@ -8,7 +8,7 @@ import subprocess
 import configparser
 
 import cotengra as ctg
-from cgreedy import CGreedy
+#from cgreedy import CGreedy
 
 from alive_progress import alive_bar
 
@@ -34,7 +34,7 @@ def run_algorithm_cpp(algorithm, test_filename, tt_dim, delta, ctg_algorithm=Non
     if ctg_algorithm is not None:
         algorithm_arguments += f" ctg_algorithm {ctg_algorithm}"
 
-    args = f"source ~/.xmake/profile && xmake run -w . OptiTenseurs -a \"{algorithm_arguments}\" -f {test_filename}"
+    args = f"./build/OptiTenseurs -a \"{algorithm_arguments}\" -f {test_filename}"
 
     # Run the C++ program and retrieve output of the algorithm
     result = subprocess.run(args=args, capture_output=True, text=True, shell=True)
@@ -97,7 +97,7 @@ def run_algorithm_naive(test_filename, tt_dim, dim):
             naive_costs = []
             for line in lines:
                 if line.startswith('c'):
-                    cost = float(re.split('\W+', line)[3])
+                    cost = float(re.split(r'\W+', line)[3])
                     naive_costs.append(cost)
 
             cost = min(naive_costs)
@@ -115,9 +115,6 @@ def run_algorithm_naive(test_filename, tt_dim, dim):
 
         # Retrieve cost of naive order
         cost = run_validation_on_test_case(tt_dim, test_filename, order)
-        if test_filename == "/home/pdominik/Tensor_experiments/Tests3/xAxT/random/low/d_003_v_037.txt":
-            print(order)
-            print(cost)
 
         return cost, 0.0, "naive_order_NA"
     else:
@@ -137,7 +134,7 @@ def run_algorithm(algorithm, test_filename, tt_dim, dim, delta):
 
 def run_validation_on_test_case(tt_dim, test_filename, order):
     # Prepare command line arguments
-    args = f"source ~/.xmake/profile && xmake run -w . Compute"
+    args = f"./build/Compute"
 
     # Prepare input (list of contractions in the order)
     inputs = f"{tt_dim}\n{test_filename}\n{len(order)}\n"
@@ -163,8 +160,6 @@ def run_validation_on_test_case(tt_dim, test_filename, order):
 def run_algorithm_on_test_case(input):
     # Unpack the input arguments
     algorithm, test_filename, result_filename, tt_dim, delta, dimension, instance = input[0]
-    if test_filename != "/home/pdominik/Tensor_experiments/Tests3/xAxT/random/low/d_003_v_037.txt":
-        return
 
     # Run the algorith on the test case
     cost, execution_time, order = run_algorithm(algorithm, test_filename, tt_dim, dimension, delta)
@@ -278,7 +273,7 @@ if __name__ == "__main__":
     validate_results = int(config['Results']['validate_order'])
 
     # Computation of the test cases
-    cores = min(int(config['Results']['max_cores']), multiprocessing.cpu_count() // 2)
+    cores = min(int(config['Results']['max_cores']), multiprocessing.cpu_count())
     pool = multiprocessing.Pool(processes=cores)
     parallel_input = []
 
