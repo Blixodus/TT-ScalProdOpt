@@ -1,7 +1,7 @@
 add_rules("mode.debug", "mode.release")
 add_includedirs("extern/pybind11/include")
-add_includedirs("/usr/include/python3.11")
-add_links("python3.11")
+add_linkdirs("/gpfs/workdir/torria/pdominik/tt_contr_conda/lib/python3.12/config-3.12-x86_64-linux-gnu", "/gpfs/workdir/torria/pdominik/tt_contr_conda/lib")
+add_links("stdc++", "pthread", "dl", "util", "m", "python3.12")
 
 target("OneSidedOneDim")
     set_kind("binary")
