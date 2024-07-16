@@ -32,26 +32,72 @@ git submodule init
 git submodule update
 ```
 
-### Initializing build system
-
-
 ### Preparing Python environment and dependencies
+[Ruche only step] Load the necessary modules.
+```
+module load anaconda3/2024.06/gcc-13.2.0
+module load gcc/13.2.0/gcc-4.8.5
+module load cmake/3.28.3/gcc-11.2.0
+```
 
+We recommend using Conda manage Python version and necessary dependencies. You can create new Conda environment with Python 3.12.4 using the following command:
+```
+conda create --prefix ./tt_contr_conda python=3.12.4 --channel conda-forge
+source tt_contr_env/bin/activate
+conda config --set pip_interop_enabled True
+```
+If you opt for using your own Python environment, make sure to include Python-dev package, as the project relies on Python.h header file and Python.so library.
+
+After activating the environment, install necessary Python packages.
+```
+conda install conda-forge::cotengra
+conda install conda-forge::alive-progress
+pip install kahypar cgreedy
+```
+
+# Compilation and usage
 
 ## Compilation
-In order to compile the project along with all available algorithms and tools, use the following command:
+In order to compile the project along with all available algorithms and tools, use the following commands:
 ```
-xmake b
+cmake -B build
+cd build
+make -j
 ```
 
 ## Usage
+[Ruche only step] Load the necessary modules.
+```
+module load anaconda3/2024.06/gcc-13.2.0
+module load gcc/13.2.0/gcc-4.8.5
+module load cmake/3.28.3/gcc-11.2.0
+```
 
+Activate the Python environment.
+```
+source tt_contr_env/bin/activate
+```
 
+Run the project with the following command:
+```
+./build/OptiTenseurs -a "[arguments]" -f [test case filename]"
+```
+where `argument` is a dictionary of parameters, which include:
+* `main_alg` - the main algorithm to be used,
+* `tt_dim` - problem type (for example 2 for $xy$ case, 3 for $xAy$ case, 4 for $xABy$ case),
+* `delta` - the maximum size of the window (for $2-sided$ $\Delta-dim$ algorithm),
+* `ctg_algorithm` - the algorithm from Cotengra library which should be used by our wrapper (when `main_alg` is set to `CotengraWrapper`).
 
+### Examples
+In order to run $2-sided$ $\Delta-dim$ algorithm with $\Delta=4$ on the $xx^T$ test case, use the following command:
+```
+./OptiTenseurs -a "main_alg TwoSidedDeltaDim tt_dim 2 delta 4" -f /path_to_tests/xxT/random/low/d_003_v001.txt
+```
 
-
-
-# Preparing repository for usage
+In order to run $Hyper-Greedy$ algorithm using Cotengra wrapper on the $xAy$ test case, use the following command:
+```
+./OptiTenseurs -a "main_alg CotengraWrapper tt_dim 3 ctg_algorithm hyper-greedy" -f /path_to_tests/xAy/quantized/medium/d_004_v002.txt
+```
 
 
 # OptiTenseurs
@@ -194,6 +240,8 @@ Plots can be named and saved to the 'plot/' directory
 
 # Known bugs
 
+
+
 Bug | Occurrence | Cause
 ----|----|----
 SplitsDimByDim returns 2^63 | Past 50 dimensions | In solve(), when the best_cost for state2 is computed.
@@ -206,3 +254,16 @@ ConvexSplits undershoots the best cost | If best_cost is initialized as somethin
 * Results visualization does not properly support having the same algorithm executed multiple time on the same network, but could be added.  
 * A slider could be added to select the range of networks to display (a zoom essentially).
 * GreedyEdgeSort is a bit rough around the edges (mostly the sorting part), it has no excuse to be this slow, considering the range of solution it explores (1).
+
+```
+wget https://xmake.io/shget.text --no-check-certificate  -O - | bash
+source ~/.xmake/profile
+xmake f -m release --clean --cxx=g++ --cxxflags="-std=c++23 `python3-config --ldflags` `python3-config --includes`" -o build
+
+
+xmake f -m release --clean --cxx=g++ --cxxflags="-std=c++23 `python3-config --ldflags` -rdynamic  `python3-config --includes`" -o build
+```
+xmake f -m release --clean --cxx=g++ --cxxflags="-std=c++23 -Wl,--export-dynamic -Wl,--whole-archive /gpfs/softs/languages/python/3.12.4/lib/libpython3.12.a -Wl,--no-whole-archive `python3-config --ldflags` `python3-config --includes`" -o build
+
+ xmake f -m release --clean --cxx=g++ --cxxflags="-std=c++23 -Wl,--export-dynamic -Wl,--no-whole-archive `python3-co
+nfig --includes`" -o build
