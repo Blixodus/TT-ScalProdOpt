@@ -3,19 +3,6 @@
 # Algorithms
 
 
-## Tensor-Train network format
-
-## Contraction orderding format
-In the implementation of the $1-sided$ $1-dim$ and $2-sided$ $\Delta-dim$ algorithms, we have opted for the recursive definition of the final contraction order, as it provides an elegant and unambiguous way to define the order of each contraction and resulting tensor.
-
-![Contraction ordering example](./docs/Ordering_example.png)
-
-For example for contraction presented above, the order returned by our algorithm would be defined as `((((0, 1), (3, 4)), 2), 5)`, which can be represented in form of list of nodes to be contracted as `[(0, 1), (3, 4), (0, 3), (0, 2), (0, 5)]` (assuming that node with lower id represents the result of each contraction). 
-
-We have provided the script to flatten the recursive order definition:
-`tools/flat_order.py`.
-
-
 # Preparing the environment
 
 ### Cloning the repository
@@ -83,7 +70,7 @@ Run the project with the following command:
 ./build/OptiTenseurs -a "[arguments]" -f [test case filename]"
 ```
 where `argument` is a dictionary of parameters, which include:
-* `main_alg` - the main algorithm to be used,
+* `main_alg` - the main algorithm to be used (`OneSidedOneDim`, `TwoSidedDeltaDim`, `CotengraWrapper`),
 * `tt_dim` - problem type (for example 2 for $xy$ case, 3 for $xAy$ case, 4 for $xABy$ case),
 * `delta` - the maximum size of the window (for $2-sided$ $\Delta-dim$ algorithm),
 * `ctg_algorithm` - the algorithm from Cotengra library which should be used by our wrapper (when `main_alg` is set to `CotengraWrapper`).
@@ -98,6 +85,25 @@ In order to run $Hyper-Greedy$ algorithm using Cotengra wrapper on the $xAy$ tes
 ```
 ./OptiTenseurs -a "main_alg CotengraWrapper tt_dim 3 ctg_algorithm hyper-greedy" -f /path_to_tests/xAy/quantized/medium/d_004_v002.txt
 ```
+
+# Input and output formats
+## Input: tensor-train network format
+Tensor-train networks are defined as text files which use the following format:
+* lines starting with 'c' are comment lines, and are not taken into account by the parser,
+* lines starting with 'v' are a visual representation of the tensor-train network, and are not taken into account by the parser,
+* single line starting with 't' followed by the number of rows (tt_dim) of the tensor-train,
+* single line starting with 'd' followed by the dimension (width) of the tensor-train,
+* lines starting with 'e' describe contraction weight: 'node1 node2 weight' (as weight of the edge between node1 and node2).
+
+## Output: contraction orderding format
+The contraction order returned by $1-sided$ $1-dim$ and $2-sided$ $\Delta-dim$ algorithms, as well as Cotengra library algorithms run using our wrapper, uses a recursive definition the contractions.
+
+![Contraction ordering example](./docs/Ordering_example.png){: width="50%"}
+
+For example for contractions presented above, the order returned by the algorithm would be defined as `((((0, 1), (3, 4)), 2), 5)`, which can be represented in form of list of nodes to be contracted as `[(0, 1), (3, 4), (0, 3), (0, 2), (0, 5)]` (assuming that node with lower id represents the result of each contraction). 
+
+For convenience, we have provided the script to flatten the recursive order definition:
+`tools/flat_order.py`.
 
 
 # OptiTenseurs
@@ -158,17 +164,6 @@ An example of a valid command can be found in exec_example.sh.
 
 Alternatively, you can use the GUI to select the parameters and execute the code. You can also use it to generate the execution command and copy it to your clipboard.
 
-# Networks
-Networks are text files located in the 'instances' directory. They can be read by the programs in order to be solved.
-They are formatted in the following way :  
-
-* Lines starting with 'c' are comment lines, and are not taken into account by the execution
-* Lines starting with 'v' are a representation of the Tensor Train
-* One single line starts with 'd' followed by the dimension (width) of the TT
-* Lines starting with 'e' describe edges, they read 'node1 node2 weight'
-
-Examples of input files can be found in the 'instances/test/' directory.
-
 # Algorithms
 The code currently supports 6 algorithms.
 We note D, the dimension of a network.
@@ -211,32 +206,15 @@ We note "explicit edges" the edges of the network, and "implicit edges" the edge
     * Complexity : 
     * dmax : 
 
-# GUI
-In order to ease the execution of many algorithms with different parameters on many files, a basic Graphical User Interface is provided.  
-It is recommanded to have python 3.* installed to use the GUI.  
 
-## Launching
-You can launch the gui by executing OptiGUI, or by directly using python3 GUI/main.py.
+# Experiments
 
-## Functionalities
-The GUI provides the ability to add algorithm entries, tweak the parameters, add network files, select an output file, copy the execution command to clipboard, and launch the execution.  
-It will only display the parameters available/relevant for the selected algorithms.  
-Currently, launching the execution directly from the interface will lock it, hence why it may be interesting to copy the command and execute it separately.  
-Additionnaly, the GUI provides a tab to import and inspect the results of an execution.
+## Generating test cases
 
-# Results
+## Computing the results
 
-## Exporting
-If [output_file] is specified, the resulting file contains for each algorithm used, their parameters, the resulting cost, the time to solve, and the network and its caracteristics. Algorithms that timed-out are omitted.  
-If the output file does not exist prior to the execution, it will be created by the program. If it already exists, the new results will be added at the end of the file.  
-The default delimiter is ';' and cannot easily be modified yet.  
-An example of output file is provided in the 'results/' directory.
+## Plotting the results
 
-## Visualizing results
-In the results visualization tab, the user can import .csv files generated by an execution, and plot them.  
-2 types of line-plot are available, Cost per Network Dimension, and Time per Network Dimension.  
-Each algorithm can be toggled on or off.  
-Plots can be named and saved to the 'plot/' directory
 
 # Known bugs
 
