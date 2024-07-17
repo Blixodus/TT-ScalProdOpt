@@ -1,14 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=tt_contr
 #SBATCH --exclusive
-#SBATCH --output=ruche/%x.o%j
+#SBATCH --output=/gpfs/workdir/torria/pdominik/ruche_output/%x.o%j
 #SBATCH --ntasks=1
 #SBATCH --time=04:00:00
 #SBATCH --cpus-per-task=40
 #SBATCH --partition=cpu_med           # (see available partitions)
-#SBATCH --mail-user=przemyslaw.dominikowski@lisn.fr
-#SBATCH --mail-type=END
-#SBATCH --mail-type=FAIL
 
 # To clean and load modules defined at the compile and link phases
 module purge

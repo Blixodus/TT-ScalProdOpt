@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the config path
-DIR_PATH="/gpfs/workdir/torria/pdominik/OptiTenseurs/tools/configs"
+DIR_PATH="/gpfs/workdir/torria/pdominik/OptiTenseurs/tools/configs/dim2"
 
 # Check if the directory exists
 if [ -d "$DIR_PATH" ]; then
@@ -12,7 +12,8 @@ if [ -d "$DIR_PATH" ]; then
     if [ -f "$ini_file" ]; then
       # Execute the command.sh script with the ini file as an argument
       echo "Submitting task for $ini_file"
-      sbatch tensor_experiment_dim2.sh "$ini_file"
+      sbatch ruche_task.sh "$ini_file"
+      sleep 1s
     else
       echo "No .ini files found in $DIR_PATH"
     fi
