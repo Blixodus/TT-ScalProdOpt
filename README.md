@@ -22,23 +22,22 @@ git submodule update
 ### Preparing Python environment and dependencies
 [Ruche only step] Load the necessary modules.
 ```
-module load anaconda3/2024.06/gcc-13.2.0
+module load miniconda3/24.5.0/gcc-13.2.0
 module load gcc/13.2.0/gcc-4.8.5
 module load cmake/3.28.3/gcc-11.2.0
 ```
 
-We recommend using Conda manage Python version and necessary dependencies. You can create new Conda environment with Python 3.12.4 using the following command:
+We recommend using Conda manage Python version and necessary dependencies. You can create new Conda environment with Python 3.10.14 using the following command:
 ```
-conda create --prefix ./tt_contr_conda python=3.12.4 --channel conda-forge
-source tt_contr_env/bin/activate
-conda config --set pip_interop_enabled True
+conda create --prefix ./tt_contr_env python=3.10.14 --channel conda-forge
+source activate ./tt_contr_env
 ```
-If you opt for using your own Python environment, make sure to include Python-dev package, as the project relies on Python.h header file and Python.so library.
+If you opt for using your own Python environment, make sure to include Python-dev package, as the project relies on Python.h header file and Python.so library. Moreover, make sure to install Python version 3.10.14, as newer versions cause compatibility issues with the
+`kahypar` library used by `Cotengra`.
 
 After activating the environment, install necessary Python packages.
 ```
-conda install conda-forge::cotengra
-conda install conda-forge::alive-progress
+conda install conda-forge::cotengra anaconda::pandas conda-forge::seaborn conda-forge::alive-progress
 pip install kahypar cgreedy
 ```
 
@@ -55,14 +54,14 @@ make -j
 ## Usage
 [Ruche only step] Load the necessary modules.
 ```
-module load anaconda3/2024.06/gcc-13.2.0
+module load miniconda3/24.5.0/gcc-13.2.0
 module load gcc/13.2.0/gcc-4.8.5
 module load cmake/3.28.3/gcc-11.2.0
 ```
 
 Activate the Python environment.
 ```
-source tt_contr_env/bin/activate
+source activate ./tt_contr_env
 ```
 
 Run the project with the following command:
@@ -232,16 +231,3 @@ ConvexSplits undershoots the best cost | If best_cost is initialized as somethin
 * Results visualization does not properly support having the same algorithm executed multiple time on the same network, but could be added.  
 * A slider could be added to select the range of networks to display (a zoom essentially).
 * GreedyEdgeSort is a bit rough around the edges (mostly the sorting part), it has no excuse to be this slow, considering the range of solution it explores (1).
-
-```
-wget https://xmake.io/shget.text --no-check-certificate  -O - | bash
-source ~/.xmake/profile
-xmake f -m release --clean --cxx=g++ --cxxflags="-std=c++23 `python3-config --ldflags` `python3-config --includes`" -o build
-
-
-xmake f -m release --clean --cxx=g++ --cxxflags="-std=c++23 `python3-config --ldflags` -rdynamic  `python3-config --includes`" -o build
-```
-xmake f -m release --clean --cxx=g++ --cxxflags="-std=c++23 -Wl,--export-dynamic -Wl,--whole-archive /gpfs/softs/languages/python/3.12.4/lib/libpython3.12.a -Wl,--no-whole-archive `python3-config --ldflags` `python3-config --includes`" -o build
-
- xmake f -m release --clean --cxx=g++ --cxxflags="-std=c++23 -Wl,--export-dynamic -Wl,--no-whole-archive `python3-co
-nfig --includes`" -o build
