@@ -10,9 +10,6 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-import cotengra as ctg
-from cgreedy import CGreedy
-
 from alive_progress import alive_bar
 
 from Scripts.naming import get_algorithm_name, get_dir, get_dir_ratio, get_test_filename, get_result_filename
@@ -63,6 +60,9 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
         # Sort the results by size and instance
         results[algorithm].sort_values(by=['Size', 'Instance'], inplace=True)
 
+        # Drop rows with cost equal to 0
+        results[algorithm] = results[algorithm].loc[(results[algorithm]['Cost'] != 0)]
+
         # Drop rows with any size for which there is any instance missing
         sizes = results[algorithm]['Size'].unique()
         for size in sizes:
@@ -75,10 +75,6 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
                 else:
                     completed_successfully = False
                     error_message += f"missing optimal instances\t"
-        
-        if algorithm == 'optimal' and max(sizes) < 30:
-            completed_successfully = False
-            error_message += f"missing optimal sizes {max(sizes)}/30\t"
 
     # Normalize the results using results from given normalization algorithm
     if normalization_algorithm in results:
@@ -99,6 +95,12 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
 
         plt.axis([None, None, 0.95, 1.25])
         plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_zoom.pdf')
+
+        plt.axis([None, None, 0.95, 2])
+        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_zoom2.pdf')
+
+        plt.axis([None, None, 0.5, 1.5])
+        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_zoom15.pdf')
 
         plt.close()
     else:
@@ -227,7 +229,7 @@ if __name__ == "__main__":
     normalization_algorithm = (config['Plots']['normalization_algorithm'], config['Plots']['normalization_delta'])
 
     # Plotting of each test case
-    cores = min(int(config['Plots']['max_cores']), multiprocessing.cpu_count() // 2)
+    cores = min(int(config['Plots']['max_cores']), multiprocessing.cpu_count())
     pool = multiprocessing.Pool(processes=cores)
     parallel_input = []
 

@@ -8,8 +8,9 @@ import subprocess
 import configparser
 
 import cotengra as ctg
-#from cgreedy import CGreedy
+from cgreedy import CGreedy
 
+import pandas as pd
 from alive_progress import alive_bar
 
 from Scripts.naming import get_dir, get_dir_ratio, get_test_filename, get_result_filename
@@ -38,7 +39,7 @@ def run_algorithm_cpp(algorithm, test_filename, tt_dim, delta, ctg_algorithm=Non
 
     # Run the C++ program and retrieve output of the algorithm
     result = subprocess.run(args=args, capture_output=True, text=True, shell=True)
-
+    
     # Print the stderr output of the algorithm to inform about warning or errors
     if result.stderr:
         print(f"🚨 Algorithm {algorithm} returned warnings and/or errors on {test_filename}.")
@@ -143,8 +144,6 @@ def run_validation_on_test_case(tt_dim, test_filename, order):
 
     # Run the C++ validator and retrieve the output
     result = subprocess.run(args=args, input=inputs, capture_output=True, text=True, shell=True)
-    print(result.stdout)
-    print(result.stderr)
 
     # Parse cost of the contraction and execution time of the algorithm
     cost = 0
@@ -207,10 +206,18 @@ def generate_arguments_for_test_case(type, algorithm, test_dir_path, result_dir_
     # Prepare arguments for each test case
     arguments = []
     if type != "ratio":
+        # Open and parse the file with results to check which test cases have already been computed
+        existing_results = pd.read_csv(result_filename, sep=';')
+        existing_results.sort_values(by=['Size', 'Instance'], inplace=True)
+
+        # Generate test cases to be computed
         for dimension in range(min_size, max_size + 1):
             for instance in range(1, nb_instances + 1):
                 test_filename = get_test_filename(test_dir_path, dimension, instance)
-                arguments.append([(algorithm, test_filename, result_filename, tt_dim, delta, dimension, instance)])
+                if existing_results[existing_results['Test_file'] == test_filename].empty or not existing_results[existing_results['Test_file'] == test_filename]['Cost'].any():
+                    #print(f"Calculating test case {test_filename} for {algorithm} as it has not been calculated")
+                    arguments.append([(algorithm, test_filename, result_filename, tt_dim, delta, dimension, instance)])
+                    
     else:
         ratio_list = ast.literal_eval(config['General']['ratio_list'])
         for rank_const, dim_const in ratio_list:
@@ -225,10 +232,17 @@ def generate_arguments_for_test_case(type, algorithm, test_dir_path, result_dir_
                     else:
                         result_file.write(f"Algorithm;Size;Instance;Test_file;Cost;Execution_time;Validated_cost;Validation_result\n")
 
+            # Open and parse the file with results to check which test cases have already been computed
+            existing_results = pd.read_csv(result_filename, sep=';')
+            existing_results.sort_values(by=['Size', 'Instance'], inplace=True)
+
+            # Generate test cases to be computed
             for dimension in range(min_size, max_size + 1, step_size):
                 for instance in range(1, nb_instances + 1):
                     test_filename = get_test_filename(ratio_test_dir, dimension, instance)
-                    arguments.append([(algorithm, test_filename, result_filename, tt_dim, delta, dimension, instance)])
+                    if existing_results[existing_results['Test_file'] == test_filename].empty or not existing_results[existing_results['Test_file'] == test_filename]['Cost'].any():
+                        #print(f"Calculating test case {test_filename} for {algorithm} as it has not been calculated")
+                        arguments.append([(algorithm, test_filename, result_filename, tt_dim, delta, dimension, instance)])
 
             rank_const *= 2
             dim_const //= 2
@@ -247,6 +261,7 @@ if __name__ == "__main__":
         exit("Error! No configuration file provided.")
 
     # Read configuration file
+    print(f"Reading configuration file {config_file}")
     config = configparser.ConfigParser()
     config.read(config_file)
 
@@ -308,7 +323,7 @@ if __name__ == "__main__":
 
 
     # Execute tasks in parallel
-    print(f"Executing test cases in parallel using {cores} cores")
+    print(f"Executing {len(parallel_input)} test cases in parallel using {cores} cores")
     with alive_bar(len(parallel_input)) as bar:
         for i in pool.imap_unordered(run_algorithm_on_test_case, parallel_input):
             bar()
