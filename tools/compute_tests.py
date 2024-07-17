@@ -141,9 +141,10 @@ def run_validation_on_test_case(tt_dim, test_filename, order):
     inputs = f"{tt_dim}\n{test_filename}\n{len(order)}\n"
     for contraction in order:
         inputs += f"{contraction[0]} {contraction[1]}\n"
+    print(inputs)
 
     # Run the C++ validator and retrieve the output
-    result = subprocess.run(args=args, input=inputs, capture_output=True, text=True, shell=True)
+    result = subprocess.run(args=args, input=inputs, text=True, shell=True)
 
     # Parse cost of the contraction and execution time of the algorithm
     cost = 0

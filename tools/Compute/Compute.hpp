@@ -33,7 +33,6 @@ class Cost_cpt {
         while(this->m_representative[v] != -1) {
             v = this->m_representative[v];
         }
-        this->m_representative[vertex] = v;
         return v;
     }
 
