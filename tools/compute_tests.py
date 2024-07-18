@@ -147,6 +147,10 @@ def run_validation_on_test_case(tt_dim, test_filename, order):
 
     # Run the C++ validator and retrieve the output
     result = subprocess.run(args=args, input=inputs, capture_output=True, text=True, shell=True)
+    if result.stderr:
+        print(f"🚨 Validation of {algorithm} returned warnings and/or errors on {test_filename}.")
+        print("Args: ", args)
+        print(result.stderr)
 
     # Parse cost of the contraction and execution time of the algorithm
     cost = 0
@@ -173,7 +177,10 @@ def run_algorithm_on_test_case(input):
     # Validate the contraction cost for given order if requested
     if validate_results and order != "naive_order_NA":
         contraction_recursive = ast.literal_eval(order)
-        contraction_flat, _ = generate_contraction_list(contraction_recursive)
+        if algorithm != "OneSidedOneDim":
+            contraction_flat, _ = generate_contraction_list(contraction_recursive)
+        else:
+            contraction_flat = contraction_recursive
         cost_validation = run_validation_on_test_case(tt_dim, test_filename, contraction_flat)
         result_validation = "Correct"
         if cost_validation != cost:

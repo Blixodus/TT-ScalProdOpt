@@ -56,7 +56,7 @@ class OneSidedOneDim : public Algorithm {
     OneSidedOneDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
     // Initializer
-    void init(std::string filename, split_direction_e direction);
+    void init(std::string filename);
 
     // Solvers
     cost_t solve();
@@ -65,6 +65,7 @@ class OneSidedOneDim : public Algorithm {
     // Utility functions
     void display_order(int s, int k);
     void display_order();
-    void get_order(int s, int k);
+    std::string generate_order();
+    std::string generate_order(int s, int k);
 };
 #endif
