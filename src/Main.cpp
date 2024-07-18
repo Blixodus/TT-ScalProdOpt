@@ -148,61 +148,9 @@ void display_infos(Algorithm& solver){
     std::cout << "--------------" << std::endl;
 }
 
-/**
- * @brief executes solver.execfile inside a thread, and stops it after the time limit is reached 
- * 
- * @tparam T 
- * @param solver
- */
 template<class T>
 void launch_exec(T& solver, std::string network_file){
-    int status;
-    pid_t pid = fork();
-    if(pid == 0) { // child process
-        condition_variable cv;
-        mutex mtx;
-
-        // Thread that will carry the execution
-        std::thread t1([&solver, &cv, &network_file](){
-            execfile_no_display(solver, network_file);
-            std::cout<<"Execution done"<<std::endl;
-            cv.notify_all();
-        });
-
-        pthread_t tid = t1.native_handle();
-        t1.detach();
-
-        //un mutex lock le thread "principal" tant que l'autre n'a pas fini (ou jusqu'à la fin du délai)
-        std::unique_lock<std::mutex> lock(mtx);
-        //TODO: it might not work, as solver may not be initialized at this stage
-        auto status = cv.wait_for(lock, solver.timeout_time);
-
-        // si timeout il y a, on tue le thread
-        if (status == std::cv_status::timeout) {
-            pthread_cancel(tid);
-            solver.best_cost = -1;
-            std::cerr << "Timed out (max. " << solver.timeout_time << "s). You can use TIME [seconds] parameter to adjust time limit" << std::endl;
-            exit(-3);
-        }else{
-            //display
-            display_infos(solver);
-        }
-        
-        exit(0);
-
-    } else { // parent process
-        wait(&status);
-        if(status != 0) { // if timeout
-            //the algorithm leaves the execution queue
-            solver.still_up = false;
-        }
-    }
-}
-
-template<class T>
-void launch_untimed_exec(T& solver, std::string network_file){
     execfile_no_display(solver, network_file);
-    //display
     display_infos(solver);
 }
 
