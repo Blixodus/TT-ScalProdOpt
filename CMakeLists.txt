@@ -22,3 +22,7 @@ message("Python_Development_FOUND:${Python_Development_FOUND}")
 message("Python_LIBRARIES:${Python_LIBRARIES}")
 target_include_directories(OptiTenseurs PRIVATE ${Python_INCLUDE_DIRS})
 target_link_libraries(OptiTenseurs ${Python_LIBRARIES} pthread dl util m)
+
+# Set up validation executable
+add_executable(Compute ${TOOLS_DIR}/Compute/Main.cpp)
+target_include_directories(Compute PRIVATE ${TOOLS_DIR}/Compute ${SRC_DIR}/Components)
