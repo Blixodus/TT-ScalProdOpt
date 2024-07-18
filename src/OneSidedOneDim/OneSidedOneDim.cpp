@@ -229,13 +229,15 @@ void OneSidedOneDim::get_order(int s, int k){
     }
 }
 
-void OneSidedOneDim::init(std::string filename){
+void OneSidedOneDim::init(std::string filename, split_direction_e direction = BOTH_SIDES) {
     // Initialize network 2D
     this->m_network_2d = Network<2>(filename);
 
     set_limit_dim(this->m_network_2d.dimension);
     this->dim = this->m_network_2d.dimension;
     this->n_vertex = this->m_network_2d.n_vertex;
+
+    this->m_direction = direction;
 
     m_adjacence_matrix.clear();
     m_ext_cost_tab.clear();

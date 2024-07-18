@@ -10,58 +10,59 @@
 #include "../Components/Components.hpp"
 #include "../Components/Algorithm.hpp"
 
-class OneSidedOneDim : public Algorithm{
+class OneSidedOneDim : public Algorithm {
     private:
-    // Generalized network information
-    Network<2> m_network_2d;
+    // Solution parameters
+    split_direction_e m_direction;  // Direction for the start of the contraction
 
-    public:
+    // Network information
+    Network<2> m_network_2d;        // Generalized network information
 
-    //size : n_vertex
-    //cumulated weight of a vertex
-    vector_weight_t m_ext_cost_tab;
+    vector_weight_t m_ext_cost_tab;     // Cumulated weight for each vertex
+    matrix_weight_t m_adjacence_matrix; // Contraction weight for each edge (contraction between two nodes)
 
-    //size : n_vertex*(n_vertex+1))
-    matrix_weight_t m_adjacence_matrix;
-
-    //size : 2(dim-1)
-    //Stores all the possible immediate contraction cost
-    //m_central_weight[i] at point s =
-    //  all the different accumulation of central edges, for i between 2 and 2(s+1) 
-    //  the best contraction cost we could theoretically have by contracting R (i=0)
-    //  the best contraction cost we could theoretically have by contracting Q (i=1)
+    // Subproblem storage
+    // Set of all the possible immediate contraction cost (size = 2*(dim-1))
+    //  m_central_weight[i] at point s =
+    //    *  all the different accumulation of central edges, for i between 2 and 2(s+1) 
+    //    * the best contraction cost we could theoretically have by contracting R (i=0)
+    //    * the best contraction cost we could theoretically have by contracting Q (i=1)
     vector_weight_t m_central_weight;
 
-    //size : 2(dim-1)
-    //m_cost_to_reach[i] = cost to get to m_central_weight[i]
+    // Cost to reach subproblem (size = 2*(dim-1))
+    //  m_cost_to_reach[i] = cost to get to m_central_weight[i]
     vector_cost_t m_cost_to_reach;
 
-    //size : n_vertex
+    // Choice of the best contraction order (size = 2*(dim-1))
     //m_ref_cost[i] = The best contraction order (cost-wise) if we where to contract a lateral edge at i = s/2 (see main loop)
     vector_cost_t m_ref_cost;
 
-    //size : dim
-    //m_central_ref[i] = The centrale edge (or the accumulation of) that gave the best cost when contracting the lateral edges at s = i
-    vector_edgeID_t m_central_ref; 
+    // Edge which gave the best cost when contracting the lateral edges at s = i (size = dim)
+    //  m_central_ref[i] = id of central edge which weight (or the accumulation of) that gave the best cost when contracting the lateral edges at s = i
+    vector_edgeID_t m_central_ref;
 
-    //list of pairs {0, 1, 2}x{0, 1, 2}, corresponding to the duo of edges we contracted
+    // Order of the edges to contract
+    //  m_order_by_dim[i] = list of pairs {0, 1, 2}x{0, 1, 2}, corresponding to the pair of edges we contracted at i-th subproblem
     std::vector<pair<int, int>> m_order_by_dim;
 
+    // Utility functions
+    cost_t contract(int s, int i, int x, pair<int, int>& p);
+    void compute_ect(int s, int k);
+    void restore_ect(int s);
+
+    public:
     // Constructors
     OneSidedOneDim(){}
     OneSidedOneDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
 
     // Initializer
-    void init(std::string filename);
+    void init(std::string filename, split_direction_e direction);
 
     // Solvers
     cost_t solve();
     cost_t call_solve();
-    cost_t contract(int s, int i, int x, pair<int, int>& p);
  
     // Utility functions
-    void compute_ect(int s, int k);
-    void restore_ect(int s);
     void display_order(int s, int k);
     void display_order();
     void get_order(int s, int k);
