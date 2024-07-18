@@ -180,7 +180,7 @@ void launch_exec(T& solver, std::string network_file){
         if (status == std::cv_status::timeout) {
             pthread_cancel(tid);
             solver.best_cost = -1;
-            std::cout << "Timed out." << std::endl;
+            std::cerr << "Timed out (max. " << solver.timeout_time << "s). You can use TIME [seconds] parameter to adjust time limit" << std::endl;
             exit(-3);
         }else{
             //display

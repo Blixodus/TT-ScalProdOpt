@@ -50,13 +50,16 @@ def run_algorithm_cpp(algorithm, test_filename, tt_dim, delta, ctg_algorithm=Non
     cost = 0
     order = ""
     execution_time = 0.0
-    for line in result.stdout.split("\n"):
-        if line.startswith("Best cost"):
-            cost = float(line.split(":")[-1])
-        if line.startswith("Best order"):
-            order = line.split(":")[-1]
-        if line.startswith("Execution time"):
-            execution_time = float(line.split(":")[-1][:-1])
+    if result.stdout:
+        for line in result.stdout.split("\n"):
+            if line.startswith("Best cost"):
+                cost = float(line.split(":")[-1])
+            if line.startswith("Best order"):
+                order = line.split(":")[-1]
+            if line.startswith("Execution time"):
+                execution_time = float(line.split(":")[-1][:-1])
+    else:
+        print(f"🚨 Algorithm {algorithm} did not return any output on {test_filename}.")
 
     # Return results
     return cost, execution_time, order
@@ -141,17 +144,19 @@ def run_validation_on_test_case(tt_dim, test_filename, order):
     inputs = f"{tt_dim}\n{test_filename}\n{len(order)}\n"
     for contraction in order:
         inputs += f"{contraction[0]} {contraction[1]}\n"
-    print(inputs)
 
     # Run the C++ validator and retrieve the output
-    result = subprocess.run(args=args, input=inputs, text=True, shell=True)
+    result = subprocess.run(args=args, input=inputs, capture_output=True, text=True, shell=True)
 
     # Parse cost of the contraction and execution time of the algorithm
     cost = 0
-    for line in result.stdout.split("\n"):
-        if line.startswith("Cost"):
-            cost = float(line.split(":")[-1])
-            break
+    if result.stdout:
+        for line in result.stdout.split("\n"):
+            if line.startswith("Cost"):
+                cost = float(line.split(":")[-1])
+                break
+    else:
+        print(f"🚨 Validation algorithm did not return any output on {test_filename}.")
 
     # Return result
     return cost

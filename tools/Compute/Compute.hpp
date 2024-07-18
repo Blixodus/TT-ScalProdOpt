@@ -39,14 +39,14 @@ class Cost_cpt {
     cost_t contract(vertex_pair_t edge) {
         vertexID_t v1 = this->rep(edge.first);
         vertexID_t v2 = this->rep(edge.second);
-         std::cout<<"\t"<<edge.first<<" "<<v1<<" "<<edge.second<<" "<<v2<<endl;
+        //std::cout<<"\t"<<edge.first<<" "<<v1<<" "<<edge.second<<" "<<v2<<endl;
 
         // We always keep smaller node as representative of the contracted edge
         if(v1 > v2) std::swap(v1, v2);
 
         if(v1 != v2) {
             cost_t result = this->m_adjacence_matrix[v1][v2];
-            std::cout<<"\t\t"<<result<<endl;
+            //std::cout<<"\t\t"<<result<<endl;
             for(vertexID_t j = 0; j < this->m_network.n_vertex; j++) {
                 if(v1 != j) {
                     //std::cout<<"\t\t\t"<<v2<<" "<<j<<" "<<m_adjacence_matrix[v2][j]<<endl;
@@ -102,7 +102,7 @@ class Cost_cpt {
     cost_t compute_order_cost() {
         // Check if the order is valid
         if(this->m_order.size() > this->m_network.n_edge) {
-            std::cout << "[Warning] Too many edges given, skipping order" << std::endl;
+            std::cerr << "[Warning] Too many edges given, skipping order" << std::endl;
             return 0;
         }
 
@@ -110,10 +110,10 @@ class Cost_cpt {
         // operation to obtain the total cost of given order
         cost_t cost = 0;
         for(vertex_pair_t edge : this->m_order){
-            std::cout<<"# Contracting "<<edge.first<<" and "<<edge.second<<std::endl;
+            //std::cout<<"# Contracting "<<edge.first<<" and "<<edge.second<<std::endl;
             cost_t contraction_cost = this->contract(edge);
             cost += contraction_cost;
-            std::cout<<"$ Contracting "<<edge.first<<" and "<<edge.second<<" cost : "<<contraction_cost<<std::endl;
+            //std::cout<<"$ Contracting "<<edge.first<<" and "<<edge.second<<" cost : "<<contraction_cost<<std::endl;
         }
         return cost;
     }

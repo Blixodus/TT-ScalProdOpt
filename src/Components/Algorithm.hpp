@@ -64,7 +64,7 @@ class Algorithm{
     chrono::duration<double> time = std::chrono::duration<double>(0);
 
     //Maximum alloted time before timeout
-    std::chrono::minutes timeout_time = std::chrono::minutes(10);
+    std::chrono::minutes timeout_time = std::chrono::minutes(30);
 
     //Whether or not we should test the solution
     bool to_test = false;
