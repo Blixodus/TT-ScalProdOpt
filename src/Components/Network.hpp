@@ -11,7 +11,7 @@
 template <size_t tt_dim = 2>
 struct Network {
     // Network information
-    dim_t dimension;
+    dim_t dim;
     edgeID_t n_edge; // number of edges
     vertexID_t n_vertex; // number of nodes
 
@@ -49,9 +49,9 @@ struct Network {
             switch(line[0]) {
                 case 'd':
                     // Parse characteristics of the network
-                    this->dimension = atoi(&line[2]);
-                    this->n_vertex = this->dimension * tt_dim;
-                    this->n_edge = (tt_dim - 1) * this->dimension + tt_dim * (this->dimension - 1); // dimensions + ranks
+                    this->dim = atoi(&line[2]);
+                    this->n_vertex = this->dim * tt_dim;
+                    this->n_edge = (tt_dim - 1) * this->dim + tt_dim * (this->dim - 1); // dimensions + ranks
 
                     // Initialize the edge weight vector
                     this->m_egde_weight.resize(this->n_edge, 1);
@@ -80,7 +80,7 @@ struct Network {
 
         // Display the network information
         std::cout << "TT dimension " << tt_dim << std::endl;
-        std::cout << "Dimension " << this->dimension << std::endl;
+        std::cout << "Dimension " << this->dim << std::endl;
 
         // Close the file
         ifile.close();
@@ -92,16 +92,16 @@ struct Network {
         assert(nodeA < nodeB);
 
         // Calculate position of node in 2D grid
-        const int row = nodeA / this->dimension;    // row of node in 2D grid
-        const int column = nodeA % this->dimension; // column of node in 2D grid
+        const int row = nodeA / this->dim;    // row of node in 2D grid
+        const int column = nodeA % this->dim; // column of node in 2D grid
 
         // Calculate offset in the edge list (e.g. rrr|dddd#rrr|dddd...)
         // 0 if the nodes are adjacent (requested edge is rank)
         // dimension - 1 if the nodes are not adjacent (requested edge is dimension)
-        const int offset = (nodeB - nodeA) == 1 ? 0 : this->dimension - 1;
+        const int offset = (nodeB - nodeA) == 1 ? 0 : this->dim - 1;
 
         // Calculate the final index of edge in the edge list
-        const int index = row * (2 * this->dimension - 1) + offset + column;
+        const int index = row * (2 * this->dim - 1) + offset + column;
 
         //std::cout<<"Edge: " << nodeA<<" "<<nodeB<<" "<<index<<std::endl;
         assert(index < this->m_egde_weight.size());
@@ -116,13 +116,13 @@ struct Network {
         if(nodeA > nodeB) std::swap(nodeA, nodeB);
 
         // Check if subsequent nodes are in the same row
-        if (nodeB - nodeA == 1 && nodeA / this->dimension != nodeB / this->dimension) {
+        if (nodeB - nodeA == 1 && nodeA / this->dim != nodeB / this->dim) {
             return 0;
         }
 
         // Check if the nodes are adjacent and return the weight of edge
         // between them, or 0 otherwise
-        if(nodeB - nodeA == 1 || nodeB - nodeA == this->dimension) {
+        if(nodeB - nodeA == 1 || nodeB - nodeA == this->dim) {
             return (*this)[nodeA, nodeB];
         }
             

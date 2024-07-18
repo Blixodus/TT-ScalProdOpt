@@ -16,7 +16,7 @@ class OneSidedOneDim : public Algorithm {
     split_direction_e m_direction;  // Direction for the start of the contraction
 
     // Network information
-    Network<2> m_network_2d;        // Generalized network information
+    Network<2> m_network;        // Generalized network information
 
     vector_weight_t m_ext_cost_tab;     // Cumulated weight for each vertex
     matrix_weight_t m_adjacence_matrix; // Contraction weight for each edge (contraction between two nodes)
@@ -61,7 +61,12 @@ class OneSidedOneDim : public Algorithm {
     public:
     // Constructors
     OneSidedOneDim(){}
-    OneSidedOneDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){}
+    OneSidedOneDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){
+        // Default timeout override (as this algorithm execution is much faster)
+        if(param_dictionary.find("time") == param_dictionary.end()) {
+            this->timeout_time = std::chrono::minutes(1);
+        }
+    }
 
     // Initializer
     void init(std::string filename);

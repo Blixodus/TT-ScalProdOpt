@@ -44,6 +44,7 @@ def run_algorithm_cpp(algorithm, test_filename, tt_dim, delta, ctg_algorithm=Non
     if result.stderr:
         print(f"🚨 Algorithm {algorithm} returned warnings and/or errors on {test_filename}.")
         print("Args: ", args)
+        print(result.stdout)
         print(result.stderr)
 
     # Parse cost of the contraction and execution time of the algorithm
@@ -176,17 +177,21 @@ def run_algorithm_on_test_case(input):
 
     # Validate the contraction cost for given order if requested
     if validate_results and order != "naive_order_NA":
-        contraction_recursive = ast.literal_eval(order)
-        if algorithm != "OneSidedOneDim":
-            contraction_flat, _ = generate_contraction_list(contraction_recursive)
-        else:
-            contraction_flat = contraction_recursive
-        cost_validation = run_validation_on_test_case(tt_dim, test_filename, contraction_flat)
-        result_validation = "Correct"
-        if cost_validation != cost:
+        if order != "":
+            contraction_recursive = ast.literal_eval(order)
+            if algorithm != "OneSidedOneDim":
+                contraction_flat, _ = generate_contraction_list(contraction_recursive)
+            else:
+                contraction_flat = contraction_recursive
+            cost_validation = run_validation_on_test_case(tt_dim, test_filename, contraction_flat)
+            result_validation = "Correct"
+            if cost_validation != cost:
+                result_validation = "Invalid"
+                print(f"❌ Validation failed for {algorithm} on {test_filename}. Expected cost: {cost}, validated cost: {cost_validation}")
+            output_str += f";{cost_validation};{result_validation}"
+        else: 
             result_validation = "Invalid"
-            print(f"❌ Validation failed for {algorithm} on {test_filename}. Expected cost: {cost}, validated cost: {cost_validation}")
-        output_str += f";{cost_validation};{result_validation}"
+            print(f"❌ Validation failed for {algorithm} on {test_filename}. No order returned.")
     elif validate_results and order == "naive_order_NA":
         output_str += ";0;Correct"
 

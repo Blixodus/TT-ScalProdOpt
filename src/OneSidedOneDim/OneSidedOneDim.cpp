@@ -1,16 +1,14 @@
 #include "OneSidedOneDim.hpp"
 
 cost_t OneSidedOneDim::solve(){
-    std::cout<<"!!"<<std::endl;
     std::pair<int, int> p;
     // Maximum number of accumulated central edges results
-    int kmax = 2 * dmax + 1;
+    int kmax = 2 * this->m_network.dim + 1;
 
     // Iterating over the dimensions of the tensor train
-    std::cout<<"Size: "<<n_vertex<<std::endl;
-    for(int s = 0; s < n_vertex/2-1; s++) {
+    for(int s = 0; s < this->m_network.n_vertex/2-1; s++) {
         // Prepare the current central edge
-        weight_t N = m_adjacence_matrix[n_vertex*s + s+n_vertex/2]; // Central edge to multiply
+        weight_t N = m_adjacence_matrix[this->m_network.n_vertex*s + s+this->m_network.n_vertex/2]; // Central edge to multiply
         int ofs = 2*s; // Offset in the m_central_cost array
         int ofsc = (s+1)*(s+1)-1; // Offset in the m_cost_to_reach array
 
@@ -52,8 +50,8 @@ cost_t OneSidedOneDim::solve(){
         }
 
         // Add the 2 new lateral edges
-        m_central_weight[0] = m_adjacence_matrix[n_vertex*s + s+1];
-        m_central_weight[1] = m_adjacence_matrix[n_vertex*(s+n_vertex/2) + s+1+n_vertex/2];
+        m_central_weight[0] = m_adjacence_matrix[this->m_network.n_vertex*s + s+1];
+        m_central_weight[1] = m_adjacence_matrix[this->m_network.n_vertex*(s+this->m_network.n_vertex/2) + s+1+this->m_network.n_vertex/2];
 
         // Rank the best cost for R and Q
         m_cost_to_reach[0] = m_ref_cost[ofs];
@@ -61,8 +59,8 @@ cost_t OneSidedOneDim::solve(){
     }
 
     // Last step, we directly retrieve the result
-    int s = n_vertex/2-1;
-    weight_t N = m_adjacence_matrix[n_vertex*s + s+n_vertex/2];
+    int s = this->m_network.n_vertex/2-1;
+    weight_t N = m_adjacence_matrix[this->m_network.n_vertex*s + s+this->m_network.n_vertex/2];
     cost_t cost = std::numeric_limits<cost_t>::max();
 
     for(int k = 0; k <= min(2*s, kmax); k++){
@@ -90,8 +88,8 @@ cost_t OneSidedOneDim::contract(int s, int k, int x, pair<int, int>& p){
     compute_ect(s, k);
 
     // Recover the weights of the side edges (not necessary but more readable)
-    cost_t costR = m_adjacence_matrix[n_vertex*s + s+1];
-    cost_t costQ = m_adjacence_matrix[n_vertex*(s+n_vertex/2) + s+1+n_vertex/2];
+    cost_t costR = m_adjacence_matrix[this->m_network.n_vertex*s + s+1];
+    cost_t costQ = m_adjacence_matrix[this->m_network.n_vertex*(s+this->m_network.n_vertex/2) + s+1+this->m_network.n_vertex/2];
    
 
     // The costs associated with the different contraction orders
@@ -105,10 +103,10 @@ cost_t OneSidedOneDim::contract(int s, int k, int x, pair<int, int>& p){
         // Keep the top edge (R)
         case 0:
             // First Q followed by N
-            r12 = m_ext_cost_tab[s+1+n_vertex/2]*m_central_weight[k] + m_ext_cost_tab[s]*m_ext_cost_tab[s+1+n_vertex/2]/costQ;
+            r12 = m_ext_cost_tab[s+1+this->m_network.n_vertex/2]*m_central_weight[k] + m_ext_cost_tab[s]*m_ext_cost_tab[s+1+this->m_network.n_vertex/2]/costQ;
 
             // First N followed by Q
-            r21 = costR*costQ*m_central_weight[k] + costR*m_ext_cost_tab[s+1+n_vertex/2];
+            r21 = costR*costQ*m_central_weight[k] + costR*m_ext_cost_tab[s+1+this->m_network.n_vertex/2];
             if(r12 < r21){
                 cost = r12;
                 p = make_pair(1, 2);
@@ -120,7 +118,7 @@ cost_t OneSidedOneDim::contract(int s, int k, int x, pair<int, int>& p){
 
         // Keep the bottom edge (Q)
         case 1:
-            r02 = m_ext_cost_tab[s+1]*m_central_weight[k] + m_ext_cost_tab[s+n_vertex/2]*m_ext_cost_tab[s+1]/costR;
+            r02 = m_ext_cost_tab[s+1]*m_central_weight[k] + m_ext_cost_tab[s+this->m_network.n_vertex/2]*m_ext_cost_tab[s+1]/costR;
             r20 = costQ*(costR*m_central_weight[k] + m_ext_cost_tab[s+1]);
             if(r02 < r20){
                 cost = r02;
@@ -133,7 +131,7 @@ cost_t OneSidedOneDim::contract(int s, int k, int x, pair<int, int>& p){
 
         // Keep the central edge (C)
         case 2:
-            cost = m_central_weight[k]*(m_ext_cost_tab[s+1] + m_ext_cost_tab[s+1+n_vertex/2]);
+            cost = m_central_weight[k]*(m_ext_cost_tab[s+1] + m_ext_cost_tab[s+1+this->m_network.n_vertex/2]);
             p = make_pair(0, 1);
             break;
         default:
@@ -154,8 +152,8 @@ cost_t OneSidedOneDim::contract(int s, int k, int x, pair<int, int>& p){
  * @param s the state we are currently at
  */
 void OneSidedOneDim::compute_ect(int s, int k){
-    m_ext_cost_tab[s] = m_adjacence_matrix[n_vertex*s + s+1]*m_central_weight[k];
-    m_ext_cost_tab[s+n_vertex/2] = m_adjacence_matrix[n_vertex*(s+n_vertex/2) + s+1+n_vertex/2]*m_central_weight[k];
+    m_ext_cost_tab[s] = m_adjacence_matrix[this->m_network.n_vertex*s + s+1]*m_central_weight[k];
+    m_ext_cost_tab[s+this->m_network.n_vertex/2] = m_adjacence_matrix[this->m_network.n_vertex*(s+this->m_network.n_vertex/2) + s+1+this->m_network.n_vertex/2]*m_central_weight[k];
 }
 
 /**
@@ -164,17 +162,17 @@ void OneSidedOneDim::compute_ect(int s, int k){
  * @param s the state
  */
 void OneSidedOneDim::restore_ect(int s){
-    m_ext_cost_tab[s] = m_adjacence_matrix[n_vertex*n_vertex + s];
-    m_ext_cost_tab[s+n_vertex/2] = m_adjacence_matrix[n_vertex*n_vertex + s+n_vertex/2];
+    m_ext_cost_tab[s] = m_adjacence_matrix[this->m_network.n_vertex*this->m_network.n_vertex + s];
+    m_ext_cost_tab[s+this->m_network.n_vertex/2] = m_adjacence_matrix[this->m_network.n_vertex*this->m_network.n_vertex + s+this->m_network.n_vertex/2];
 }
 
 std::string OneSidedOneDim::generate_order(result_direction_e direction) {
-    std::string order = this->generate_order(n_vertex/2-2, this->m_central_ref[n_vertex/2-1], direction);
+    std::string order = this->generate_order(this->m_network.n_vertex/2-2, this->m_central_ref[this->m_network.n_vertex/2-1], direction);
 
     if(direction == LR) {
-        return "(" + order + ", (" + std::to_string(n_vertex / 2 - 1) + ", " + std::to_string(n_vertex-1) + "))";
+        return "(" + order + ", (" + std::to_string(this->m_network.n_vertex / 2 - 1) + ", " + std::to_string(this->m_network.n_vertex-1) + "))";
     } else if(direction == RL) {
-        return "(" + order + ", (" + std::to_string(0) + ", " + std::to_string(n_vertex / 2) + "))";
+        return "(" + order + ", (" + std::to_string(0) + ", " + std::to_string(this->m_network.n_vertex / 2) + "))";
     }
 
     return "Invalid direction";
@@ -183,8 +181,8 @@ std::string OneSidedOneDim::generate_order(result_direction_e direction) {
 std::pair<int, int> OneSidedOneDim::generate_operation(int s, int operation_id, result_direction_e direction) {
     std::pair<vertexID_t, vertexID_t> operation;
 
-    const int end_up = n_vertex / 2 - 1;
-    const int end_down = n_vertex - 1;
+    const int end_up = this->m_network.n_vertex / 2 - 1;
+    const int end_down = this->m_network.n_vertex - 1;
 
     switch(operation_id){
         case 0:
@@ -192,11 +190,11 @@ std::pair<int, int> OneSidedOneDim::generate_operation(int s, int operation_id, 
             else                operation = {end_up - s, end_up - (s + 1)};
         break;
         case 1:
-            if(direction == LR) operation = {n_vertex / 2 + s, n_vertex / 2 + (s + 1)};
+            if(direction == LR) operation = {this->m_network.n_vertex / 2 + s, this->m_network.n_vertex / 2 + (s + 1)};
             else                operation = {end_down - s, end_down - (s + 1)};
         break;
         case 2:
-            if(direction == LR) operation = {s, n_vertex / 2 + s};
+            if(direction == LR) operation = {s, this->m_network.n_vertex / 2 + s};
             else                operation = {end_up - s, end_down - s};
             
         break;
@@ -238,12 +236,8 @@ std::string OneSidedOneDim::generate_order(int s, int k, result_direction_e dire
 
 void OneSidedOneDim::init(std::string filename) {
     // Initialize network 2D
-    std::cout<<"init"<<std::endl;
-    this->m_network_2d = Network<2>(filename);
-
-    set_limit_dim(this->m_network_2d.dimension);
-    this->dim = this->m_network_2d.dimension;
-    this->n_vertex = this->m_network_2d.n_vertex;
+    std::cout<<"init start"<<std::endl;
+    this->m_network = Network<2>(filename);
 
     // Initialize the direction
     this->m_direction = BOTH_SIDES;
@@ -253,8 +247,8 @@ void OneSidedOneDim::init(std::string filename) {
     }
 
     // Initialize algorithm variables
-    std::cout<<"$"<<this->m_direction<<std::endl;
     this->init_variables(LR);
+    std::cout<<"init end"<<std::endl;
 }
 
 void OneSidedOneDim::init_variables(result_direction_e direction) {
@@ -269,23 +263,23 @@ void OneSidedOneDim::init_variables(result_direction_e direction) {
     best_order.clear();
 
     // Initialize the variables
-    m_cost_to_reach.resize(min(2*(n_vertex/2)-1, 2*dmax+1), 0); // cost table
-    m_central_weight.resize(min(2*(n_vertex/2)-1, 2*dmax+1), 1); // possible weight of the central edge
-    m_adjacence_matrix.resize(n_vertex*(n_vertex+1), 1);
-    m_ext_cost_tab.resize(n_vertex, 1);
-    m_ref_cost.resize(n_vertex, -1);
-    m_order_by_dim.resize(n_vertex*n_vertex/4, {-1, -1});
-    m_central_ref.resize(n_vertex/2, -1);
+    m_cost_to_reach.resize(min(2*(this->m_network.n_vertex/2)-1, 2*this->m_network.dim+1), 0); // cost table
+    m_central_weight.resize(min(2*(this->m_network.n_vertex/2)-1, 2*this->m_network.dim+1), 1); // possible weight of the central edge
+    m_adjacence_matrix.resize(this->m_network.n_vertex*(this->m_network.n_vertex+1), 1);
+    m_ext_cost_tab.resize(this->m_network.n_vertex, 1);
+    m_ref_cost.resize(this->m_network.n_vertex, -1);
+    m_order_by_dim.resize(this->m_network.n_vertex*this->m_network.n_vertex/4, {-1, -1});
+    m_central_ref.resize(this->m_network.n_vertex/2, -1);
 
     // Initialize the weight tables
-    for(int v1 = 0; v1 < this->m_network_2d.n_vertex; v1++) {
-        for(int v2 = v1 + 1; v2 < this->m_network_2d.n_vertex; v2++) {
+    for(int v1 = 0; v1 < this->m_network.n_vertex; v1++) {
+        for(int v2 = v1 + 1; v2 < this->m_network.n_vertex; v2++) {
             weight_t w = 0;
             if(direction == LR) {
-                w = this->m_network_2d[v1, v2, true];
+                w = this->m_network[v1, v2, true];
             } else {
-                const int end_up = this->m_network_2d.n_vertex / 2 - 1;
-                const int end_down = this->m_network_2d.n_vertex - 1;
+                const int end_up = this->m_network.n_vertex / 2 - 1;
+                const int end_down = this->m_network.n_vertex - 1;
 
                 int v1_reversed = 0, v2_reversed = 0;
 
@@ -295,18 +289,18 @@ void OneSidedOneDim::init_variables(result_direction_e direction) {
                 if(v2 <= end_up) v2_reversed = end_up - v2;
                 else v2_reversed = (end_down - v2) + end_up + 1;
 
-                w = this->m_network_2d[v1_reversed, v2_reversed, true];
+                w = this->m_network[v1_reversed, v2_reversed, true];
             }
 
             if(w != 0) {
                 m_ext_cost_tab[v1] *= w;
                 m_ext_cost_tab[v2] *= w;
 
-                m_adjacence_matrix[n_vertex*v1 + v2] = w;
-                m_adjacence_matrix[n_vertex*v2 + v1] = w;
+                m_adjacence_matrix[this->m_network.n_vertex*v1 + v2] = w;
+                m_adjacence_matrix[this->m_network.n_vertex*v2 + v1] = w;
 
-                m_adjacence_matrix[n_vertex*n_vertex + v1] *= w;
-                m_adjacence_matrix[n_vertex*n_vertex + v2] *= w;
+                m_adjacence_matrix[this->m_network.n_vertex*this->m_network.n_vertex + v1] *= w;
+                m_adjacence_matrix[this->m_network.n_vertex*this->m_network.n_vertex + v2] *= w;
             }
         }
     }
@@ -320,11 +314,13 @@ cost_t OneSidedOneDim::call_solve() {
 
     // Compute cost of contraction starting from left side
     if(this->m_direction & START_LEFT) {
+        std::cout<<"LR start"<<std::endl;
         cost_LR = this->solve();
         order_LR = this->generate_order(LR);
 
         std::cout<<"Cost_LR: "<<cost_LR<<std::endl;
         std::cout<<"Order_LR: "<<order_LR<<std::endl;
+        std::cout<<"LR end"<<std::endl;
     }
 
     // Find the best cost and corresponding order
@@ -341,7 +337,7 @@ cost_t OneSidedOneDim::call_solve() {
     }
 
     // Find the best cost and corresponding order
-    if(cost_LR < cost_RL) {
+    if(cost_LR <= cost_RL) {
         this->best_cost = cost_LR;
         this->best_order_str = order_LR;
     } else {
@@ -349,5 +345,6 @@ cost_t OneSidedOneDim::call_solve() {
         this->best_order_str = order_RL;
     }
 
+    std::cout<<"end solve"<<std::endl;
     return this->best_cost;
 }

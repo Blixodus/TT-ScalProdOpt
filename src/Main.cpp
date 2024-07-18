@@ -158,13 +158,14 @@ template<class T>
 void launch_exec(T& solver, std::string network_file){
     int status;
     pid_t pid = fork();
-    if(pid == 0){ //processus fils
+    if(pid == 0) { // child process
         condition_variable cv;
         mutex mtx;
 
         // Thread that will carry the execution
         std::thread t1([&solver, &cv, &network_file](){
             execfile_no_display(solver, network_file);
+            std::cout<<"Execution done"<<std::endl;
             cv.notify_all();
         });
 
@@ -189,9 +190,9 @@ void launch_exec(T& solver, std::string network_file){
         
         exit(0);
 
-    }else{ //processus parent
+    } else { // parent process
         wait(&status);
-        if(status!=0){ //if timeout
+        if(status != 0) { // if timeout
             //the algorithm leaves the execution queue
             solver.still_up = false;
         }
@@ -202,7 +203,7 @@ template<class T>
 void launch_untimed_exec(T& solver, std::string network_file){
     execfile_no_display(solver, network_file);
     //display
-    display_info(solver);
+    display_infos(solver);
 }
 
 /**

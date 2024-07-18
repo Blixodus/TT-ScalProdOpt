@@ -26,7 +26,7 @@ class TwoSidedDeltaDim : public Algorithm {
     CotengraWrapper<tt_dim> m_exact_solver;
 
     // Generalized network information
-    Network<tt_dim> m_network_2d;
+    Network<tt_dim> m_network;
 
     // Constructors
     TwoSidedDeltaDim(){}
@@ -35,19 +35,16 @@ class TwoSidedDeltaDim : public Algorithm {
     // Initializers
     void init(std::string filename) {
         // Initialize network 2D
-        this->m_network_2d = Network<tt_dim>(filename);
-
-        this->dim = this->m_network_2d.dimension;
-        this->n_vertex = this->m_network_2d.n_vertex;
+        this->m_network = Network<tt_dim>(filename);
 
         // Initialize the memoization tables
         for(int type = 0; type < 2; type++) {
-            this->m_cost[type].resize(this->dim + 1);
-            this->m_order[type].resize(this->dim + 1);
-            for(int t = 0; t <= this->dim; t++) {
-                this->m_cost[type][t].resize(this->dim);
-                this->m_order[type][t].resize(this->dim);
-                for(int s = 0; s < this->dim; s++) {
+            this->m_cost[type].resize(this->m_network.dim + 1);
+            this->m_order[type].resize(this->m_network.dim + 1);
+            for(int t = 0; t <= this->m_network.dim; t++) {
+                this->m_cost[type][t].resize(this->m_network.dim);
+                this->m_order[type][t].resize(this->m_network.dim);
+                for(int s = 0; s < this->m_network.dim; s++) {
                     this->m_cost[type][t][s] = std::numeric_limits<cost_t>::max();
                 }
             }
@@ -58,7 +55,7 @@ class TwoSidedDeltaDim : public Algorithm {
         this->best_order_str = "ORDER_NOT_FOUND";
 
         // Initialize the exact solver
-        this->m_exact_solver.init(this->m_network_2d);
+        this->m_exact_solver.init(this->m_network);
     }
     
     // Computation functions
@@ -68,7 +65,7 @@ class TwoSidedDeltaDim : public Algorithm {
             // Iterate over windows of size t up to Δ
             for(int t = 1; t <= delta; t++) {
                 // Iterate over all the possible starting points
-                for(int s = 0; s < (this->dim - t + 1); s++) {
+                for(int s = 0; s < (this->m_network.dim - t + 1); s++) {
                     // Solve the window [s, s+t-1] optimally and store the result
                     // in the memoization table
                     std::pair<cost_t, std::string> optimal_result = m_exact_solver.solve(s, s + t - 1, LR);
@@ -81,9 +78,9 @@ class TwoSidedDeltaDim : public Algorithm {
             // In this case the algorithm performs the splits into two subproblems
             // of size t up Δ and D-t, and solves the first one optimally and the
             // second one recursively
-            for(int t = delta + 1; t <= this->dim; t++) {
+            for(int t = delta + 1; t <= this->m_network.dim; t++) {
                 // Iterate over all the possible starting points
-                for(int s = 0; s < (this->dim - t + 1); s++) {
+                for(int s = 0; s < (this->m_network.dim - t + 1); s++) {
                     // Solve the window [s, s+t-1] by splitting it into two subproblems
                     for(int k = 1; k <= delta; k++) {
                         cost_t cost = this->m_cost[LR][k][s] + this->m_cost[LR][t - k][s + k];
@@ -108,7 +105,7 @@ class TwoSidedDeltaDim : public Algorithm {
             // Iterate over windows of size t up to Δ
             for(int t = 1; t <= delta; t++) {
                 // Iterate over all the possible starting splits
-                for(int s = 0; s < (this->dim - t + 1); s++) {
+                for(int s = 0; s < (this->m_network.dim - t + 1); s++) {
                     // Solve the window [s, s+t-1] optimally and store the result
                     // in the memoization table
                     std::pair<cost_t, std::string> optimal_result = m_exact_solver.solve(s, s + t - 1, RL);
@@ -121,9 +118,9 @@ class TwoSidedDeltaDim : public Algorithm {
             // In this case the algorithm performs the splits into two subproblems
             // of size D-t and t up Δ, and solves the first one recursively and the
             // second one optimally
-            for(int t = delta + 1; t <= this->dim; t++) {
+            for(int t = delta + 1; t <= this->m_network.dim; t++) {
                 // Iterate over all the possible starting points
-                for(int s = 0; s < (this->dim - t + 1); s++) {
+                for(int s = 0; s < (this->m_network.dim - t + 1); s++) {
                     // Solve the window [s, s+t-1] by splitting it into two subproblems
                     for(int k = 1; k <= delta; k++) {
                         cost_t cost = this->m_cost[RL][t - k][s] + this->m_cost[RL][k][s + t - k];
@@ -153,35 +150,35 @@ class TwoSidedDeltaDim : public Algorithm {
 
         // Include the cost of starting from the left side of TT
         if constexpr(dir & START_LEFT) {
-            if(this->m_cost[LR][this->dim][0] < this->best_cost) {
-                this->best_cost = this->m_cost[LR][this->dim][0];
-                this->best_order_str = this->m_order[LR][this->dim][0];
+            if(this->m_cost[LR][this->m_network.dim][0] < this->best_cost) {
+                this->best_cost = this->m_cost[LR][this->m_network.dim][0];
+                this->best_order_str = this->m_order[LR][this->m_network.dim][0];
             }
         }
 
         // Include the cost of starting from the right side of TT
         if constexpr(dir & START_RIGHT) {
-            if(this->m_cost[RL][this->dim][0] < this->best_cost) {
-                this->best_cost = this->m_cost[RL][this->dim][0];
-                this->best_order_str = this->m_order[RL][this->dim][0];
+            if(this->m_cost[RL][this->m_network.dim][0] < this->best_cost) {
+                this->best_cost = this->m_cost[RL][this->m_network.dim][0];
+                this->best_order_str = this->m_order[RL][this->m_network.dim][0];
             }
         }
 
         // Include the cost of starting from both sides of TT
         if constexpr(dir & ALL) {
             // Iterate over all the possible starting splits
-            for(int split = 1; split < this->dim; split++) {
+            for(int split = 1; split < this->m_network.dim; split++) {
                 // Retrieve the cost of the left part
                 cost_t cost_left = this->m_cost[LR][split][0];
 
                 // Retrieve the cost of the right part
-                cost_t cost_right = this->m_cost[RL][dim - split][split];
+                cost_t cost_right = this->m_cost[RL][this->m_network.dim - split][split];
 
                 // Compute the cost of contracting the final two nodes together
                 // (results of the two subproblems) 
                 cost_t cost_connect = 1;
                 for(int row = 0; row < tt_dim; row++) {
-                    cost_connect *= this->m_network_2d[row * this->dim + (split - 1), row * this->dim + split];
+                    cost_connect *= this->m_network[row * this->m_network.dim + (split - 1), row * this->m_network.dim + split];
                 }
 
                 // Calculate the total cost of the split
@@ -190,7 +187,7 @@ class TwoSidedDeltaDim : public Algorithm {
                 // Update the best cost
                 if(total_cost < this->best_cost) {
                     this->best_cost = total_cost;
-                    this->best_order_str = "(" + this->m_order[LR][split][0] + ", " + this->m_order[RL][dim - split][split] + ")";
+                    this->best_order_str = "(" + this->m_order[LR][split][0] + ", " + this->m_order[RL][this->m_network.dim - split][split] + ")";
                 }
             }
         }
