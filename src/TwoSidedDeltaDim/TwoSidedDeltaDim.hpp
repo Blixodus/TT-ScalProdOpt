@@ -55,6 +55,7 @@ class TwoSidedDeltaDim : public Algorithm {
 
         // Initialize the result variables
         this->best_cost = std::numeric_limits<cost_t>::max();
+        this->best_order_str = "ORDER_NOT_FOUND";
 
         // Initialize the exact solver
         this->m_exact_solver.init(this->m_network_2d);

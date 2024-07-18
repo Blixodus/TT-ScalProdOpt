@@ -45,10 +45,18 @@ class OneSidedOneDim : public Algorithm {
     //  m_order_by_dim[i] = list of pairs {0, 1, 2}x{0, 1, 2}, corresponding to the pair of edges we contracted at i-th subproblem
     std::vector<pair<int, int>> m_order_by_dim;
 
+    // Initializer
+    void init_variables(result_direction_e direction);
+
     // Utility functions
     cost_t contract(int s, int i, int x, pair<int, int>& p);
+
     void compute_ect(int s, int k);
     void restore_ect(int s);
+
+    std::string generate_order(result_direction_e direction);
+    std::string generate_order(int s, int k, result_direction_e direction);
+    std::pair<int, int> generate_operation(int s, int operation_id, result_direction_e direction);
 
     public:
     // Constructors
@@ -61,11 +69,5 @@ class OneSidedOneDim : public Algorithm {
     // Solvers
     cost_t solve();
     cost_t call_solve();
- 
-    // Utility functions
-    void display_order(int s, int k);
-    void display_order();
-    std::string generate_order();
-    std::string generate_order(int s, int k);
 };
 #endif

@@ -168,38 +168,44 @@ void OneSidedOneDim::restore_ect(int s){
     m_ext_cost_tab[s+n_vertex/2] = m_adjacence_matrix[n_vertex*n_vertex + s+n_vertex/2];
 }
 
-/**
- * @brief displays the best contraction order using backtracking
- * 
- * @param s a state
- * @param k the center-edge that lead to the best final cost
- */
-void OneSidedOneDim::display_order(int s, int k){
-    int ofs = (s+1)*(s+1)-1;
-    if(s >= 0){
-        if(k > 1){
-            display_order(s-1, k-2);
-        }else{
-            display_order(s-1, m_central_ref[s]-2);
-        }
-        cout << "|" << m_order_by_dim.at(ofs + k).first << " - " << m_order_by_dim.at(ofs + k).second << "|";
+std::string OneSidedOneDim::generate_order(result_direction_e direction) {
+    std::string order = this->generate_order(n_vertex/2-2, this->m_central_ref[n_vertex/2-1], direction);
+
+    if(direction == LR) {
+        return "(" + order + ", (" + std::to_string(n_vertex / 2 - 1) + ", " + std::to_string(n_vertex-1) + "))";
+    } else if(direction == RL) {
+        return "(" + order + ", (" + std::to_string(0) + ", " + std::to_string(n_vertex / 2) + "))";
     }
+
+    return "Invalid direction";
 }
 
-void OneSidedOneDim::display_order(){
-    for(int i = 0; i < best_order.size()-1; i++){
-        cout << best_order[i] << " - ";
+std::pair<int, int> OneSidedOneDim::generate_operation(int s, int operation_id, result_direction_e direction) {
+    std::pair<vertexID_t, vertexID_t> operation;
+
+    const int end_up = n_vertex / 2 - 1;
+    const int end_down = n_vertex - 1;
+
+    switch(operation_id){
+        case 0:
+            if(direction == LR) operation = {s, s + 1};
+            else                operation = {end_up - s, end_up - (s + 1)};
+        break;
+        case 1:
+            if(direction == LR) operation = {n_vertex / 2 + s, n_vertex / 2 + (s + 1)};
+            else                operation = {end_down - s, end_down - (s + 1)};
+        break;
+        case 2:
+            if(direction == LR) operation = {s, n_vertex / 2 + s};
+            else                operation = {end_up - s, end_down - s};
+            
+        break;
     }
-    cout << best_order.back() << '\n';
+
+    return operation;
 }
 
-std::string OneSidedOneDim::generate_order() {
-    std::string order = generate_order(n_vertex/2-2, m_central_ref[n_vertex/2-1]);
-    //return "(" + order + 
-    return "(" + order + ", (" + std::to_string(n_vertex / 2 - 1) + ", " + std::to_string(n_vertex-1) + "))";
-}
-
-std::string OneSidedOneDim::generate_order(int s, int k) {
+std::string OneSidedOneDim::generate_order(int s, int k, result_direction_e direction) {
     std::string order = "";
 
     int ofs = (s+1)*(s+1)-1;
@@ -207,71 +213,52 @@ std::string OneSidedOneDim::generate_order(int s, int k) {
     if(s >= 0) {
         // Traverse the tree of subproblems recursively
         if(k > 1){
-            order = generate_order(s-1, k-2);
+            order = generate_order(s-1, k-2, direction);
         } else {
-            order = generate_order(s-1, m_central_ref[s]-2);
+            order = generate_order(s-1, m_central_ref[s]-2, direction);
         }
 
         // Generate contractions for current step
         int e1 = m_order_by_dim[ofs + k].first;
         int e2 = m_order_by_dim[ofs + k].second;
 
-        std::pair<vertexID_t, vertexID_t> operation1, operation2;
-        switch(e1){
-            case 0:
-                operation1 = {s, s + 1};
-            break;
-            case 1:
-                operation1 = {n_vertex / 2 + s, n_vertex / 2 + (s + 1)};
-            break;
-            case 2:
-                operation1 = {s, n_vertex / 2 + s};
-            break;
-        }
+        std::pair<vertexID_t, vertexID_t> operation1 = generate_operation(s, e1, direction);
+        std::pair<vertexID_t, vertexID_t> operation2 = generate_operation(s, e2, direction);
 
-        switch(e2){
-            case 0:
-                operation2 = {s, s + 1};
-            break;
-            case 1:
-                operation2 = {n_vertex / 2 + s, n_vertex / 2 + (s + 1)};
-            break;
-            case 2:
-                operation2 = {s, n_vertex / 2 + s};
-            break;
-        }
-        //cout << "|" << m_order_by_dim.at(ofs + k).first << " - " << m_order_by_dim.at(ofs + k).second << "|";
-
-        // Generate the ordering string
-        /*if(order != "") {
-            order = "(" + order + ", (" + std::to_string(operation1.first) + ", " + std::to_string(operation1.second) + "))";
-            order = "(" + order + ", (" + std::to_string(operation2.first) + ", " + std::to_string(operation2.second) + "))";
-        } else {
-            order = "((" + std::to_string(operation1.first) + ", " + std::to_string(operation1.second) + "), (" + std::to_string(operation2.first) + ", " + std::to_string(operation2.second) + "))";
-        }*/
+        // Generate the order string
         if(order != "") {
             order += ", (" + std::to_string(operation1.first) + ", " + std::to_string(operation1.second) + "), (" + std::to_string(operation2.first) + ", " + std::to_string(operation2.second) + ")";
         } else {
             order = "(" + std::to_string(operation1.first) + ", " + std::to_string(operation1.second) + "), (" + std::to_string(operation2.first) + ", " + std::to_string(operation2.second) + ")";
         }
-
-        std::cout<<"Order: "<<s<<" "<<k<<" "<<e1<<" "<<e2<<"\t"<<order<<std::endl;
     }
 
     return order;
 }
 
 void OneSidedOneDim::init(std::string filename) {
-    std::cout<<"!init"<<endl;
     // Initialize network 2D
+    std::cout<<"init"<<std::endl;
     this->m_network_2d = Network<2>(filename);
 
     set_limit_dim(this->m_network_2d.dimension);
     this->dim = this->m_network_2d.dimension;
     this->n_vertex = this->m_network_2d.n_vertex;
 
-    //this->m_direction = direction;
+    // Initialize the direction
+    this->m_direction = BOTH_SIDES;
+    if(this->m_direction == ALL) {
+        std::cerr<<"Warning! OneSidedOneDim algorithm does not support ALL (splits) direction. Using BOTH_SIDES instead."<<std::endl;
+        this->m_direction = BOTH_SIDES;
+    }
 
+    // Initialize algorithm variables
+    std::cout<<"$"<<this->m_direction<<std::endl;
+    this->init_variables(LR);
+}
+
+void OneSidedOneDim::init_variables(result_direction_e direction) {
+    // Clear the variables
     m_adjacence_matrix.clear();
     m_ext_cost_tab.clear();
     m_ref_cost.clear();
@@ -281,6 +268,7 @@ void OneSidedOneDim::init(std::string filename) {
     m_central_ref.clear();
     best_order.clear();
 
+    // Initialize the variables
     m_cost_to_reach.resize(min(2*(n_vertex/2)-1, 2*dmax+1), 0); // cost table
     m_central_weight.resize(min(2*(n_vertex/2)-1, 2*dmax+1), 1); // possible weight of the central edge
     m_adjacence_matrix.resize(n_vertex*(n_vertex+1), 1);
@@ -292,7 +280,24 @@ void OneSidedOneDim::init(std::string filename) {
     // Initialize the weight tables
     for(int v1 = 0; v1 < this->m_network_2d.n_vertex; v1++) {
         for(int v2 = v1 + 1; v2 < this->m_network_2d.n_vertex; v2++) {
-            weight_t w = this->m_network_2d[v1, v2, true];
+            weight_t w = 0;
+            if(direction == LR) {
+                w = this->m_network_2d[v1, v2, true];
+            } else {
+                const int end_up = this->m_network_2d.n_vertex / 2 - 1;
+                const int end_down = this->m_network_2d.n_vertex - 1;
+
+                int v1_reversed = 0, v2_reversed = 0;
+
+                if(v1 <= end_up) v1_reversed = end_up - v1;
+                else v1_reversed = (end_down - v1) + end_up + 1;
+
+                if(v2 <= end_up) v2_reversed = end_up - v2;
+                else v2_reversed = (end_down - v2) + end_up + 1;
+
+                w = this->m_network_2d[v1_reversed, v2_reversed, true];
+            }
+
             if(w != 0) {
                 m_ext_cost_tab[v1] *= w;
                 m_ext_cost_tab[v2] *= w;
@@ -308,17 +313,41 @@ void OneSidedOneDim::init(std::string filename) {
 }
 
 cost_t OneSidedOneDim::call_solve() {
-    std::cout<<"!solve"<<endl;
-    cost_t c = solve();
-    std::string order_str = this->generate_order();
-    this->best_order_str = order_str;
+    // Initialize the cost variables
+    cost_t cost_LR = std::numeric_limits<cost_t>::max();
+    cost_t cost_RL = std::numeric_limits<cost_t>::max();
+    std::string order_LR = "", order_RL = "";
 
-    std::cout<<"!solved"<<endl;
+    // Compute cost of contraction starting from left side
+    if(this->m_direction & START_LEFT) {
+        cost_LR = this->solve();
+        order_LR = this->generate_order(LR);
 
-    std::cout<<"! ";
-    for(vertexID_t v : best_order){
-        std::cout << v << " ";
+        std::cout<<"Cost_LR: "<<cost_LR<<std::endl;
+        std::cout<<"Order_LR: "<<order_LR<<std::endl;
     }
-    std::cout<<endl;
-    return c;
+
+    // Find the best cost and corresponding order
+    if(this->m_direction & START_RIGHT) {
+        // Reverse the network
+        this->init_variables(RL);
+
+        // Compute the cost and retrieve order
+        cost_RL = this->solve();
+        order_RL = this->generate_order(RL);
+
+        std::cout<<"Cost_RL: "<<cost_RL<<std::endl;
+        std::cout<<"Order_RL: "<<order_RL<<std::endl;
+    }
+
+    // Find the best cost and corresponding order
+    if(cost_LR < cost_RL) {
+        this->best_cost = cost_LR;
+        this->best_order_str = order_LR;
+    } else {
+        this->best_cost = cost_RL;
+        this->best_order_str = order_RL;
+    }
+
+    return this->best_cost;
 }
