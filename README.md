@@ -1,5 +1,18 @@
 # Exploring optimal contraction strategies for fast vector scalar product in Tensor-Train format
 
+This repository presents an implementation of the algorithms for finding quasi-optimal contraction orderings for scalar products in Tensor-Train format discussed in the paper:
+
+```bibtex
+@article{paper_name,
+  author    = {author list},
+  title     = {Exploring optimal contraction strategies for fast vector scalar product in Tensor-Train format},
+  year      = {2024},
+  journal   = {},
+  doi       = {}
+}
+```
+
+
 # Algorithms
 In this project, we include the implementations of two algorithms presented in the article: **1-sided 1-dim** algorithm and **2-sided $\Delta$-dim**. Moreover we provide a wrapper for the `Cotengra` library, which allows to use the algorithms implemented in this library for the benchmarking purposes.
 
@@ -119,61 +132,13 @@ For example for contractions presented above, the order returned by the algorith
 For convenience, we have provided the script to flatten the recursive order definition:
 `tools/flat_order.py`.
 
-
-# OptiTenseurs
-The goal of this project is to implement algorithms capable of finding the best order of contraction of any tensor train, given the size of each vertex's dimension.
-
-# Structure
+# Repository Structure
 
 * 'results' : contains all exported results, it is the default root directory for output files.
 * 'instances' : contains the network files, it is the default root directory for input files.
 * 'src' : contains all the main algorithms (divided in their own sub-directories), the components that define the networks and some types, as well as the main .cpp file that will process the execution queue.
 * 'tools' : contains quality-of-life programs such as the code that displays a TT, the code to test contraction orders, and the code to generate instances.
 * 'GUI' : contains the python code for the graphical user interface.
-
-
-# Algorithms
-The code currently supports 6 algorithms.
-We note D, the dimension of a network.
-We note "explicit edges" the edges of the network, and "implicit edges" the edges of weight 1 that implicitly link every vertices together.
-
-1. ### AllSplits
-    * Type : exact, dynamic programming
-    * Description : Solves every possible splits (over the vertices) of the network
-    * Complexity : 2^4D
-
-2. ### AllEdgeByEdge 
-    * Type : theoretically exact (need proof), iterative (edges)
-    * Description : Solves every contraction order of the network
-    * Complexity : 
-    * Remark : Unlike AllSplits which consider every splits possible, this algorithm only considers the explicit edges.
-
-3. ### ConvexSplits
-    * Type : heuristic (close to exact), dynamic programming
-    * Description : Solves every possible convex splits (over the vertices) of the network
-    * Complexity : 
-    * dmax : Limits how many edges can be crossed when splitting
-    * Remark : By virtue of being unable to generate concave sub-problem, this algorithm is not exact. However it is unlikely to find a network where the optimal solution would require a concave decomposition. Determining the best and worst network-structure for this algorithm could be interesting.
-
-4. ### GreedyEdgeSort
-    * Type : greedy, iterative (edges)
-    * Description : Solves a single contraction order, sorts the edges by weight^2/contraction_cost (descending order), re-computed at each iteration.
-    * Complexity : D*log(D!)
-    * Remark : This algorithm attempts to minimize the overall weight of the network, while not skyrocketting the final cost. This strategy is both cheap and consistently good, which makes its solution a good starting point for any algorithm. Additionaly, a thorough analysis of the network could provide information that would allow more constraint to be added in order to approach the optimal solution.
-
-5. ### OneSideDimByDim
-    * Type : heuristic, iterative (edges + dimensions)
-    * Description : Explores the solutions by going from one side of the network to the other. Contracts 2 edges in {upper, central, lower} per dimension.
-    * Complexity : 
-    * dmax : The amount of central edges that can be accumulated
-    * Remark : Each dimension is composed of 3 edges, two lateral and one central. Once 2 edges have been contracted on that dimension, the remaining edge fuses with the next central edge. Hence why it is interesting to limit how many central edges can fuse together.
-
-6. ### SplitsDimByDim :
-    * Type : heuristic, iterative (dimensions) + dynamic programming
-    * Description : Iterates over d in [1, dmax], then splits the network in 2 sub-networks of dimensions d and D-d.
-    * Complexity : 
-    * dmax : 
-
 
 # Experiments
 
@@ -182,21 +147,3 @@ We note "explicit edges" the edges of the network, and "implicit edges" the edge
 ## Computing the results
 
 ## Plotting the results
-
-
-# Known bugs
-
-
-
-Bug | Occurrence | Cause
-----|----|----
-SplitsDimByDim returns 2^63 | Past 50 dimensions | In solve(), when the best_cost for state2 is computed.
-ConvexSplits undershoots the best cost | If best_cost is initialized as something close to the max of int64 | Likely an overflow in some part of the code, because it is unlikely that a network actually lends a result greater than 2^63, it is more likely that a value is summed to best_cost at some point.
-
-# Additional Notes
-* AllSplits is slower than AllEdgeByEdge and should therefore be ignored.  
-* AllEdgeByEdge should be replaced by a proper dynamic programming algorithm.  
-* More naive algorithms should be implemented.  
-* Results visualization does not properly support having the same algorithm executed multiple time on the same network, but could be added.  
-* A slider could be added to select the range of networks to display (a zoom essentially).
-* GreedyEdgeSort is a bit rough around the edges (mostly the sorting part), it has no excuse to be this slow, considering the range of solution it explores (1).
