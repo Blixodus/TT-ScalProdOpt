@@ -69,6 +69,27 @@ conda install conda-forge::cotengra anaconda::pandas conda-forge::seaborn conda-
 pip install kahypar cgreedy
 ```
 
+### Legacy Cotengra environment
+To use `quickbb` and `flowcutter` algorithms from Cotengra library, you need to setup another environment, with older version of cotengra library.
+```
+conda create --prefix ./tt_contr_env_legacy python=3.10.14 --channel conda-forge
+source activate ./tt_contr_env_legacy
+pip install cotengra==0.2.0
+pip install networkx
+conda install anaconda::pandas conda-forge::seaborn conda-forge::alive-progress
+pip install kahypar cgreedy
+```
+
+Then you should compile the `quickbb` and `flowcutter` libraries and move the binaries to `extern` directory.
+* https://web.archive.org/web/20171001202810/http://www.hlt.utdallas.edu/~vgogate/quickbb_64
+* https://github.com/kit-algo/flow-cutter-pace17
+
+Finally, you should add `extern` directory to your `PATH` environment variable.
+```
+export PATH=$PATH:/[repository path]/extern
+```
+
+
 # Compilation and usage
 
 ## Compilation
@@ -113,8 +134,10 @@ In order to run $Hyper-Greedy$ algorithm using Cotengra wrapper on the $xAy$ tes
 ./OptiTenseurs -a "main_alg CotengraWrapper tt_dim 3 ctg_algorithm hyper-greedy" -f /path_to_tests/xAy/quantized/medium/d_004_v002.txt
 ```
 
-# Input and output formats
-## Input: tensor-train network format
+# Technical considerations
+
+
+## Input tensor-train network format
 Tensor-train networks are defined as text files which use the following format:
 * lines starting with 'c' are comment lines, and are not taken into account by the parser,
 * lines starting with 'v' are a visual representation of the tensor-train network, and are not taken into account by the parser,
@@ -122,23 +145,16 @@ Tensor-train networks are defined as text files which use the following format:
 * single line starting with 'd' followed by the dimension (width) of the tensor-train,
 * lines starting with 'e' describe contraction weight: 'node1 node2 weight' (as weight of the edge between node1 and node2).
 
-## Output: contraction orderding format
+## Output contraction orderding format
 The contraction order returned by $1-sided$ $1-dim$ and $2-sided$ $\Delta-dim$ algorithms, as well as Cotengra library algorithms run using our wrapper, uses a recursive definition the contractions.
 
-![Contraction ordering example](./docs/Ordering_example.png){: width="50%"}
+<img src="./docs/Ordering_example.png" width="240px"/>
 
 For example for contractions presented above, the order returned by the algorithm would be defined as `((((0, 1), (3, 4)), 2), 5)`, which can be represented in form of list of nodes to be contracted as `[(0, 1), (3, 4), (0, 3), (0, 2), (0, 5)]` (assuming that node with lower id represents the result of each contraction). 
 
 For convenience, we have provided the script to flatten the recursive order definition:
 `tools/flat_order.py`.
 
-# Repository Structure
-
-* 'results' : contains all exported results, it is the default root directory for output files.
-* 'instances' : contains the network files, it is the default root directory for input files.
-* 'src' : contains all the main algorithms (divided in their own sub-directories), the components that define the networks and some types, as well as the main .cpp file that will process the execution queue.
-* 'tools' : contains quality-of-life programs such as the code that displays a TT, the code to test contraction orders, and the code to generate instances.
-* 'GUI' : contains the python code for the graphical user interface.
 
 # Experiments
 
