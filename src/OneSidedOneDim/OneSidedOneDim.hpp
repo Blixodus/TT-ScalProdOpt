@@ -66,6 +66,26 @@ class OneSidedOneDim : public Algorithm {
         if(param_dictionary.find("time") == param_dictionary.end()) {
             this->timeout_time = std::chrono::minutes(1);
         }
+
+        // Direction of the contraction
+        if(param_dictionary.find("dir") != param_dictionary.end()) {
+            std::string dir = std::any_cast<string>(param_dictionary["dir"]);
+            if(dir == "START_LEFT") {
+                this->m_direction = split_direction_e::START_LEFT;
+            } else if(dir == "START_RIGHT") {
+                this->m_direction = split_direction_e::START_RIGHT;
+            } else if(dir == "BOTH_SIDES") {
+                this->m_direction = split_direction_e::BOTH_SIDES;
+            } else if(dir == "ALL") {
+                std::cerr<<"Warning! OneSidedOneDim algorithm does not support ALL (splits) direction. Using BOTH_SIDES instead."<<std::endl;
+                this->m_direction = split_direction_e::BOTH_SIDES;
+            } else {
+                std::cerr<<"Warning! Unknown direction '"<<dir<<"'. Using BOTH_SIDES instead."<<std::endl;
+                this->m_direction = split_direction_e::BOTH_SIDES;
+            }
+        } else {
+            this->m_direction = split_direction_e::BOTH_SIDES;
+        }
     }
 
     // Initializer

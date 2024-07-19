@@ -68,15 +68,17 @@ struct edge_t{
 
 // Direction for the start of the contraction
 enum split_direction_e {
-    START_LEFT  = 1,    // contraction starting from the left side of TT
-    START_RIGHT = 2,    // contraction starting from the right side of TT
+    START_LEFT  = 1,     // contraction starting from the left side of TT
+    START_RIGHT = 2,     // contraction starting from the right side of TT
     BOTH_SIDES  = 3,     // contraction starting from either side of TT (that is minimum of left, right)
-    ALL         = 7     // contraction starting from both sides of TT (and mimimum of all options)
+    ALL         = 7      // contraction starting from both sides of TT (and mimimum of all options)
 };
 
+// Direction of the order computation for given window
 enum result_direction_e {
-    LR = 0,
-    RL = 1
+    LR = 0,              // solution from left to right
+    RL = 1               // solution from right to left
 };
+
 
 #endif

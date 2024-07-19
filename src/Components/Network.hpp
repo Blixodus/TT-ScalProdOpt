@@ -29,9 +29,7 @@ struct Network {
         this->m_filename = file;
 
         // Open the network file
-        //std::cout<<"!"<<std::endl;
         std::ifstream ifile(this->m_filename);
-        //std::cout<<"!!"<<std::endl;
 
         if(!ifile) {
             std::cerr << "Could not open file : " << file << " at Network initialization" << std::endl;

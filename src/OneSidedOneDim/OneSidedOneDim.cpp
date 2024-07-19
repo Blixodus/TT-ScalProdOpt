@@ -236,19 +236,10 @@ std::string OneSidedOneDim::generate_order(int s, int k, result_direction_e dire
 
 void OneSidedOneDim::init(std::string filename) {
     // Initialize network 2D
-    std::cout<<"init start"<<std::endl;
     this->m_network = Network<2>(filename);
-
-    // Initialize the direction
-    this->m_direction = BOTH_SIDES;
-    if(this->m_direction == ALL) {
-        std::cerr<<"Warning! OneSidedOneDim algorithm does not support ALL (splits) direction. Using BOTH_SIDES instead."<<std::endl;
-        this->m_direction = BOTH_SIDES;
-    }
 
     // Initialize algorithm variables
     this->init_variables(LR);
-    std::cout<<"init end"<<std::endl;
 }
 
 void OneSidedOneDim::init_variables(result_direction_e direction) {
@@ -314,7 +305,6 @@ cost_t OneSidedOneDim::call_solve() {
 
     // Compute cost of contraction starting from left side
     if(this->m_direction & START_LEFT) {
-        std::cout<<"LR start"<<std::endl;
         cost_LR = this->solve();
         order_LR = this->generate_order(LR);
 
@@ -345,6 +335,5 @@ cost_t OneSidedOneDim::call_solve() {
         this->best_order_str = order_RL;
     }
 
-    std::cout<<"end solve"<<std::endl;
     return this->best_cost;
 }
