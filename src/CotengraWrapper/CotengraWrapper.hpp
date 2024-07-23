@@ -106,7 +106,7 @@ class CotengraWrapper : public Algorithm {
         }
     }
 
-        void generate_subproblem(const int i_min, const int j_min, const int i_max, const int j_max, const result_direction_e direction, std::vector<std::wstring>& input, std::wstring& output, std::map<wchar_t, cost_t>& weights, bool& input_node_included) {
+        void generate_subproblem(const int i_min, const int i_max, const int j_min, const int j_max, const result_direction_e direction, std::vector<std::wstring>& input, std::wstring& output, std::map<wchar_t, cost_t>& weights, bool& input_node_included) {
         // Generate the input node (representing the part of TT which is already
         // contracted prior to this subproblem) and the output node (representing 
         // the part of TT which is result of this computation)
@@ -301,14 +301,14 @@ class CotengraWrapper : public Algorithm {
         return make_pair(result[0].cast<cost_t>(), result[1].cast<std::string>());
     }
 
-    std::pair<cost_t, std::string> solve(const int i_min, const int j_min, const int i_max, const int j_max, const result_direction_e direction) {
+    std::pair<cost_t, std::string> solve(const int i_min, const int i_max, const int j_min, const int j_max, const result_direction_e direction) {
         // Prepare input, output, sizes_dict arguments for calling Cotengra on
         // requested subpart of the network
         std::vector<std::wstring> inputs;
         std::wstring output;
         std::map<wchar_t, cost_t> weights;
         bool input_node_included = false;
-        generate_subproblem(i_min, j_min, i_max, j_max, direction, inputs, output, weights, input_node_included);
+        generate_subproblem(i_min, i_max, j_min, j_max, direction, inputs, output, weights, input_node_included);
 
         // Call the Cotengra wrapper script to solve the subpart of the network
         // using the optimal algorithm from the Cotengra library

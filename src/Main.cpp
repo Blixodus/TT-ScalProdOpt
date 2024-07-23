@@ -125,6 +125,18 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary) {
                 return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
             }
             break;
+        case TWOSIDEDIJ:
+            if(delta == 2) {
+                return new TwoSidedIJ<2, ALL>(dictionary);
+            } else if(delta == 3) {
+                return new TwoSidedIJ<3, ALL>(dictionary);
+            } else if(delta == 4) {
+                return new TwoSidedIJ<4, ALL>(dictionary);
+            } else {
+                std::cerr<<"[Warning] Using default delta value of 2. Please add tt_dim to template in Main.cpp in order to use it."<<std::endl;
+                return new TwoSidedIJ<2, ALL>(dictionary);
+            }
+            break;
         case COTENGRAWRAPPER:
             if(tt_dim == 2) {
                 return new CotengraWrapper<2>(dictionary);

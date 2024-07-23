@@ -40,7 +40,7 @@ def rename_nodes(contraction_tree, dim, dmin, dmax, input_node_included):
 
 def rename_nodes_ij(contraction_tree, dim, i_min, j_min, i_max, j_max, input_node_included):
     if isinstance(contraction_tree, tuple):
-        return (rename_nodes(contraction_tree[0], dim, i_min, j_min, i_max, j_max, input_node_included), rename_nodes(contraction_tree[1], dim, i_min, j_min, i_max, j_max, input_node_included))
+        return (rename_nodes_ij(contraction_tree[0], dim, i_min, j_min, i_max, j_max, input_node_included), rename_nodes_ij(contraction_tree[1], dim, i_min, j_min, i_max, j_max, input_node_included))
     else:
         if not input_node_included:
             return node_id_from_ctg_ij(contraction_tree, dim, i_min, j_min, i_max, j_max)
@@ -84,6 +84,8 @@ def cotengra_wrapper_solve_with_args(algorithm, inputs, output, sizes_dict, dim,
 
 
 def cotengra_wrapper_solve_ij(algorithm, inputs, output, sizes_dict, dim, i_min, j_min, i_max, j_max, input_node_included):
+    print(inputs, output, sizes_dict, dim, i_min, j_min, i_max, j_max, input_node_included)
+
     # Compute the contraction ordering for given arguments
     algorithm_str = algorithm
     if algorithm == 'cgreedy':

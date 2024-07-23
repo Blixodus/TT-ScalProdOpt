@@ -16,10 +16,11 @@
 using namespace std;
 
 //Enum and map to switch on the algorithms' name
-enum algorithm_e {ONESIDEDONEDIM, TWOSIDEDDELTADIM, COTENGRAWRAPPER};
+enum algorithm_e {ONESIDEDONEDIM, TWOSIDEDDELTADIM, TWOSIDEDIJ, COTENGRAWRAPPER};
 static std::map<std::string, algorithm_e> ALGO_MAP {
     {"OneSidedOneDim", ONESIDEDONEDIM},
     {"TwoSidedDeltaDim", TWOSIDEDDELTADIM},
+    {"TwoSidedIJ", TWOSIDEDIJ},
     {"CotengraWrapper", COTENGRAWRAPPER}
 };
 

@@ -4,6 +4,7 @@
 #include "Components/Algorithm.hpp"
 #include "OneSidedOneDim/OneSidedOneDim.hpp"
 #include "TwoSidedDeltaDim/TwoSidedDeltaDim.hpp"
+#include "TwoSidedIJ/TwoSidedIJ.hpp"
 #include "CotengraWrapper/CotengraWrapper.hpp"
 
 #include <algorithm>
