@@ -251,7 +251,6 @@ void OneSidedOneDim::init_variables(result_direction_e direction) {
     m_central_weight.clear();
     m_order_by_dim.clear();
     m_central_ref.clear();
-    best_order.clear();
 
     // Initialize the variables
     m_cost_to_reach.resize(min(2*(this->m_network.n_vertex/2)-1, 2*this->m_network.dim+1), 0); // cost table

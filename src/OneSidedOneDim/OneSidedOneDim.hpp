@@ -1,10 +1,3 @@
-/**
- * @brief 
- * Iterates over the edges, 
- * Explores the solutions by going from one side of the TT to the other.
- * Type : Heuristic
- * Complexity : 
- */
 #ifndef ONESIDEDONEDIM_HPP
 #define ONESIDEDONEDIM_HPP
 #include "../Components/Components.hpp"
@@ -62,11 +55,6 @@ class OneSidedOneDim : public Algorithm {
     // Constructors
     OneSidedOneDim(){}
     OneSidedOneDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){
-        // Default timeout override (as this algorithm execution is much faster)
-        if(param_dictionary.find("time") == param_dictionary.end()) {
-            this->timeout_time = std::chrono::minutes(1);
-        }
-
         // Direction of the contraction
         if(param_dictionary.find("dir") != param_dictionary.end()) {
             std::string dir = std::any_cast<string>(param_dictionary["dir"]);

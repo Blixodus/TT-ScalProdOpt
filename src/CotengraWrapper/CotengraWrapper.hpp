@@ -1,8 +1,3 @@
-/**
- * @brief 
- * Wrapper for the Cotengra library optimal algorithm
- * Type : exact algorithm
- */
 #ifndef COTENGRA_WRAPPER_HPP
 #define COTENGRA_WRAPPER_HPP
 #define PYBIND11_DETAILED_ERROR_MESSAGES

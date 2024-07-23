@@ -1,7 +1,5 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
-// #include "Matrice/MatrixSolver.hpp"
-// #include "TriScoreNaive/TriScoreN.hpp"
 #include "../tools/Argparser/Argparser.hpp"
 #include "Components/Algorithm.hpp"
 #include "OneSidedOneDim/OneSidedOneDim.hpp"
@@ -11,11 +9,7 @@
 #include <algorithm>
 #include <signal.h>
 #include <chrono>
-#include <thread>
 #include <unistd.h>
-#include <condition_variable>
-#include <sys/types.h>
-#include <sys/wait.h>
 
 using namespace std::chrono_literals;
 

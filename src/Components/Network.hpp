@@ -1,5 +1,5 @@
-#ifndef NETWORK2D_HPP
-#define NETWORK2D_HPP
+#ifndef NETWORK_HPP
+#define NETWORK_HPP
 #include "Components.hpp"
 #include <string>
 #include <cassert>
@@ -11,8 +11,8 @@
 template <size_t tt_dim = 2>
 struct Network {
     // Network information
-    dim_t dim;
-    edgeID_t n_edge; // number of edges
+    dim_t dim;           // dimension of the tensor-train
+    edgeID_t n_edge;     // number of edges
     vertexID_t n_vertex; // number of nodes
 
     // Filename the network was imported from
