@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the config path
-DIR_PATH="/gpfs/workdir/torria/pdominik/OptiTenseurs/tools/configs/dim2"
+DIR_PATH="/gpfs/workdir/torria/pdominik/OptiTenseurs/tools/configs/dim2/opt"
 
 # Check if the directory exists
 if [ -d "$DIR_PATH" ]; then

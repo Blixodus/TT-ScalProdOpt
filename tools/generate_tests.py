@@ -166,6 +166,7 @@ if __name__ == "__main__":
 
     types = config['General']['types'].split(',')
     rank_types = config['General']['rank_types'].split(',')
+    const_dim = int(config['Tests']['const_dim'])
 
     # Retrieve seed
     seed = int(config['Tests']['seed'])
@@ -197,7 +198,7 @@ if __name__ == "__main__":
                     ranks_gen = lambda x : rand.integers(low=2, high=(max_rank + 1))
 
                     if type in ["increasing", "quantized"]:
-                        dims_gen  = lambda x : 2
+                        dims_gen  = lambda x : const_dim
                     elif type in ["random"]:
                         dims_gen  = lambda x : rand.integers(low=2, high=51)
                     else:

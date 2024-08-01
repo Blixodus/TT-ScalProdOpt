@@ -13,16 +13,18 @@ import seaborn as sns
 from alive_progress import alive_bar
 
 from Scripts.naming import get_algorithm_name, get_dir, get_dir_ratio, get_test_filename, get_result_filename
-from Scripts.import_file import import_tensor_train
 
 # ----------------------------- Utility functions ------------------------------
 def get_label(algorithm):
     label_dict = {
         'optimal': 'Optimal',
         'hyper-greedy': 'Hyper-Greedy',
+        'hyper-kahypar': 'Hyper-Kahypar',
         'cgreedy': 'Cgreedy',
         'naive': "Naive",
-        'OneSidedOneDim': "1-sided 1-dim"
+        'OneSidedOneDim': "1-sided 1-dim",
+        'quickbb-2': 'QuickBB',
+        'flowcutter': 'FlowCutter'
     }
 
     if algorithm in label_dict:
@@ -31,6 +33,28 @@ def get_label(algorithm):
         return f"2-sided Δ-dim (Δ={algorithm.split('_')[1]})"
     else:
         return algorithm
+
+
+def get_color(algorithm):
+    color_dict = {
+        'optimal': 'tab:red',
+        'hyper-greedy': 'tab:cyan',
+        'hyper-kahypar': 'tab:pink',
+        'cgreedy': 'tab:olive',
+        'naive': "tab:gray",
+        'OneSidedOneDim': "tab:green",
+        'quickbb-2': 'tab:purple',
+        'flowcutter': 'tab:brown'
+    }
+
+    if algorithm in color_dict:
+        return color_dict[algorithm]
+    elif algorithm == "TwoSidedDeltaDim_4":
+        return "tab:blue"
+    elif algorithm == "TwoSidedDeltaDim_8":
+        return "tab:orange"
+    else:
+        return None
 
 # ------------------------------- Plot function --------------------------------
 def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, plot_dir_path, nb_instances):
@@ -66,7 +90,7 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
         # Drop rows with any size for which there is any instance missing
         sizes = results[algorithm]['Size'].unique()
         for size in sizes:
-            if len(results[algorithm].loc[(results[algorithm]['Size'] == size)]) != nb_instances:
+            if len(results[algorithm].loc[(results[algorithm]['Size'] == size)]) < nb_instances:
                 print(f"[Warning ❗] In import of file {result_filename} dropped size {size} due to missing instances.", )
                 results[algorithm] = results[algorithm].loc[(results[algorithm]['Size'] != size)]
                 if algorithm != 'optimal':
@@ -76,6 +100,20 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
                     completed_successfully = False
                     error_message += f"missing optimal instances\t"
 
+    # Find cut-off line for optimal algorithm, when result calculation
+    # takes more than 1 hour
+    cutoff_limits = {60 : "silver", 600 : "grey", 1800: "dimgrey", 3600: "black"}
+    cutoff_sizes = {}
+    if 'optimal' in results:
+        sizes = results['optimal']['Size'].unique().tolist()
+        print(result_dir_path, len(sizes), sizes)
+        if sizes is not None and len(sizes) > 0:
+            for time_limit in cutoff_limits:
+                for size in sizes:
+                    if results['optimal'].loc[(results['optimal']['Size'] == size)]['Execution_time'].mean() > time_limit:
+                        cutoff_sizes[time_limit] = size
+                        break
+
     # Normalize the results using results from given normalization algorithm
     if normalization_algorithm in results:
         results_cmp = {}
@@ -84,23 +122,54 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
             results_cmp[algorithm]['Normalized_cost'] = results_cmp[algorithm]['Cost'] / results_cmp[algorithm]['Cost_Norm']
 
         # Plot the normalized contraction cost
+        plt.plot([0]) # to shift color map
+        plt.plot([0])
+        plt.plot([0])
+        plt.plot([0])
         for algorithm in algorithms:
-            sns.lineplot(data=results_cmp[algorithm], x="Size", y="Normalized_cost", label=get_label(algorithm))
+            sns_plot = sns.lineplot(data=results_cmp[algorithm], x="Size", y="Normalized_cost", label=get_label(algorithm), color=get_color(algorithm)) #estimator="median"
+            #sns.lineplot(data=results_cmp[algorithm], x="Size", y="Normalized_cost", label=get_label(algorithm))
+
+        # Plot vertical lines for time limit cutoffs
+        for time_limit in cutoff_sizes:
+            plt.axvline(x=cutoff_sizes[time_limit], color=cutoff_limits[time_limit], linestyle=':')
+
         plt.xlabel('Size of the dataset')
-        plt.ylabel('Contraction cost (mean of 50 instances)')
+        plt.ylabel('Normalized contraction cost')
+        #plt.ylabel(plot_dir_path.replace("/gpfs/workdir/torria/pdominik/Plots/Plots_", ""))
         plt.title('Comparison of the contraction cost (normalized to 2SΔD)')
         plt.legend(loc='upper right')
 
-        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized.pdf')
+        # Unbounded scale plots
+        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_1.pdf', bbox_inches='tight')
+
+        plt.yscale('log')
+        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_1_log.pdf', bbox_inches='tight')
+
+        # Non-logarithim scale plots
+        plt.yscale('linear')
 
         plt.axis([None, None, 0.95, 1.25])
-        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_zoom.pdf')
+        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_2.pdf', bbox_inches='tight')
+
+        plt.axis([None, None, 0.95, 1.5])
+        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_3.pdf', bbox_inches='tight')
 
         plt.axis([None, None, 0.95, 2])
-        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_zoom2.pdf')
+        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_4.pdf', bbox_inches='tight')
 
         plt.axis([None, None, 0.5, 1.5])
-        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_zoom15.pdf')
+        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_5.pdf', bbox_inches='tight')
+
+        plt.axis([None, None, 0.0, 2.0])
+        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_6.pdf', bbox_inches='tight')
+
+        # Logarithimic scale plots
+        plt.yscale('log')
+
+        plt.axis([None, None, 0.5, 2])
+        plt.savefig(f'{plot_dir_path}/contraction_cost_normalized_log.pdf', bbox_inches='tight')
+
 
         plt.close()
     else:
@@ -109,17 +178,24 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
         error_message += "normalization algorithm missing\t"
 
     # Plot the mean execution time
+    plt.plot([0])
+    plt.plot([0])  
+    plt.plot([0])
+    plt.plot([0])
     for algorithm in algorithms:
+        if algorithm == 'naive':
+            continue
         line = '--'
         if algorithm == 'optimal':
-            line = 'r+'
-        plt.plot(results[algorithm].groupby('Size')['Execution_time'].mean(), line, label=get_label(algorithm))
+            line = '+'
+        plt.plot(results[algorithm].groupby('Size')['Execution_time'].mean(), line, label=get_label(algorithm), color=get_color(algorithm))
+        #plt.plot(results[algorithm].groupby('Size')['Execution_time'].mean(), line, label=get_label(algorithm))
     plt.xlabel('Size of the dataset')
     plt.ylabel('Execution time [s] (mean of 50 instances)')
     plt.title('Comparison of the execution time')
     plt.yscale('log')
     plt.legend(loc='upper right')
-    plt.savefig(f'{plot_dir_path}/execution_time.pdf')
+    plt.savefig(f'{plot_dir_path}/execution_time.pdf', bbox_inches='tight')
     plt.close()
 
     print(f"[Plot ✅] Plot generation for test case {result_dir_path} \t ({plot_dir_path}) \t completed.")
@@ -165,10 +241,8 @@ def plot_ratio(ratio_list, plot_algorithms, normalization_algorithm, result_dir_
             results_cmp[algorithm]['Normalized_cost'] = results_cmp[algorithm]['Cost'] / results_cmp[algorithm]['Cost_Norm']
 
         # Plot the normalized contraction cost for each size
-        print(results_cmp[algorithms[0]]['Size'].unique())
         for size in results_cmp[algorithms[0]]['Size'].unique():
             for algorithm in algorithms:
-                print(size, algorithm)
                 sns.lineplot(data=results_cmp[algorithm].loc[(results_cmp[algorithm]['Size'] == size)], x="Ratio", y="Normalized_cost", label=algorithm)
             plt.xlabel('Ratio (dim_const / rank_const)')
             plt.ylabel('Normalized contraction cost')
@@ -257,6 +331,8 @@ if __name__ == "__main__":
 
                     plot_algorithms = []
                     for algorithm in algorithms:
+                        if algorithm == "OneSidedOneDim" and tt_dim != 2:
+                            continue
                         if algorithm != "TwoSidedDeltaDim":
                             plot_algorithms.append((algorithm, None))
                         else:
