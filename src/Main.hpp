@@ -5,6 +5,7 @@
 #include "../tools/Argparser/Argparser.hpp"
 #include "Components/Algorithm.hpp"
 #include "OneSidedOneDim/OneSidedOneDim.hpp"
+#include "TwoSidedSweeping/TwoSidedSweeping.hpp"
 #include "TwoSidedDeltaDim/TwoSidedDeltaDim.hpp"
 #include "CotengraWrapper/CotengraWrapper.hpp"
 

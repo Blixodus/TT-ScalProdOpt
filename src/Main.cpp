@@ -86,6 +86,9 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
         case ONESIDEDONEDIM:
             return new OneSidedOneDim(dictionary);
             break;
+        case TWOSIDEDSWEEPING:
+            return new TwoSidedSweeping(dictionary);
+            break;
         case TWOSIDEDDELTADIM:
             if (tt_dim == 2) {
                 if(delta == 3)       return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
@@ -96,6 +99,16 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
                 else if(delta == 8)  return new TwoSidedDeltaDim<8, ALL, 2>(dictionary);
                 else if(delta == 9)  return new TwoSidedDeltaDim<9, ALL, 2>(dictionary);
                 else if(delta == 10) return new TwoSidedDeltaDim<10, ALL, 2>(dictionary);
+                else if(delta == 11) return new TwoSidedDeltaDim<11, ALL, 2>(dictionary);
+                else if(delta == 12) return new TwoSidedDeltaDim<12, ALL, 2>(dictionary);
+                else if(delta == 13) return new TwoSidedDeltaDim<13, ALL, 2>(dictionary);
+                else if(delta == 14) return new TwoSidedDeltaDim<14, ALL, 2>(dictionary);
+                else if(delta == 15) return new TwoSidedDeltaDim<15, ALL, 2>(dictionary);
+                else if(delta == 16) return new TwoSidedDeltaDim<16, ALL, 2>(dictionary);
+                else if(delta == 17) return new TwoSidedDeltaDim<17, ALL, 2>(dictionary);
+                else if(delta == 18) return new TwoSidedDeltaDim<18, ALL, 2>(dictionary);
+                else if(delta == 19) return new TwoSidedDeltaDim<19, ALL, 2>(dictionary);
+                else if(delta == 20) return new TwoSidedDeltaDim<20, ALL, 2>(dictionary);
                 else {
                     std::cerr<<"[Warning] Using default delta value of 3. Please add delta to template in Main.cpp in order to use it."<<std::endl;
                     return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
@@ -109,6 +122,16 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
                 else if(delta == 8)  return new TwoSidedDeltaDim<8, ALL, 3>(dictionary);
                 else if(delta == 9)  return new TwoSidedDeltaDim<9, ALL, 3>(dictionary);
                 else if(delta == 10) return new TwoSidedDeltaDim<10, ALL, 3>(dictionary);
+                else if(delta == 11) return new TwoSidedDeltaDim<11, ALL, 3>(dictionary);
+                else if(delta == 12) return new TwoSidedDeltaDim<12, ALL, 3>(dictionary);
+                else if(delta == 13) return new TwoSidedDeltaDim<13, ALL, 3>(dictionary);
+                else if(delta == 14) return new TwoSidedDeltaDim<14, ALL, 3>(dictionary);
+                else if(delta == 15) return new TwoSidedDeltaDim<15, ALL, 3>(dictionary);
+                else if(delta == 16) return new TwoSidedDeltaDim<16, ALL, 3>(dictionary);
+                else if(delta == 17) return new TwoSidedDeltaDim<17, ALL, 3>(dictionary);
+                else if(delta == 18) return new TwoSidedDeltaDim<18, ALL, 3>(dictionary);
+                else if(delta == 19) return new TwoSidedDeltaDim<19, ALL, 3>(dictionary);
+                else if(delta == 20) return new TwoSidedDeltaDim<20, ALL, 3>(dictionary);
                 else {
                     std::cerr<<"[Warning] Using default delta value of 3. Please add delta to template in Main.cpp in order to use it."<<std::endl;
                     return new TwoSidedDeltaDim<3, ALL, 3>(dictionary);
