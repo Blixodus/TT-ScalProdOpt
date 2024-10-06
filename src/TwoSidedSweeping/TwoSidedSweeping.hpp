@@ -3,6 +3,8 @@
 #include "../Components/Components.hpp"
 #include "../Components/Algorithm.hpp"
 
+#define NOT_CALCULATED -1
+
 // Type of the contraction
 enum contraction_type_e {
     QC = 12,
@@ -29,18 +31,29 @@ class TwoSidedSweeping : public Algorithm {
     Network<2> m_network;        // Generalized network information
     //std::vector<cost_t> cost[3]; // Cost of contracting subproblem [j, i] starting with edge P, Q or C
 
-    std::vector<std::vector<cost_t>> DP_P, DP_Q; // Cost of contracting subproblem [1, i] with keeping edge P, Q or C
+    std::vector<std::vector<long double>> DP_P, DP_Q; // Cost of contracting subproblem [1, i] with keeping edge P, Q or C
     std::vector<std::vector<std::string>> order_P, order_Q; // Order of contraction of subproblem [1, i] with keeping edge P, Q or C
-     
+    std::vector<std::vector<long double>> edge[3];
 
     // Initializer
     void init_variables(result_direction_e direction) {
         // Clear the variables
-        DP_P.resize(this->m_network.dim + 2, std::vector<cost_t>(this->m_network.dim + 2, std::numeric_limits<cost_t>::max()));
-        DP_Q.resize(this->m_network.dim + 2, std::vector<cost_t>(this->m_network.dim + 2, std::numeric_limits<cost_t>::max()));
+        DP_P.clear();
+        DP_Q.clear();
+        DP_P.resize(this->m_network.dim + 2, std::vector<long double>(this->m_network.dim + 2, std::numeric_limits<long double>::max()));
+        DP_Q.resize(this->m_network.dim + 2, std::vector<long double>(this->m_network.dim + 2, std::numeric_limits<long double>::max()));
 
+        order_P.clear();
+        order_Q.clear();
         order_P.resize(this->m_network.dim + 2, std::vector<std::string>(this->m_network.dim + 2, ""));
         order_Q.resize(this->m_network.dim + 2, std::vector<std::string>(this->m_network.dim + 2, ""));
+
+        edge[P].clear();
+        edge[Q].clear();
+        edge[C].clear();
+        edge[P].resize(this->m_network.dim + 2, std::vector<long double>(this->m_network.dim + 2, NOT_CALCULATED));
+        edge[Q].resize(this->m_network.dim + 2, std::vector<long double>(this->m_network.dim + 2, NOT_CALCULATED));
+        edge[C].resize(this->m_network.dim + 2, std::vector<long double>(this->m_network.dim + 2, NOT_CALCULATED));
 
         // Reverse the network if the direction is from the right
         if(direction == RL) {
@@ -62,10 +75,10 @@ class TwoSidedSweeping : public Algorithm {
                 }
             }
 
-            std::cout<<"Network:"<<std::endl;
+            //std::cout<<"Network:"<<std::endl;
             for(int i = 0; i < 2*this->m_network.dim; i++) {
                 for(int j = 0; j < 2*this->m_network.dim; j++) {
-                    std::cout<<i<<" "<<j<<" "<<this->m_network[i, j, true]<<std::endl;
+                    //std::cout<<i<<" "<<j<<" "<<this->m_network[i, j, true]<<std::endl;
                 }
             }
         }
@@ -155,22 +168,25 @@ class TwoSidedSweeping : public Algorithm {
     }
 
     cost_t cost(int i, cost_t c, contraction_type_e type) {
-        if(i == 0 && c == 11 && type == QP) {
-            std::cout<<"\n\t"<<get_edge(P, i)<<" "<<get_edge(Q, i)<<" "<<c<<" "<<get_edge(P, i + 1)<<" "<<get_edge(Q, i + 1)<<" "<<get_edge(C, i + 1)<<" "<<type<<" "<<contraction_cost(get_edge(P, i), get_edge(Q, i), c, get_edge(P, i + 1), get_edge(Q, i + 1), get_edge(C, i + 1), type)<<std::endl;
+        if(i == 2 && c == 51 && type == CQ) {
+            //std::cout<<"\n\t"<<get_edge(P, i)<<" "<<get_edge(Q, i)<<" "<<c<<" "<<get_edge(P, i + 1)<<" "<<get_edge(Q, i + 1)<<" "<<get_edge(C, i + 1)<<" "<<type<<" "<<contraction_cost(get_edge(P, i), get_edge(Q, i), c, get_edge(P, i + 1), get_edge(Q, i + 1), get_edge(C, i + 1), type)<<std::endl;
         }
         return contraction_cost(get_edge(P, i), get_edge(Q, i), c, get_edge(P, i + 1), get_edge(Q, i + 1), get_edge(C, i + 1), type);
     }
 
     cost_t edge_cumulated(int i, int j, edge_type_e type)
     {
+        if(this->edge[type][i][j] != NOT_CALCULATED) {
+            return this->edge[type][i][j];
+        }
+
         cost_t weight = get_edge(type, j);
         for(int k = j + 1; k < i; k++) {
-            if(weight >= std::numeric_limits<cost_t>::max() / (get_edge(C, k) * 2 * 1000 * 1000 * 1000))
-                return 0;
-
             weight *= get_edge(C, k);
         }
         weight *= get_edge(C, i);
+
+        this->edge[type][i][j] = weight;
         return weight;
     }
 
@@ -205,6 +221,14 @@ class TwoSidedSweeping : public Algorithm {
         std::pair<vertexID_t, vertexID_t> operation1 = generate_operation(i, type / 10, direction);
         std::pair<vertexID_t, vertexID_t> operation2 = generate_operation(i, type % 10, direction);
 
+        if(i == this->m_network.dim) {
+            if(direction == LR) {
+                return "(" + order + ", (" + std::to_string(this->m_network.dim - 1) + ", " + std::to_string(2 * this->m_network.dim - 1) + "))";
+            } else {
+                return "(" + order + ", (" + std::to_string(0) + ", " + std::to_string(this->m_network.dim) + "))";
+            }
+        }
+
         // Generate the order string
         if(order != "") {
             order += ", (" + std::to_string(operation1.first) + ", " + std::to_string(operation1.second) + ")";
@@ -213,14 +237,26 @@ class TwoSidedSweeping : public Algorithm {
         }
 
         // Add second operation if it is not artifical contraction at the end of the tensor-train
-        if(operation2.first < this->m_network.n_vertex && operation2.second < this->m_network.n_vertex) {
-            order += ", (" + std::to_string(operation2.first) + ", " + std::to_string(operation2.second) + ")";
-        }
+        /*if(direction == RL) {
+            std::cout<<"Order: "<<direction<<" "<<i<<" "<<operation1.first<<" "<<operation1.second<<" "<<operation2.first<<" "<<operation2.second<<std::endl;
+        }*/
+
+        order += ", (" + std::to_string(operation2.first) + ", " + std::to_string(operation2.second) + ")";
+
+        /*if(direction == LR) {
+            if((operation2.first < this->m_network.n_vertex && operation2.second < this->m_network.n_vertex)) {
+                order += ", (" + std::to_string(operation2.first) + ", " + std::to_string(operation2.second) + ")";
+            }
+        } else {
+            if((operation1.first != 0 && operation1.second != 0)) {
+                order += ", (" + std::to_string(operation2.first) + ", " + std::to_string(operation2.second) + ")";
+            }
+        }*/
 
         return order;
     }
 
-    cost_t solve(result_direction_e direction = LR) {
+    cost_t solve(result_direction_e direction) {
         // Base case for contracting the first edge
         DP_P[0][0] = 0;
         DP_Q[0][0] = 0;
@@ -229,20 +265,21 @@ class TwoSidedSweeping : public Algorithm {
 
         // Iterating over subnetworks [i...dim-1]
         for(int i = 2; i <= this->m_network.dim + 1; i++) { 
-            std::cout<<"Iteration: "<<i<<std::endl;
+            //std::cout<<"Iteration: "<<i<<std::endl;
             for(int j = 0; j < i; j++) {
                 // We use P[i-1][j] to calculate next subproblems
-                if(DP_P[i - 1][j] != std::numeric_limits<cost_t>::max()) {
+                if(DP_P[i - 1][j] != std::numeric_limits<long double>::max()) {
                     // Contraction PC -> Q[i][i-1]
+                    //std::cout<<"---------- P ----------"<<std::endl;
                     cost_t cost_PC = cost(i - 1, edge_cumulated(i - 1, j, P), PC);
-                    std::cout<<"PC: "<<i<<" "<<j<<" "<<DP_P[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, P), PC)<<" "<<cost_PC<<" "<<edge_cumulated(i - 1, j, P)<<std::endl;
+                    //std::cout<<"PC: "<<i<<" "<<j<<" "<<(long long)DP_P[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, P), PC)<<" "<<cost_PC<<" "<<edge_cumulated(i - 1, j, P)<<std::endl;
                     if(cost_PC > 0 && DP_P[i - 1][j] + cost_PC < DP_Q[i][i - 1]) {
                         DP_Q[i][i - 1] = DP_P[i - 1][j] + cost_PC;
                         order_Q[i][i - 1] = this->build_order(i - 1, PC, order_P[i - 1][j], direction);
                     }
 
                     cost_t cost_CP = cost(i - 1, edge_cumulated(i - 1, j, P), CP);
-                    std::cout<<"CP: "<<i<<" "<<j<<" "<<DP_P[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, P), CP)<<" "<<cost_CP<<" "<<edge_cumulated(i - 1, j, P)<<std::endl;
+                    //std::cout<<"CP: "<<i<<" "<<j<<" "<<(long long)DP_P[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, P), CP)<<" "<<cost_CP<<" "<<edge_cumulated(i - 1, j, P)<<std::endl;
                     if(cost_CP > 0 &&  DP_P[i - 1][j] + cost_CP < DP_Q[i][i - 1]) {
                         DP_Q[i][i - 1] =  DP_P[i - 1][j] + cost_CP;
                         order_Q[i][i - 1] = this->build_order(i - 1, CP, order_P[i - 1][j], direction);
@@ -250,14 +287,14 @@ class TwoSidedSweeping : public Algorithm {
 
                     // Contraction QC -> P[i][i-1]
                     cost_t cost_QC = cost(i - 1, edge_cumulated(i - 1, j, P), QC);
-                    std::cout<<"QC: "<<i<<" "<<j<<" "<<DP_P[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, P), QC)<<" "<<cost_QC<<" "<<edge_cumulated(i - 1, j, P)<<std::endl;
+                    //std::cout<<"QC: "<<i<<" "<<j<<" "<<(long long)DP_P[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, P), QC)<<" "<<cost_QC<<" "<<edge_cumulated(i - 1, j, P)<<std::endl;
                     if(cost_QC > 0 && DP_P[i - 1][j] + cost_QC < DP_P[i][i - 1]) {
                         DP_P[i][i - 1] = DP_P[i - 1][j] + cost_QC;
                         order_P[i][i - 1] = this->build_order(i - 1, QC, order_P[i - 1][j], direction);
                     }
 
                     cost_t cost_CQ = cost(i - 1, edge_cumulated(i - 1, j, P), CQ);
-                    std::cout<<"CQ: "<<i<<" "<<j<<" "<<DP_P[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, P), CQ)<<" "<<cost_CQ<<" "<<edge_cumulated(i - 1, j, P)<<std::endl;
+                    //std::cout<<"CQ: "<<i<<" "<<j<<" "<<(long long)DP_P[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, P), CQ)<<" "<<cost_CQ<<" "<<edge_cumulated(i - 1, j, P)<<std::endl;
                     if(cost_CQ > 0 && DP_P[i - 1][j] + cost_CQ < DP_P[i][i - 1]) {
                         DP_P[i][i - 1] = DP_P[i - 1][j] + cost_CQ;
                         order_P[i][i - 1] = this->build_order(i - 1, CQ, order_P[i - 1][j], direction);
@@ -265,31 +302,32 @@ class TwoSidedSweeping : public Algorithm {
 
                     // Contraction PQ -> P[i][j]
                     cost_t cost_PQ = cost(i - 1, edge_cumulated(i - 1, j, P), PQ);
-                    std::cout<<"PQ: "<<i<<" "<<j<<" "<<DP_P[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, P), PQ)<<" "<<edge_cumulated(i - 1, j, P)<<std::endl;
+                    //std::cout<<"PQ: "<<i<<" "<<j<<" "<<(long long)DP_P[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, P), PQ)<<" "<<edge_cumulated(i - 1, j, P)<<std::endl;
                     if(cost_PQ > 0 && DP_P[i - 1][j] + cost_PQ < DP_P[i][j]) {
                         DP_P[i][j] = DP_P[i - 1][j] + cost_PQ;
                         order_P[i][j] = this->build_order(i - 1, PQ, order_P[i - 1][j], direction);
                     }
 
                     cost_t cost_QP = cost(i - 1, edge_cumulated(i - 1, j, P), QP);
-                    std::cout<<"QP: "<<i<<" "<<j<<" "<<DP_P[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, P), QP)<<" "<<edge_cumulated(i - 1, j, P)<<std::endl;
+                    //std::cout<<"QP: "<<i<<" "<<j<<" "<<(long long)DP_P[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, P), QP)<<" "<<edge_cumulated(i - 1, j, P)<<std::endl;
                     if(cost_QP > 0 && DP_P[i - 1][j] + cost_QP < DP_P[i][j]) {
                         DP_P[i][j] = DP_P[i - 1][j] + cost_QP;
                         order_P[i][j] = this->build_order(i - 1, QP, order_P[i - 1][j], direction);
                     }
                 }
                 // We use Q[i-1][j] to calculate next subproblems
-                if(DP_Q[i - 1][j] != std::numeric_limits<cost_t>::max()) {
+                if(DP_Q[i - 1][j] != std::numeric_limits<long double>::max()) {
                     // Contraction PC -> Q[i][i-1]
+                    //std::cout<<"---------- Q ----------"<<std::endl;
                     cost_t cost_PC = cost(i - 1, edge_cumulated(i - 1, j, Q), PC);
-                    std::cout<<"PC: "<<i<<" "<<j<<" "<<DP_Q[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, Q), PC)<<" "<<cost_PC<<" "<<edge_cumulated(i - 1, j, Q)<<std::endl;
-                    if(cost_PC > 0 && cost_PC < DP_Q[i - 1][j] + DP_Q[i][i - 1]) {
+                    //std::cout<<"PC: "<<i<<" "<<j<<" "<<(long long)DP_Q[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, Q), PC)<<" "<<cost_PC<<" "<<edge_cumulated(i - 1, j, Q)<<std::endl;
+                    if(cost_PC > 0 && DP_Q[i - 1][j] + cost_PC < DP_Q[i][i - 1]) {
                         DP_Q[i][i - 1] = DP_Q[i - 1][j] + cost_PC;
                         order_Q[i][i - 1] = this->build_order(i - 1, PC, order_Q[i - 1][j], direction);
                     }
 
                     cost_t cost_CP = cost(i - 1, edge_cumulated(i - 1, j, Q), CP);
-                    std::cout<<"CP: "<<i<<" "<<j<<" "<<DP_Q[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, Q), CP)<<" "<<cost_CP<<" "<<edge_cumulated(i - 1, j, Q)<<std::endl;
+                    //std::cout<<"CP: "<<i<<" "<<j<<" "<<(long long)DP_Q[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, Q), CP)<<" "<<cost_CP<<" "<<edge_cumulated(i - 1, j, Q)<<std::endl;
                     if(cost_CP > 0 && DP_Q[i - 1][j] + cost_CP < DP_Q[i][i - 1]) {
                         DP_Q[i][i - 1] = DP_Q[i - 1][j] + cost_CP;
                         order_Q[i][i - 1] = this->build_order(i - 1, CP, order_Q[i - 1][j], direction);
@@ -297,14 +335,14 @@ class TwoSidedSweeping : public Algorithm {
 
                     // Contraction QC -> P[i][i-1]
                     cost_t cost_QC = cost(i - 1, edge_cumulated(i - 1, j, Q), QC);
-                    std::cout<<"QC: "<<i<<" "<<j<<" "<<DP_Q[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, Q), QC)<<" "<<cost_QC<<" "<<edge_cumulated(i - 1, j, Q)<<std::endl;
+                    //std::cout<<"QC: "<<i<<" "<<j<<" "<<(long long)DP_Q[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, Q), QC)<<" "<<cost_QC<<" "<<edge_cumulated(i - 1, j, Q)<<std::endl;
                     if(cost_QC > 0 && DP_Q[i - 1][j] + cost_QC < DP_P[i][i - 1]) {
                         DP_P[i][i - 1] = DP_Q[i - 1][j] + cost_QC;
                         order_P[i][i - 1] = this->build_order(i - 1, QC, order_Q[i - 1][j], direction);
                     }
 
                     cost_t cost_CQ = cost(i - 1, edge_cumulated(i - 1, j, Q), CQ);
-                    std::cout<<"CQ: "<<i<<" "<<j<<" "<<DP_Q[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, Q), CQ)<<" "<<cost_CQ<<" "<<edge_cumulated(i - 1, j, Q)<<std::endl;
+                    //std::cout<<"CQ: "<<i<<" "<<j<<" "<<(long long)DP_Q[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, Q), CQ)<<" "<<cost_CQ<<" "<<edge_cumulated(i - 1, j, Q)<<std::endl;
                     if(cost_CQ > 0 && DP_Q[i - 1][j] + cost_CQ < DP_P[i][i - 1]) {
                         DP_P[i][i - 1] = DP_Q[i - 1][j] + cost_CQ;
                         order_P[i][i - 1] = this->build_order(i - 1, CQ, order_Q[i - 1][j], direction);
@@ -312,28 +350,30 @@ class TwoSidedSweeping : public Algorithm {
 
                     // Contraction PQ -> Q[i][j]
                     cost_t cost_PQ = cost(i - 1, edge_cumulated(i - 1, j, Q), PQ);
-                    std::cout<<"PQ: "<<i<<" "<<j<<" "<<DP_Q[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, Q), PQ)<<" "<<edge_cumulated(i - 1, j, Q)<<std::endl;
+                    //std::cout<<"PQ: "<<i<<" "<<j<<" "<<(long long)DP_Q[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, Q), PQ)<<" "<<edge_cumulated(i - 1, j, Q)<<std::endl;
                     if(cost_PQ > 0 && DP_Q[i - 1][j] + cost_PQ < DP_Q[i][j]) {
                         DP_Q[i][j] = DP_Q[i - 1][j] + cost_PQ;
                         order_Q[i][j] = this->build_order(i - 1, PQ, order_Q[i - 1][j], direction);
                     }
 
                     cost_t cost_QP = cost(i - 1, edge_cumulated(i - 1, j, Q), QP);
-                    std::cout<<"QP: "<<i<<" "<<j<<" "<<DP_Q[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, Q), QP)<<" "<<edge_cumulated(i - 1, j, Q)<<std::endl;
+                    //std::cout<<"QP: "<<i<<" "<<j<<" "<<(long long)DP_Q[i - 1][j]<<" "<<cost(i - 1, edge_cumulated(i - 1, j, Q), QP)<<" "<<edge_cumulated(i - 1, j, Q)<<std::endl;
                     if(cost_QP > 0 && DP_Q[i - 1][j] + cost_QP < DP_Q[i][j]) {
                         DP_Q[i][j] = DP_Q[i - 1][j] + cost_QP;
                         order_Q[i][j] = this->build_order(i - 1, QP, order_Q[i - 1][j], direction);
                     }
                 }
             }
-            std::cout<<"!!!!!!!!! Results for iteration i = "<<i<<std::endl;
-            for (int j = 0; j < i; j++) {
-                std::cout<<"j = "<<j<<" :"<<DP_P[i][j]<<" "<<DP_Q[i][j]<<std::endl;
-            }
+            /*
+            //std::cout<<"!!!!!!!!! Results for iteration i = "<<i<<std::endl;
+            //for (int j = 0; j < i; j++) {
+                //std::cout<<"j = "<<j<<" :"<<(long long)DP_P[i][j]<<" "<<(long long)DP_Q[i][j]<<std::endl;
+            //}
+            */
         }
 
         // Return the minimum cost
-        cost_t min_cost = std::numeric_limits<cost_t>::max();
+        long double min_cost = std::numeric_limits<long double>::max();
         for(int j = 0; j < this->m_network.dim; j++) {
             min_cost = std::min(min_cost, DP_P[this->m_network.dim + 1][j]);
             min_cost = std::min(min_cost, DP_Q[this->m_network.dim + 1][j]);
@@ -343,22 +383,26 @@ class TwoSidedSweeping : public Algorithm {
 
     cost_t call_solve() {
         // Initialize the cost variables
-        cost_t cost_LR = std::numeric_limits<cost_t>::max();
-        cost_t cost_RL = std::numeric_limits<cost_t>::max();
+        long double cost_LR = std::numeric_limits<long double>::max();
+        long double cost_RL = std::numeric_limits<long double>::max();
         std::string order_LR = "", order_RL = "";
 
         // Compute cost of contraction starting from left side
-        if(this->m_direction & START_LEFT) {
+        /*if(this->m_direction & START_LEFT) {
             this->solve(LR);
-            for(int j = 0; j < this->m_network.dim + 1; j++) {
-                if(DP_P[this->m_network.dim + 1][j] < cost_LR) {
-                    cost_LR = DP_P[this->m_network.dim + 1][j];
-                    order_LR = "(" + order_P[this->m_network.dim + 1][j] + ")";
+            for(int j = 0; j < this->m_network.dim; j++) {
+                long double cost1 = DP_P[this->m_network.dim][j] + edge_cumulated(this->m_network.dim + 1, j, P);
+                //std::cout<<"DP_P: "<<j<<" "<<(long long)DP_P[this->m_network.dim][j]<<" "<<edge_cumulated(this->m_network.dim + 1, j, P)<<std::endl;
+                if(cost1 < cost_LR) {
+                    cost_LR = cost1;
+                    order_LR = "(" + order_P[this->m_network.dim][j] + ", (" + std::to_string(this->m_network.dim - 1) + ", " + std::to_string(2 * this->m_network.dim - 1) + "))";
                 }
 
-                if(DP_Q[this->m_network.dim + 1][j] < cost_LR) {
-                    cost_LR = DP_Q[this->m_network.dim + 1][j];
-                    order_LR = "(" + order_Q[this->m_network.dim + 1][j] + ")";
+                long double cost2 = DP_Q[this->m_network.dim][j] + edge_cumulated(this->m_network.dim + 1, j, Q);
+                //std::cout<<"DP_Q: "<<j<<(long long)DP_Q[this->m_network.dim][j]<<" "<<edge_cumulated(this->m_network.dim + 1, j, Q)<<std::endl;
+                if(cost2 < cost_LR) {
+                    cost_LR = cost2;
+                    order_LR = "(" + order_Q[this->m_network.dim][j] + ", (" + std::to_string(this->m_network.dim - 1) + ", " + std::to_string(2 * this->m_network.dim - 1) + "))";
                 }
             }
 
@@ -367,7 +411,62 @@ class TwoSidedSweeping : public Algorithm {
         }
 
         // Find the best cost and corresponding order
-        if(this->m_direction & START_RIGHT & false) {
+        if(this->m_direction & START_RIGHT) {
+            // Reverse the network
+            this->init_variables(RL);
+
+            // Compute the cost and retrieve order
+            this->solve(RL);
+            for(int j = 0; j < this->m_network.dim; j++) {
+                long double cost1 = cost_RL = DP_P[this->m_network.dim][j] + edge_cumulated(this->m_network.dim + 1, j, P);
+                if(cost1 < cost_RL) {
+                    //std::cout<<"DP_P: "<<(long long)DP_P[this->m_network.dim][j]<<" "<<edge_cumulated(this->m_network.dim + 1, j, P)<<std::endl;
+                    cost_RL = cost1;
+                    order_RL = "(" + order_P[this->m_network.dim][j] + ", (" + std::to_string(0) + ", " + std::to_string(this->m_network.dim) + "))";
+                }
+
+                long double cost2 = DP_Q[this->m_network.dim][j] + edge_cumulated(this->m_network.dim + 1, j, Q);
+                if(cost2 < cost_RL) {
+                    //std::cout<<"DP_Q: "<<(long long)DP_Q[this->m_network.dim][j]<<" "<<edge_cumulated(this->m_network.dim + 1, j, Q)<<std::endl;
+                    cost_RL = cost2;
+                    order_RL = "(" + order_Q[this->m_network.dim][j] + ", (" + std::to_string(0) + ", " + std::to_string(this->m_network.dim) + "))";
+                }
+            }
+
+            std::cout<<"Cost_RL: "<<cost_RL<<std::endl;
+            std::cout<<"Order_RL: "<<order_RL<<std::endl;
+        }
+
+        // Find the best cost and corresponding order
+        if(cost_LR <= cost_RL) {
+            this->best_cost = cost_LR;
+            this->best_order_str = order_LR;
+        } else {
+            this->best_cost = cost_RL;
+            this->best_order_str = order_RL;
+        }*/
+
+        // Compute cost of contraction starting from left side
+        if(this->m_direction & START_LEFT) {
+            this->solve(LR);
+            for(int j = 0; j < this->m_network.dim + 1; j++) {
+                if(DP_P[this->m_network.dim + 1][j] < cost_LR) {
+                    cost_LR = DP_P[this->m_network.dim + 1][j];
+                    order_LR = order_P[this->m_network.dim + 1][j];
+                }
+
+                if(DP_Q[this->m_network.dim + 1][j] < cost_LR) {
+                    cost_LR = DP_Q[this->m_network.dim + 1][j];
+                    order_LR = order_Q[this->m_network.dim + 1][j];
+                }
+            }
+
+            std::cout<<"Cost_LR: "<<cost_LR<<std::endl;
+            std::cout<<"Order_LR: "<<order_LR<<std::endl;
+        }
+
+        // Find the best cost and corresponding order
+        if(this->m_direction & START_RIGHT) {
             // Reverse the network
             this->init_variables(RL);
 
@@ -376,12 +475,12 @@ class TwoSidedSweeping : public Algorithm {
             for(int j = 0; j < this->m_network.dim + 1; j++) {
                 if(DP_P[this->m_network.dim + 1][j] < cost_RL) {
                     cost_RL = DP_P[this->m_network.dim + 1][j];
-                    order_RL = "(" + order_P[this->m_network.dim + 1][j] + ")";
+                    order_RL = order_P[this->m_network.dim + 1][j];
                 }
 
                 if(DP_Q[this->m_network.dim + 1][j] < cost_RL) {
                     cost_RL = DP_Q[this->m_network.dim + 1][j];
-                    order_RL = "(" + order_Q[this->m_network.dim + 1][j] + ")";
+                    order_RL = order_Q[this->m_network.dim + 1][j];
                 }
             }
 
