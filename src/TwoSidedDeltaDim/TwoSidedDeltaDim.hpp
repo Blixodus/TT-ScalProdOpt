@@ -1,3 +1,9 @@
+/**
+ * @brief 
+ * Iterates over the dimensions and splits the tensor-train into 2 sub-problems
+ * of size i and D-i, solved optimally and recursively respectively.
+ * Type : Heuristic
+ */
 #ifndef TWOSIDEDDELTADIM_HPP
 #define TWOSIDEDDELTADIM_HPP
 #include "../Components/Components.hpp"

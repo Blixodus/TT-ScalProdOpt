@@ -1,6 +1,7 @@
 #ifndef COMPONENTS_HPP
 #define COMPONENTS_HPP
 #include <vector>
+#include <deque>
 #include <iostream>
 #include <algorithm>
 #include <math.h>
@@ -12,48 +13,52 @@
 #include <unordered_map>
 #include <limits>
 #include <map>
+#include "../../tools/Display/Display.hpp"
 
 using namespace std;
 
 //Enum and map to switch on the algorithms' name
-enum algorithm_e {ONESIDEDONEDIM, TWOSIDEDDELTADIM, TWOSIDEDIJ, COTENGRAWRAPPER};
+enum algorithm_e {ALLSPLITS, ALLEDGEBYEDGE, CONVEXSPLITS, GREEDYEDGESORT,
+ONESIDEDONEDIM, SHUFFLE, SPLITSDIMBYDIM, ONESIDEDDELTADIM, TWOSIDEDSWEEPING, TWOSIDEDDELTADIM, COTENGRAWRAPPER};
 static std::map<std::string, algorithm_e> ALGO_MAP {
-    {"OneSidedOneDim", ONESIDEDONEDIM},
+    {"AllSplits", ALLSPLITS}, {"AllEdgeByEdge", ALLEDGEBYEDGE},{"ConvexSplits", CONVEXSPLITS},
+    {"GreedyEdgeSort", GREEDYEDGESORT},{"OneSidedOneDim", ONESIDEDONEDIM},
+    {"Shuffle", SHUFFLE},{"SplitsDimByDim", SPLITSDIMBYDIM}, {"OneSidedDeltaDim", ONESIDEDDELTADIM},
+    {"TwoSidedSweeping", TWOSIDEDSWEEPING},
     {"TwoSidedDeltaDim", TWOSIDEDDELTADIM},
-    {"TwoSidedIJ", TWOSIDEDIJ},
     {"CotengraWrapper", COTENGRAWRAPPER}
 };
 
 //Type for network dimensions
 using dim_t = int;
 
-// Type to encode vertices
+//Type to encode vertices
 using vertexID_t = dim_t;
-
-// Type to encode edges
+//Type to encode edges
 using edgeID_t = dim_t;
 using vertex_pair_t = std::pair<vertexID_t, vertexID_t>;
 
-// Type to encode weights
+//Type to encode weights
 using weight_t = int64_t;
-
-// Type for costs
+//Type for costs
 using cost_t = int64_t;
 
-// Type for vector of weight
-using matrix_weight_t = std::vector<weight_t>;
-using vector_weight_t = std::vector<weight_t>;
+//Type for vector of weight
+using matrix_weight_t = std::vector<weight_t> ;
+using vector_weight_t = std::vector<weight_t> ;
+//Type for vector of cost
+using matrix_cost_t = std::vector<cost_t> ;
+using vector_cost_t = std::vector<cost_t> ;
+// using CostTab = vector<cost_t> ;
+//Type for vector of integer
+// using Tab = std::vector<int> ;
+using vector_edgeID_t = std::vector<edgeID_t> ;
+using vector_vertex_pair_t = std::vector<vertex_pair_t> ;
+using vector_vertexID_t = std::vector<vertexID_t> ;
+using deque_vertexID_t = std::deque<vertexID_t> ;
 
-// Type for vector of cost
-using vector_cost_t = std::vector<cost_t>;
-
-// Type for vector of network elements
-using vector_edgeID_t = std::vector<edgeID_t>;
-using vector_vertex_pair_t = std::vector<vertex_pair_t>;
-using vector_vertexID_t = std::vector<vertexID_t>;
-
-// Type for edges
-struct edge_t {
+//Type for edges
+struct edge_t{
     //Type for edges
     std::pair<vertexID_t, vertexID_t> m_edge;
     weight_t m_weight;

@@ -8,7 +8,7 @@ import subprocess
 import configparser
 
 import cotengra as ctg
-from cgreedy import CGreedy
+#from cgreedy import #CGreedy work around for CGreedy not working
 
 import pandas as pd
 from alive_progress import alive_bar
@@ -129,7 +129,7 @@ def run_algorithm_naive(test_filename, tt_dim, dim):
 # Wrapper function to run computations for given test using either
 # C++ (our algorithms), or Python (cotengra and other algorithms)
 def run_algorithm(algorithm, test_filename, tt_dim, dim, delta):
-    if algorithm in ['OneSidedOneDim', 'TwoSidedDeltaDim']:
+    if algorithm in ['OneSidedOneDim', 'TwoSidedSweeping', 'TwoSidedDeltaDim']:
         return run_algorithm_cpp(algorithm, test_filename, tt_dim, delta)
     elif algorithm == 'naive':
         return run_algorithm_naive(test_filename, tt_dim, dim)
@@ -148,8 +148,11 @@ def run_validation_on_test_case(tt_dim, test_filename, order):
 
     # Run the C++ validator and retrieve the output
     result = subprocess.run(args=args, input=inputs, capture_output=True, text=True, shell=True)
+    if test_filename == "/gpfs/workdir/torria/pdominik/Tests/Tests_dim2/xxT/random/low/d_005_v_001.txt":
+        print(f"Validation input: {inputs}")
+        print(f"Validation output: {result.stdout}")
     if result.stderr:
-        print(f"🚨 Validation of {algorithm} returned warnings and/or errors on {test_filename}.")
+        print(f"🚨 Validation returned warnings and/or errors on {test_filename}.")
         print("Args: ", args)
         print(result.stderr)
 
@@ -179,11 +182,22 @@ def run_algorithm_on_test_case(input):
     if validate_results and order != "naive_order_NA":
         if order != "":
             contraction_recursive = ast.literal_eval(order)
-            if algorithm != "OneSidedOneDim":
+            if algorithm not in ["OneSidedOneDim", "TwoSidedSweeping"]:
                 contraction_flat, _ = generate_contraction_list(contraction_recursive)
             else:
                 contraction_flat = contraction_recursive
             cost_validation = run_validation_on_test_case(tt_dim, test_filename, contraction_flat)
+
+            if test_filename == "/gpfs/workdir/torria/pdominik/Tests/Tests_dim2/xxT/random/low/d_005_v_001.txt":
+                contraction_flat1 = ast.literal_eval("((0, 5), (5, 6), (1, 6), (6, 7), (2, 7), (7, 8), (3, 8), (8, 9), (4, 9))")
+                cost_validation1 = run_validation_on_test_case(tt_dim, test_filename, contraction_flat1)
+
+                contraction_flat2 = ast.literal_eval("((0, 5), (5, 6), (1, 6), (1, 2), (2, 7), (7, 8), (3, 8), (3, 4), (4, 9))")
+                cost_validation2 = run_validation_on_test_case(tt_dim, test_filename, contraction_flat2)
+
+                print(f"Cost validation 1: {cost_validation1}")
+                print(f"Cost validation 2: {cost_validation2}")
+
             result_validation = "Correct"
             if cost_validation != cost:
                 result_validation = "Invalid"
@@ -307,7 +321,7 @@ if __name__ == "__main__":
 
     # Computation of the test cases
     cores = min(int(config['Results']['max_cores']), multiprocessing.cpu_count())
-    pool = multiprocessing.Pool(processes=cores)
+    pool = multiprocessing.Pool(processes=40)
     parallel_input = []
 
     case_no = 1
@@ -315,7 +329,7 @@ if __name__ == "__main__":
         # Consider case y=xT for smaller TT dimensions
         y_cases = [False]
         if tt_dim <= 3:
-            y_cases = [True, False]
+            y_cases = [False]
 
         for y_eq_xT in y_cases:
             for type in types:

@@ -2,6 +2,7 @@ import sys
 import os
 import configparser
 import numpy as np
+import math
 
 from Scripts.naming import get_dir, get_test_filename
 
@@ -54,21 +55,26 @@ def cumulative_product_bounded(values, start, bound):
     return result
 
 # ------------------------ Generation of test instance -------------------------
-def generate_instance(file, type, tt_dim, dimension, y_eq_xT, ranks_gen, dims_gen, max_val, rounded):
+def generate_instance(file, problem_type, tt_dim, dimension, y_eq_xT, ranks_gen, dims_gen, max_val, rounded):
     # Generate dimensions and ranks
     dims  = [[int(dims_gen(i * dimension + j)) for j in range(dimension)] for i in range(tt_dim - 1)]
-    ranks = [[int(ranks_gen(i * (dimension - 1) + j)) for j in range(dimension - 1)] for i in range(tt_dim)]
+    
+    ranks = []
+    if problem_type != "increasing":
+        ranks = [[int(ranks_gen(i * (dimension - 1) + j)) for j in range(dimension - 1)] for i in range(tt_dim)]
+    else:
+        ranks = [[int(ranks_gen(j, i)) for j in range(dimension - 1)] for i in range(tt_dim)]
 
     # For increasing case sort the values to have increasing ranks towards middle
-    if type == "increasing":
-        for i in range(len(ranks)):
-            ranks[i].sort()
-
-            rank_left = ranks[i][::2]
-            rank_right = ranks[i][1::2]
-            rank_right.reverse()
-
-            ranks[i] = rank_left + rank_right
+    #if type == "increasing":
+    #    for i in range(len(ranks)):
+    #        ranks[i].sort()
+    #
+    #        rank_left = ranks[i][::2]
+    #        rank_right = ranks[i][1::2]
+    #        rank_right.reverse()
+    #
+    #        ranks[i] = rank_left + rank_right
 
     # Add dummy 1 ranks at the beginning and end to simplify output handling
     for i in range(len(ranks)):
@@ -139,6 +145,32 @@ def generate_instance(file, type, tt_dim, dimension, y_eq_xT, ranks_gen, dims_ge
             for i in range(dimension):
                 file.write(f"e {t * dimension + i} {(t + 1) * dimension + i} {dims[t][i]}\n")
 
+def cos_like_increasing_gen(length, rand, noise_level=0.1):
+    centre = int(length/2)
+    return lambda x : 5+(1+np.cos(x*2*np.pi/length+np.pi))*(95/2) + rand.integers(low=-(centre-abs(x-centre))-1, high=centre-abs(x-centre)+1)
+
+def cos_like_increasing_gen2(length, max_val, rand, problem_size):
+    # Generate random peak location
+    center_offset_1 = 0.25 * length + rand.uniform(-length / 10, length / 10)
+    center_offset_2 = 0.50 * length + rand.uniform(-length / 10, length / 10)
+    center_offset_3 = 0.75 * length + rand.uniform(-length / 10, length / 10)
+
+    # Prepare scaling function
+    def scale_value(y, new_min=2, new_max=max_val):
+        y = max(-1, min(1, y))
+        return (new_max - new_min) * (y + 1) / 2 + new_min
+
+    # Generate cosine-like increasing wave
+    def gen_value(x, row):
+        if row < 1:
+            return scale_value(math.cos((x - center_offset_1) * (2 * math.pi / length))  + rand.uniform(-0.4, 0.4))
+        elif row < 2 and problem_size > 2:
+            return scale_value(math.cos((x - center_offset_2) * (2 * math.pi / length))  + rand.uniform(-0.4, 0.4))
+        else:
+            return scale_value(math.cos((x - center_offset_3) * (2 * math.pi / length))  + rand.uniform(-0.4, 0.4))
+
+    return gen_value
+
 
 # ------------------------------- Main function --------------------------------
 if __name__ == "__main__":
@@ -166,6 +198,7 @@ if __name__ == "__main__":
 
     types = config['General']['types'].split(',')
     rank_types = config['General']['rank_types'].split(',')
+    const_dim = int(config['Tests']['const_dim'])
 
     # Retrieve seed
     seed = int(config['Tests']['seed'])
@@ -197,7 +230,7 @@ if __name__ == "__main__":
                     ranks_gen = lambda x : rand.integers(low=2, high=(max_rank + 1))
 
                     if type in ["increasing", "quantized"]:
-                        dims_gen  = lambda x : 2
+                        dims_gen  = lambda x : const_dim
                     elif type in ["random"]:
                         dims_gen  = lambda x : rand.integers(low=2, high=51)
                     else:
@@ -211,6 +244,9 @@ if __name__ == "__main__":
                     case_no += 1
                     for dimension in range(3, max_size + 1):
                         for instance in range(1, nb_instances + 1):
+                            if type == "increasing":
+                                ranks_gen = cos_like_increasing_gen2(dimension, max_rank, rand, tt_dim)
+
                             filename = get_test_filename(dir, dimension, instance)
                             test_file = open(filename, "w")
                             generate_instance(test_file, type, tt_dim, dimension, y_eq_xT, ranks_gen, dims_gen, max_rank, True)

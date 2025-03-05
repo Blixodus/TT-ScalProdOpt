@@ -1,8 +1,7 @@
 import os
 
-# Get directory path for given test group
-def get_dir(root_dir, tt_dim, y_eq_xT, type, rank_type, rank_const = None, dim_const = None):
-    # Prepare test case name (general for higher TT-dim, specific for 2 and 3)
+# Get test case name
+def get_test_case_name(tt_dim, y_eq_xT):
     test_case_id = f"T{tt_dim:02}"
     if tt_dim == 2:
         if y_eq_xT:
@@ -14,6 +13,45 @@ def get_dir(root_dir, tt_dim, y_eq_xT, type, rank_type, rank_const = None, dim_c
             test_case_id = "xAxT"
         else:
             test_case_id = "xAy"
+    return test_case_id
+
+def get_test_case_name2(tt_dim, y_eq_xT):
+    test_case_id = f"T{tt_dim:02}"
+    if tt_dim == 2:
+        if y_eq_xT:
+            test_case_id = "$x^Tx$"
+        else:
+            test_case_id = "$x^Ty$"
+    elif tt_dim == 3:
+        if y_eq_xT:
+            test_case_id = "$x^TAx$"
+        else:
+            test_case_id = "$x^TAy$"
+    elif tt_dim == 4:
+        if y_eq_xT:
+            test_case_id = "$x^TABx$"
+        else:
+            test_case_id = "$x^TABy$"
+    return test_case_id
+
+def get_test_case_name3(tt_dim, y_eq_xT):
+    test_case_id = f"T{tt_dim:02}"
+    if tt_dim == 2:
+        if y_eq_xT:
+            test_case_id = "xTx"
+        else:
+            test_case_id = "xy"
+    elif tt_dim == 3:
+        if y_eq_xT:
+            test_case_id = "xTAx"
+        else:
+            test_case_id = "xTAy"
+    return test_case_id
+
+# Get directory path for given test group
+def get_dir(root_dir, tt_dim, y_eq_xT, type, rank_type, rank_const = None, dim_const = None):
+    # Prepare test case name (general for higher TT-dim, specific for 2 and 3)
+    test_case_id = get_test_case_name(tt_dim, y_eq_xT)
 
     # Prepare directory
     dir = f"{root_dir}/{test_case_id}/{type}/{rank_type}"
@@ -42,7 +80,7 @@ def get_test_filename(dir, dimension, instance):
 
 # Get algorithm name (as part of file name)
 def get_algorithm_name(algorithm, delta=None):
-    if delta:
+    if delta and algorithm != "optimal":
         return f"{algorithm}_{delta}"
     return f"{algorithm}"
 

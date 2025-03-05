@@ -10,7 +10,7 @@ set(SRC_DIR src)
 set(TOOLS_DIR tools)
 
 # Setup the main executable
-add_executable(OptiTenseurs ${SRC_DIR}/Main.cpp ${TOOLS_DIR}/Argparser/Argparser.cpp ${TOOLS_DIR}/Argparser/Splitter.cpp ${SRC_DIR}/OneSidedOneDim/OneSidedOneDim.cpp)
+add_executable(OptiTenseurs ${SRC_DIR}/Main.cpp ${SRC_DIR}/Components/Algorithm.cpp ${TOOLS_DIR}/Argparser/Argparser.cpp ${TOOLS_DIR}/Argparser/Splitter.cpp ${SRC_DIR}/OneSidedOneDim/OneSidedOneDim.cpp)
 target_include_directories(OptiTenseurs PRIVATE ${SRC_DIR}/CotengraWrapper ${SRC_DIR}/OneSidedOneDim ${SRC_DIR}/TwoSidedDeltaDim ${SRC_DIR}/Components ${TOOLS_DIR}/Argparser extern/pybind11/include)
 
 # Link to Python library
