@@ -40,36 +40,55 @@ def solve_eq(eq, shapes, baseline, max_time=300):
 
 if __name__ == "__main__":
     # Load configuration file
-    if len(sys.argv) > 1:
-        training_dir = sys.argv[1]
-        if not os.path.exists(training_dir):
-            exit("Error! Provided training directory does not exist.")
+    input_dir = False
+    output_dir = False
+    if len(sys.argv) > 2:
+        input_dir = sys.argv[1]
+        output_dir = sys.argv[2]
+        os.makedirs(output_dir, exist_ok=True)
+        if not os.path.exists(input_dir):
+            exit("Error! Provided directories do not exist.")
+    elif len(sys.argv) > 1:
+        input_dir = sys.argv[1]
+        if not os.path.exists(input_dir):
+            exit("Error! Provided directory does not exist.")
     else:
-        exit("Error! No training directory provided.")
+        exit("Error! No directory provided.")
 
     counter = 0
     eq_list = []
-    for file_path in Path(training_dir).rglob('*'):
-        if file_path.is_file():
-            counter += 1
-            # Import tensor train from file (note : output is empty list in scalar product)
-            inputs, output, sizes_dict, input_node_included = import_tensor_train(file_path)
-            # Convert the tensor train description into rl-tnco input
-            equation = ",".join("".join(sublist) for sublist in inputs)
-            list_of_sizes = [tuple(sizes_dict[char] for char in sublist) for sublist in inputs]
-            ordered_size_dict = OrderedDict(sorted(sizes_dict.items()))
-            eq_list.append((f'{equation}->', list_of_sizes, ordered_size_dict))
-
-    baselines = ['ctg_greedy']
+    baselines = ['ctg_greedy', 'oe_greedy', 'ctg_kahypar']
     solution_dict = {b: [] for b in baselines}
-    for (eq, shapes, size_dict) in eq_list:
+    for file_path in Path(input_dir).rglob('*'):
+        if not file_path.is_file():
+            continue
+        if output_dir:
+            relative_path = file_path.relative_to(input_dir)
+            filename = os.path.join(output_dir, relative_path)
+            filename = os.path.splitext(filename)[0] + '.p'
+            if filename.exists():
+                continue
+        counter += 1
+        # Import tensor train from file (note : output is empty list in scalar product)
+        inputs, output, sizes_dict, input_node_included = import_tensor_train(file_path)
+        # Convert the tensor train description into rl-tnco input
+        equation = ",".join("".join(sublist) for sublist in inputs)
+        eq = f'{equation}->'
+        shapes = [tuple(sizes_dict[char] for char in sublist) for sublist in inputs]
+        size_dict = OrderedDict(sorted(sizes_dict.items()))
+        eq_list.append((eq, shapes, size_dict))
         for baseline in baselines:
             contraction_cost, solver_time, info, path = solve_eq(eq, shapes, baseline=baseline)
             solution_dict[baseline].append((contraction_cost, solver_time, info, path))
-
-    filename = f"scalar_product_2D_dataset_num_eqs_{counter}_num_node_{100}_mean_conn_{3}.p"
-    pickle.dump((eq_list, solution_dict, ""), open(filename, "wb"))
-    
-    print(eq_list)
-    print(solution_dict)
-    print(counter)
+        if output_dir:
+            relative_path = file_path.relative_to(input_dir)
+            filename = os.path.join(output_dir, relative_path)
+            filename = os.path.splitext(filename)[0] + '.p'
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+            pickle.dump((eq_list, solution_dict, ""), open(filename, "wb"))
+            eq_list = []
+            solution_dict = {b: [] for b in baselines}
+                
+    if not output_dir:
+        filename = f"scalar_product_2D_dataset_num_eqs_{counter}_num_node_{100}_mean_conn_{3}.p"
+        pickle.dump((eq_list, solution_dict, ""), open(filename, "wb"))
