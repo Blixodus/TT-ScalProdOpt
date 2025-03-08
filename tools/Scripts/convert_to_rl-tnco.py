@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
     counter = 0
     eq_list = []
-    baselines = ['ctg_greedy', 'oe_greedy', 'ctg_kahypar']
+    baselines = ['oe_greedy']#['ctg_greedy', 'oe_greedy', 'ctg_kahypar']
     solution_dict = {b: [] for b in baselines}
     for file_path in Path(input_dir).rglob('*'):
         if not file_path.is_file():
@@ -66,8 +66,10 @@ if __name__ == "__main__":
             relative_path = file_path.relative_to(input_dir)
             filename = os.path.join(output_dir, relative_path)
             filename = os.path.splitext(filename)[0] + '.p'
-            if filename.exists():
+            if os.path.isfile(filename):
                 continue
+        if int(os.path.splitext(file_path.name)[0].split('_')[3]) > 5:
+            continue
         counter += 1
         # Import tensor train from file (note : output is empty list in scalar product)
         inputs, output, sizes_dict, input_node_included = import_tensor_train(file_path)
