@@ -1,5 +1,6 @@
 #ifndef TEST_HPP
 #define TEST_HPP
+// #include "../../src/Components/Components.hpp"
 #include "../../src/Components/Network.hpp"
 #include <fstream>
 
@@ -45,14 +46,24 @@ class Cost_cpt {
 
         if(v1 != v2) {
             cost_t result = this->m_adjacence_matrix[v1][v2];
+            //std::cout<<"\t\t"<<result<<endl;
             for(vertexID_t j = 0; j < this->m_network.n_vertex; j++) {
                 if(v1 != j) {
+                    //std::cout<<"\t\t\t"<<v2<<" "<<j<<" "<<m_adjacence_matrix[v2][j]<<endl;
                     result *= max((weight_t) 1, m_adjacence_matrix[v2][j]);
                 }
                 if(v2 != j) { 
+                    //std::cout<<"\t\t\t"<<v1<<" "<<j<<" "<<m_adjacence_matrix[v1][j]<<endl;
                     result *= max((weight_t) 1, m_adjacence_matrix[v1][j]);
                 }
+                //std::cout<<"\t\t"<<j<<" "<<result<<endl;
             }
+
+            /*for(vertexID_t i = 0; i < this->m_network.n_vertex; i++) {
+                for(vertexID_t j = 0; j < this->m_network.n_vertex; j++) {
+                    std::cout<<"AM: "<<i<<" "<<j<<" "<<m_adjacence_matrix[i][j]<<endl;
+                }
+            }*/
 
             for(vertexID_t j = 0; j < this->m_network.n_vertex; j++) {
                 if(j != v1 && j != v2) {
@@ -99,8 +110,10 @@ class Cost_cpt {
         // operation to obtain the total cost of given order
         cost_t cost = 0;
         for(vertex_pair_t edge : this->m_order){
+            //std::cout<<"# Contracting "<<edge.first<<" and "<<edge.second<<std::endl;
             cost_t contraction_cost = this->contract(edge);
             cost += contraction_cost;
+            std::cout<<"$ Contracting "<<edge.first<<" and "<<edge.second<<" cost : "<<contraction_cost<<"\t"<<cost<<std::endl;
         }
         return cost;
     }

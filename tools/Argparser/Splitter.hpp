@@ -32,7 +32,10 @@ struct Splitter{
     /**
      * @return true if the splitter reached the end of the string
      */
-    bool empty(){ return delim_pos == std::string::npos; }
+    bool empty(){return delim_pos == std::string::npos;}
+    //std::string tokens_as_string(const std::string& s, const std::string& sep, int token_amount);
+    
+    //std::vector<std::string> tokens_as_list(const std::string& s, const std::string& sep, int token_amount);
 
     std::pair<std::string, std::string> get_members();
 };

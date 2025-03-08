@@ -1,1 +1,0 @@
-__path__=["Custom_widget/", "Group_manager/"]

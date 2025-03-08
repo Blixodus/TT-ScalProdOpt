@@ -5,7 +5,7 @@
 #SBATCH --ntasks=1
 #SBATCH --time=04:00:00
 #SBATCH --cpus-per-task=40
-#SBATCH --partition=cpu_med           # (see available partitions)
+#SBATCH --partition=cpu_med       # (see available partitions)
 
 # To clean and load modules defined at the compile and link phases
 module purge
@@ -23,5 +23,6 @@ source activate /gpfs/workdir/torria/pdominik/tt_contr_env
 set -x
 
 # execution
+date
 which python3
 python3 tools/compute_tests.py "$1"
