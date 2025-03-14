@@ -2,3 +2,6 @@
 	path = extern/pybind11
 	url = ../../pybind/pybind11
 	branch = stable
+[submodule "RL-TNCO"]
+	path = RL-TNCO
+	url = https://github.com/Blixodus/RL-TNCO.git
