@@ -193,6 +193,7 @@ if __name__ == "__main__":
 
     # Retrieve test cases parameters
     tt_dims = [int(tt_dim) for tt_dim in config['General']['tt_dims'].split(',')]
+    min_size = int(config['Tests']['min_size'])
     max_size = int(config['Tests']['max_size'])
     nb_instances = int(config['Tests']['nb_instances'])
 
@@ -242,7 +243,7 @@ if __name__ == "__main__":
                     # Generate test files for given parameters
                     print(f"[Info {case_no}] Generating test cases: TT-dim={tt_dim}, (y=xT)={y_eq_xT}, type={type}, rank_type={rank_type}")
                     case_no += 1
-                    for dimension in range(3, max_size + 1):
+                    for dimension in range(min_size, max_size + 1):
                         for instance in range(1, nb_instances + 1):
                             if type == "increasing":
                                 ranks_gen = cos_like_increasing_gen2(dimension, max_rank, rand, tt_dim)

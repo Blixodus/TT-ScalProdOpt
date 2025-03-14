@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
     counter = 0
     eq_list = []
-    baselines = ['oe_greedy']#['ctg_greedy', 'oe_greedy', 'ctg_kahypar']
+    baselines = ['ctg_greedy', 'oe_greedy', 'ctg_kahypar']
     solution_dict = {b: [] for b in baselines}
     for file_path in Path(input_dir).rglob('*'):
         if not file_path.is_file():
@@ -68,7 +68,7 @@ if __name__ == "__main__":
             filename = os.path.splitext(filename)[0] + '.p'
             if os.path.isfile(filename):
                 continue
-        if int(os.path.splitext(file_path.name)[0].split('_')[3]) > 5:
+        if int(os.path.splitext(file_path.name)[0].split('_')[3]) > 25:
             continue
         counter += 1
         # Import tensor train from file (note : output is empty list in scalar product)
@@ -92,5 +92,5 @@ if __name__ == "__main__":
             solution_dict = {b: [] for b in baselines}
                 
     if not output_dir:
-        filename = f"scalar_product_2D_dataset_num_eqs_{counter}_num_node_{100}_mean_conn_{3}.p"
+        filename = f"scalar_product_dataset_num_eqs_{counter}_num_node_{100}_mean_conn_{3}.p"
         pickle.dump((eq_list, solution_dict, ""), open(filename, "wb"))
