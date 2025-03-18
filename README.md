@@ -1,21 +1,67 @@
-# Exploring optimal contraction strategies for fast vector scalar product in Tensor-Train format
+# Exploring optimal contraction strategies for fast scalar product in tensor-train format
 
-This repository presents an implementation of the algorithms for finding quasi-optimal contraction orderings for scalar products in Tensor-Train format discussed in the paper:
+## Introduction
+
+This repository contains reference implementations of the algorithms for finding quasi-optimal contraction orderings in tensor-train scalar products presented in the paper:
 
 ```bibtex
-@article{paper_name,
-  author    = {author list},
-  title     = {Exploring optimal contraction strategies for fast vector scalar product in Tensor-Train format},
-  year      = {2024},
-  journal   = {},
-  doi       = {}
+@article{torri_ttscal_2025,
+  author  = {Torri, Atte and Dominikowski, Przemysław and Pointal, Brice and Kaya, Oguz and Lima Pilla, Laercio and Coulaud, Olivier},
+  title   = {Near-Optimal Contraction Strategies for the Scalar Product in the Tensor-Train Format},
+  year    = {2025},
+  journal = {},
+  doi     = {}
 }
 ```
 
+The `src` directory contains the implementations of the ***Sweep-opt*** and ***$\Delta$-opt*** algorithms, which are presented in the paper. We provide a wrapper for the [`Cotengra` library](https://github.com/jcmgray/cotengra) and include a submodule that is a fork of [`RL-TNCO`](https://github.com/NVlabs/RL-TNCO), both of which offer different approaches to solving the tensor network contraction ordering problem. `Cotengra` provides a state-of-the-art implementation of the optimal algorithm, and multiple heuristics, while `RL-TNCO` is a reinforcement learning method.
 
-# Introduction
-## Algorithms
-In this project, we include the implementations of two algorithms presented in the article: **1-sided 1-dim** algorithm and **2-sided $\Delta$-dim**. Moreover we provide a wrapper for the [`Cotengra` library](https://github.com/jcmgray/cotengra), which allows to use the algorithms implemented in this library for the benchmarking purposes.
+## Using `RL-TNCO`
+
+This repository contains two scripts that are useful in working with `RL-TNCO`. The first one converts from our tensor-train network format into a pickle file that `RL-TNCO` can then train or evaluate on. The second converts results from `RL-TNCO` evaluation into data usable by our plotting scripts.
+
+### Converting to `RL-TNCO` pickle file format
+
+### Training and evaluation in `RL-TNCO`
+
+The training and evaluation steps are described in detail in the [fork of RL-TNCO](https://github.com/Blixodus/RL-TNCO) that we have as submodule.
+
+### Getting results from `RL-TNCO`
+
+## Initializing the datasets used in the paper
+
+### Synthetic datasets
+
+### Quantum chemistry use case datasets
+
+To reproduce our real-world use-case datasets, which come from a quantum chemistry use-case, you must use the [ttvibr](https://bitbucket.org/rakhuba/ttvibr/) library. Getting it to work can take a bit of effort, as it uses an outdated python version and libraries. We provide below complete steps to make it work using a [conda](https://www.anaconda.com/) environment, which is provided in the `envs` directory.
+
+```
+# Create a working conda environment
+conda env create -n ttvibr --file=envs/ttvibr.yml
+conda activate ttvibr
+# Install ttpy
+git clone --recurse-submodules https://github.com/oseledets/ttpy.git
+cd ttpy
+git checkout v1.2.0
+FFLAGS="-w -std=legacy -fPIC" python setup.py install
+cd ..
+# Install ttvibr
+git clone https://bitbucket.org/rakhuba/ttvibr.git
+cd ttvibr
+chmod +x compile.sh
+FFLAGS="-w -std=legacy -fPIC" ./compile.sh
+cd quadgauss
+FFLAGS="-w -std=legacy -fPIC" python setup.py build_ext --inplace
+cd ..
+# Run the jupyter notebook
+jupyter-notebook iteration.ipynb
+```
+
+When you open the jupyter notebook, you need to set `eps = 1e-6` and `rmax = 5000` everywhere so as to limit the ranks only by the defined precision and not artificially. You can then run all kernels. The values of `psi_new`, `A0`, and `Apsi_new` in the first iteration of the "Harmonic + Henon-Heiles correction" method was used in our paper as the real-world use-case. These values can then be converted to our data format for tensor-train networks.
+
+
+
 
 ### 1-sided 1-dim
 The **1-sided 1-dim** algorithm is an iterative algorithm, which finds a solution for a window consisting of the left-most mode contraction and rank contractions. At each step of the algorithm, only two out of the three contractions are performed, generating multiple sub-problems with different mode contraction cost.
