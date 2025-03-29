@@ -1,7 +1,11 @@
 #ifndef NETWORK2D_HPP
 #define NETWORK2D_HPP
+
 #include "Components.hpp"
+
 #include <string>
+#include <iostream>
+#include <fstream>
 #include <cassert>
 
 /**
