@@ -7,7 +7,7 @@
 
 using namespace std;
 
-//Enum and map to switch on the algorithms' name
+// Enum and map to switch on the algorithms' name
 enum algorithm_e {SWEEPOPT, DELTAOPT, COTENGRAWRAPPER};
 static std::map<std::string, algorithm_e> ALGO_MAP {
         {"SweepOpt", SWEEPOPT},
@@ -15,7 +15,7 @@ static std::map<std::string, algorithm_e> ALGO_MAP {
         {"CotengraWrapper", COTENGRAWRAPPER}
 };
 
-//Type for network dimensions
+// Type for network dimensions
 using dim_t = int;
 
 // Type to encode vertices
@@ -45,12 +45,11 @@ using vector_vertexID_t = std::vector<vertexID_t>;
 
 // Type for edges
 struct edge_t {
-    //Type for edges
     std::pair<vertexID_t, vertexID_t> m_edge;
     weight_t m_weight;
 
     edge_t(vertexID_t v1, vertexID_t v2, weight_t weight=0) : m_edge(std::make_pair(v1, v2)), m_weight(weight) {}
-    edge_t(std::pair<int, int> edge, weight_t weight=0) : m_edge(edge), m_weight(weight) {}
+    explicit edge_t(const std::pair<int, int> &edge, weight_t weight=0) : m_edge(edge), m_weight(weight) {}
 };
 
 // Direction for the start of the contraction

@@ -54,24 +54,24 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary) {
 
     // Parse delta parameter
     int delta = 0;
-    if(dictionary.find("delta") != dictionary.end()){
+    if(dictionary.contains("delta")){
         delta = std::stoi(std::any_cast<string>(dictionary["delta"]));
     }
 
     // Parse tt_dim parameter
     int tt_dim = 0;
-    if(dictionary.find("tt_dim") != dictionary.end()) {
+    if(dictionary.contains("tt_dim")) {
         tt_dim = std::stoi(std::any_cast<string>(dictionary["tt_dim"]));
     }
 
     // Parse solving direction parameter
     split_direction_e dir = ALL;
-    if(dictionary.find("dir") != dictionary.end()) {
+    if(dictionary.contains("dir")) {
         dir = str_to_split_direction(std::any_cast<string>(dictionary["dir"]));
     }
 
     // Generate the algorithm based on the name and the parameters
-    if(ALGO_MAP.find(algo_name) == ALGO_MAP.end()) {
+    if(!ALGO_MAP.contains(algo_name)) {
         return nullptr;
     }
 
@@ -183,11 +183,11 @@ Algorithm* instantiate(const std::string& algorithm_name) {
  * @param Algorithm
  */
 void display_info(Algorithm& solver) {
-    std::cout << "Best cost : " << solver.best_cost << '\n';
+    std::cout << "Best cost: " << solver.best_cost << '\n';
     if(solver.best_order_str != ""){
-        std::cout << "Best order : " << solver.best_order_str << '\n';
+        std::cout << "Best order: " << solver.best_order_str << '\n';
     }
-    std::cout << std::scientific << "Execution time : " << solver.time.count()  << "s" << '\n';
+    std::cout << std::scientific << "Execution time: " << solver.time.count()  << "s" << '\n';
     std::cout << "--------------" << std::endl;
 }
 

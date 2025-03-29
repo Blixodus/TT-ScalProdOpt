@@ -217,7 +217,7 @@ class CotengraWrapper : public Algorithm {
     CotengraWrapper(){}
     CotengraWrapper(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){
         // Set the algorithm Cotengra algorithm to use
-        if(param_dictionary.find("ctg_algorithm") != param_dictionary.end()) {
+        if(param_dictionary.contains("ctg_algorithm")) {
             std::cout<<"Cotengra using algorithm "<<std::any_cast<std::string>(param_dictionary["ctg_algorithm"])<<std::endl;
             this->algorithm = std::any_cast<std::string>(param_dictionary["ctg_algorithm"]);
         }

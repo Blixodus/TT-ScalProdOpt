@@ -5,7 +5,6 @@
 #include "../../tools/Compute/Compute.hpp"
 
 #include <iostream>
-#include <fstream>
 #include <iterator>
 #include <map>
 #include <any>
@@ -44,8 +43,7 @@ class Algorithm {
     Algorithm(std::map<std::string, std::any> map) {
         // Parse general runtime arguments
         for(const auto &[key, val] : map) {
-            alg_param_e param_name = param_map[key];
-            switch(param_name){
+            switch(alg_param_e param_name = param_map[key]){
                 case alg_param_e::MAIN_ALG:
                     algo_name = std::any_cast<std::string>(val);
                     break;
