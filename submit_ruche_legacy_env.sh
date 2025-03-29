@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export OMP_NUM_THREADS=1
+
 # Define the config path
 DIR_PATH="/gpfs/workdir/torria/pdominik/OptiTenseurs_dev/tools/configs/xABy_review/legacy"
 

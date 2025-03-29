@@ -8,7 +8,7 @@ import subprocess
 import configparser
 
 import cotengra as ctg
-#from cgreedy import #CGreedy work around for CGreedy not working
+from cgreedy import CGreedy
 
 import pandas as pd
 from alive_progress import alive_bar

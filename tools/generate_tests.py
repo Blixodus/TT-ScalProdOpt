@@ -56,14 +56,18 @@ def cumulative_product_bounded(values, start, bound):
 
 # ------------------------ Generation of test instance -------------------------
 def generate_instance(file, problem_type, tt_dim, dimension, y_eq_xT, ranks_gen, dims_gen, max_val, rounded):
+    dims = []
+    ranks = []
+
     # Generate dimensions and ranks
     dims  = [[int(dims_gen(i * dimension + j)) for j in range(dimension)] for i in range(tt_dim - 1)]
     
     ranks = []
-    if problem_type != "increasing":
+    if problem_type != "increasing" and problem_type != "real_life":
         ranks = [[int(ranks_gen(i * (dimension - 1) + j)) for j in range(dimension - 1)] for i in range(tt_dim)]
     else:
         ranks = [[int(ranks_gen(j, i)) for j in range(dimension - 1)] for i in range(tt_dim)]
+
 
     # For increasing case sort the values to have increasing ranks towards middle
     #if type == "increasing":
@@ -172,6 +176,131 @@ def cos_like_increasing_gen2(length, max_val, rand, problem_size):
     return gen_value
 
 
+def real_life_gen_old(tt_dim, dimension, instance):
+    x = [1, 2, 4, 6, 8, 9, 10, 11, 11, 11, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 37, 37, 38, 39, 40, 41, 42, 43, 44, 44, 45, 45, 45, 46, 47, 47, 48, 49, 52, 49, 32, 16, 8, 4, 2, 1]
+    y = [1, 2, 4, 7, 9, 10, 12, 13, 14, 16, 16, 17, 18, 19, 19, 20, 21, 22, 23, 24, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 32, 32, 33, 34, 35, 36, 36, 37, 38, 39, 40, 40, 41, 42, 43, 44, 45, 46, 47, 47, 48, 48, 51, 54, 50, 32, 16, 8, 4, 2, 1]
+    z = [1, 2, 4, 7, 10, 12, 13, 14, 14, 15, 16, 17, 19, 19, 19, 20, 21, 21, 23, 24, 25, 26, 27, 27, 28, 28, 28, 29, 30, 31, 32, 33, 35, 36, 37, 38, 39, 40, 41, 41, 41, 41, 42, 42, 44, 45, 47, 48, 50, 50, 51, 52, 55, 57, 52, 32, 16, 8, 4, 2, 1]
+    mat = [1, 3, 4, 5, 5, 6, 6, 6, 6, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 12, 12, 12, 11, 10, 8, 5, 2, 1]
+    
+    rows = []
+    if tt_dim == 2:
+        if instance == 1:
+            rows = [x[::-1], x]
+        elif instance == 2:
+            rows = [x[::-1], y]
+        elif instance == 3:
+            rows = [x[::-1], z]
+        elif instance == 4:
+            rows = [y[::-1], x]
+        elif instance == 5:
+            rows = [y[::-1], y]
+        elif instance == 6:
+            rows = [y[::-1], z]
+        elif instance == 7:
+            rows = [z[::-1], x]
+        elif instance == 8:
+            rows = [z[::-1], y]
+        elif instance == 9:
+            rows = [z[::-1], z]
+    elif tt_dim == 3:
+        if instance == 1:
+            rows = [x[::-1], mat, x]
+        elif instance == 2:
+            rows = [x[::-1], mat, y]
+        elif instance == 3:
+            rows = [x[::-1], mat, z]
+        elif instance == 4:
+            rows = [y[::-1], mat, x]
+        elif instance == 5:
+            rows = [y[::-1], mat, y]
+        elif instance == 6:
+            rows = [y[::-1], mat, z]
+        elif instance == 7:
+            rows = [z[::-1], mat, x]
+        elif instance == 8:
+            rows = [z[::-1], mat, y]
+        elif instance == 9:
+            rows = [z[::-1], mat, z]
+
+    def gen_value(x, row):
+        return rows[row][x]
+
+    return gen_value
+
+def real_life_gen(tt_dim, dimension, instance):
+    psi_1 = [1, 15, 160, 160, 159, 156, 153, 154, 152, 148, 127, 105, 98, 77, 64, 54, 42, 39,
+        32, 36, 29, 23, 23, 20, 17, 15, 10, 8, 8, 9, 10, 9, 10, 5, 5, 7,
+        7, 7, 8, 5, 6, 4, 5, 5, 13, 12, 14, 10, 8, 10, 9, 8, 10, 9,
+        10, 10, 12, 11, 10, 5, 1]
+
+    A0_1 = [1, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 1]
+
+    Apsi_1 = [1, 90, 1120, 1120, 1113, 1092, 1071, 1078, 1064, 1036, 889, 735, 686, 539, 448,
+            378, 294, 273, 224, 252, 203, 161, 161, 140, 119, 105, 70, 56, 56, 63,
+            70, 63, 70, 35, 35, 49, 49, 49, 56, 35, 42, 28, 35, 35, 91,
+            84, 98, 70, 56, 70, 63, 56, 70, 63, 70, 70, 84, 77, 70, 35, 1]
+
+    psi_2 = [1, 14, 31, 40, 39, 35, 36, 34, 36, 42, 59, 59, 70, 63, 57, 63, 57, 54, 51, 46, 47, 49, 52, 50, 46,
+            43, 47, 49, 45, 41, 33, 32, 32, 32, 32, 28, 24, 23, 19, 22, 25, 26, 19, 20, 24, 23, 28, 32, 42, 41,
+            39, 33, 26, 22, 20, 19, 17, 21, 18, 11, 1]
+
+    A0_2 = [1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+            4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1]
+
+    Apsi_2 = [1, 56, 124, 160, 156, 140, 144, 136, 144, 168, 236, 236, 280, 252, 228, 252, 228, 216,
+            204, 184, 188, 196, 208, 200, 184, 172, 188, 196, 180, 164, 132, 128, 128, 128, 128, 112,
+            96, 92, 76, 88, 100, 104, 76, 80, 96, 92, 112, 128, 168, 164, 156, 132, 104, 88,
+            80, 76, 68, 84, 72, 44, 1]
+
+    psi_3 = [1, 9, 11, 12, 13, 12, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 11, 12, 12, 14, 13, 14, 14,
+            13, 13, 13, 13, 14, 13, 13, 13, 12, 12, 12, 14, 14, 14, 14, 12, 13, 12, 13, 12, 14, 13, 13, 12, 12,
+            12, 12, 12, 12, 12, 12, 11, 13, 12, 10, 1]
+
+    A0_3 = [1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+            4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1]
+
+    Apsi_3 = [1, 56, 124, 160, 156, 140, 144, 136, 144, 168, 236, 236, 280, 252, 228, 252, 228, 216,
+            204, 184, 188, 196, 208, 200, 184, 172, 188, 196, 180, 164, 132, 128, 128, 128, 128, 112,
+            96, 92, 76, 88, 100, 104, 76, 80, 96, 92, 112, 128, 168, 164, 156, 132, 104, 88,
+            80, 76, 68, 84, 72, 44, 1]
+
+    
+    rows = []
+    if tt_dim == 2:
+        if instance == 1:
+            rows = [psi_1[::-1], psi_1]
+        elif instance == 2:
+            rows = [Apsi_1[::-1], psi_1]
+        elif instance == 3:
+            rows = [psi_2[::-1], psi_2]
+        elif instance == 4:
+            rows = [Apsi_2[::-1], psi_2]
+        elif instance == 5:
+            rows = [psi_3[::-1], psi_3]
+        elif instance == 6:
+            rows = [Apsi_3[::-1], psi_3]
+
+    elif tt_dim == 3:
+        if instance == 1:
+            rows = [psi_1[::-1], A0_1, psi_1]
+        elif instance == 2:
+            rows = [Apsi_1[::-1], A0_1, psi_1]
+        elif instance == 3:
+            rows = [psi_2[::-1], A0_2, psi_2]
+        elif instance == 4:
+            rows = [Apsi_2[::-1], A0_2, psi_2]
+        elif instance == 5:
+            rows = [psi_3[::-1], A0_3, psi_3]
+        elif instance == 6:
+            rows = [Apsi_3[::-1], A0_3, psi_3]
+
+    def gen_value(x, row):
+        return rows[row][x]
+
+    return gen_value
+
+
 # ------------------------------- Main function --------------------------------
 if __name__ == "__main__":
     # Load configuration file
@@ -193,7 +322,6 @@ if __name__ == "__main__":
 
     # Retrieve test cases parameters
     tt_dims = [int(tt_dim) for tt_dim in config['General']['tt_dims'].split(',')]
-    min_size = int(config['Tests']['min_size'])
     max_size = int(config['Tests']['max_size'])
     nb_instances = int(config['Tests']['nb_instances'])
 
@@ -214,6 +342,9 @@ if __name__ == "__main__":
 
         for y_eq_xT in y_cases:
             for type in types:
+                if type == "real_life" and y_eq_xT:
+                    continue
+
                 for rank_type in rank_types:
                     # Determine max rank based on rank type
                     max_rank = 0
@@ -230,7 +361,7 @@ if __name__ == "__main__":
                     rand = np.random.default_rng(seed=seed)
                     ranks_gen = lambda x : rand.integers(low=2, high=(max_rank + 1))
 
-                    if type in ["increasing", "quantized"]:
+                    if type in ["increasing", "quantized", "real_life"]:
                         dims_gen  = lambda x : const_dim
                     elif type in ["random"]:
                         dims_gen  = lambda x : rand.integers(low=2, high=51)
@@ -243,12 +374,19 @@ if __name__ == "__main__":
                     # Generate test files for given parameters
                     print(f"[Info {case_no}] Generating test cases: TT-dim={tt_dim}, (y=xT)={y_eq_xT}, type={type}, rank_type={rank_type}")
                     case_no += 1
+                    min_size = max_size if type == "real_life" else 3
+
                     for dimension in range(min_size, max_size + 1):
                         for instance in range(1, nb_instances + 1):
                             if type == "increasing":
                                 ranks_gen = cos_like_increasing_gen2(dimension, max_rank, rand, tt_dim)
+                            elif type == "real_life":
+                                ranks_gen = real_life_gen(tt_dim, dimension, instance)
 
                             filename = get_test_filename(dir, dimension, instance)
                             test_file = open(filename, "w")
-                            generate_instance(test_file, type, tt_dim, dimension, y_eq_xT, ranks_gen, dims_gen, max_rank, True)
+                            rounding = True
+                            if type == "real_life":
+                                rounding = False
+                            generate_instance(test_file, type, tt_dim, dimension, y_eq_xT, ranks_gen, dims_gen, max_rank, rounding)
                             test_file.close()
