@@ -2,7 +2,6 @@
 #define ALGORITHM_HPP
 
 #include "Network.hpp"
-#include "../../tools/Compute/Compute.hpp"
 
 #include <iostream>
 #include <iterator>

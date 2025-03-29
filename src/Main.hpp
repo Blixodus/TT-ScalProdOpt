@@ -1,7 +1,7 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
-#include "../tools/Argparser/Argparser.hpp"
+#include "Components/Argparser/Argparser.hpp"
 #include "Components/Algorithm.hpp"
 #include "CotengraWrapper/CotengraWrapper.hpp"
 
