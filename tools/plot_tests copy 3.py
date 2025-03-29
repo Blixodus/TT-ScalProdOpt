@@ -30,7 +30,7 @@ def get_label(algorithm, optimal_only=False):
         'OneSidedOneDim': "1-sided 1-dim",
         'quickbb-2': 'QuickBB',
         'flowcutter': 'FlowCutter',
-        'TwoSidedSweeping': 'Sweep-opt',
+        'SweepOpt': 'Sweep-opt',
         'rl-tnco' : 'RL-TNCO'
     }
 
@@ -39,7 +39,7 @@ def get_label(algorithm, optimal_only=False):
 
     if algorithm in label_dict:
         return label_dict[algorithm]
-    elif algorithm.startswith('TwoSidedDeltaDim'):
+    elif algorithm.startswith('DeltaOpt'):
         return f"Δ-opt (Δ={algorithm.split('_')[1]})"
     else:
         return algorithm
@@ -58,10 +58,10 @@ def get_color_new(algorithm):
         'quickbb-2': 'tab:orange',
         'flowcutter': '#E66101',  # Deep orange
 
-        # TwoSidedSweeping → Make it distinct
-        'TwoSidedSweeping': '#762A83',  # Dark purple
+        # SweepOpt → Make it distinct
+        'SweepOpt': '#762A83',  # Dark purple
 
-        # TwoSidedDeltaDim family → More diverse blues & teals
+        # DeltaOpt family → More diverse blues & teals
         'TwoSidedDeltaDim_2': 'tab:blue',
         'TwoSidedDeltaDim_3': '#1F78B4',  # Deep blue
         'TwoSidedDeltaDim_4': '#41B6C4',  # Cyan blue
@@ -87,7 +87,7 @@ def get_color(algorithm):
         'naive': "tab:gray",
         'quickbb-2': 'tab:purple',
         'flowcutter': 'tab:brown',
-        'TwoSidedSweeping': 'seagreen',
+        'SweepOpt': 'seagreen',
         'TwoSidedDeltaDim_2': 'navy',
         'TwoSidedDeltaDim_3': 'teal',
         'TwoSidedDeltaDim_4': 'tab:blue',
@@ -355,7 +355,7 @@ def plot_test_case(plot_algorithms, normalization_algorithm, result_dir_path, pl
     # check if 'Wrapper_time' column exists
     for algorithm in algorithms:
         sizes = results[algorithm]['Size'].unique().tolist()
-        if algorithm.startswith('TwoSidedDeltaDim') and len(sizes) > 0 and 'Wrapper_time' in results[algorithm].columns:
+        if algorithm.startswith('DeltaOpt') and len(sizes) > 0 and 'Wrapper_time' in results[algorithm].columns:
             # Create dataframe with mean time for each size
             mean_wrapper_time = results[algorithm].groupby('Size')['Wrapper_time'].mean()
             mean_optimal_time = results[algorithm].groupby('Size')['Optimal_time'].mean()
@@ -665,7 +665,7 @@ if __name__ == "__main__":
                     for algorithm in algorithms:
                         if algorithm == "OneSidedOneDim" and tt_dim != 2:
                             continue
-                        if algorithm != "TwoSidedDeltaDim":
+                        if algorithm != "DeltaOpt":
                             plot_algorithms.append((algorithm, None))
                         else:
                             for delta in deltas:

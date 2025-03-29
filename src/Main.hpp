@@ -4,9 +4,8 @@
 // #include "TriScoreNaive/TriScoreN.hpp"
 #include "../tools/Argparser/Argparser.hpp"
 #include "Components/Algorithm.hpp"
-#include "OneSidedOneDim/OneSidedOneDim.hpp"
-#include "TwoSidedSweeping/TwoSidedSweeping.hpp"
-#include "TwoSidedDeltaDim/TwoSidedDeltaDim.hpp"
+#include "SweepOpt/SweepOpt.hpp"
+#include "DeltaOpt/DeltaOpt.hpp"
 #include "CotengraWrapper/CotengraWrapper.hpp"
 
 #include <algorithm>

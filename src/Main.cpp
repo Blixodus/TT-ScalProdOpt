@@ -83,78 +83,75 @@ Algorithm* instantiate(std::map<std::string, std::any>& dictionary){
 
     if(ALGO_MAP.find(algo_name) == ALGO_MAP.end()){return nullptr;}
     switch(ALGO_MAP[algo_name]){
-        case ONESIDEDONEDIM:
-            return new OneSidedOneDim(dictionary);
+        case SWEEPOPT:
+            return new SweepOpt(dictionary);
             break;
-        case TWOSIDEDSWEEPING:
-            return new TwoSidedSweeping(dictionary);
-            break;
-        case TWOSIDEDDELTADIM:
+        case DELTAOPT:
             if (tt_dim == 2) {
-                if(delta == 2)       return new TwoSidedDeltaDim<2, ALL, 2>(dictionary);
-                else if(delta == 3)  return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
-                else if(delta == 4)  return new TwoSidedDeltaDim<4, ALL, 2>(dictionary);
-                else if(delta == 5)  return new TwoSidedDeltaDim<5, ALL, 2>(dictionary);
-                else if(delta == 6)  return new TwoSidedDeltaDim<6, ALL, 2>(dictionary);
-                else if(delta == 7)  return new TwoSidedDeltaDim<7, ALL, 2>(dictionary);
-                else if(delta == 8)  return new TwoSidedDeltaDim<8, ALL, 2>(dictionary);
-                else if(delta == 9)  return new TwoSidedDeltaDim<9, ALL, 2>(dictionary);
-                else if(delta == 10) return new TwoSidedDeltaDim<10, ALL, 2>(dictionary);
-                else if(delta == 11) return new TwoSidedDeltaDim<11, ALL, 2>(dictionary);
-                else if(delta == 12) return new TwoSidedDeltaDim<12, ALL, 2>(dictionary);
-                else if(delta == 13) return new TwoSidedDeltaDim<13, ALL, 2>(dictionary);
-                else if(delta == 14) return new TwoSidedDeltaDim<14, ALL, 2>(dictionary);
-                else if(delta == 15) return new TwoSidedDeltaDim<15, ALL, 2>(dictionary);
-                else if(delta == 16) return new TwoSidedDeltaDim<16, ALL, 2>(dictionary);
-                else if(delta == 17) return new TwoSidedDeltaDim<17, ALL, 2>(dictionary);
-                else if(delta == 18) return new TwoSidedDeltaDim<18, ALL, 2>(dictionary);
-                else if(delta == 19) return new TwoSidedDeltaDim<19, ALL, 2>(dictionary);
-                else if(delta == 20) return new TwoSidedDeltaDim<20, ALL, 2>(dictionary);
+                if(delta == 2)       return new DeltaOpt<2, ALL, 2>(dictionary);
+                else if(delta == 3)  return new DeltaOpt<3, ALL, 2>(dictionary);
+                else if(delta == 4)  return new DeltaOpt<4, ALL, 2>(dictionary);
+                else if(delta == 5)  return new DeltaOpt<5, ALL, 2>(dictionary);
+                else if(delta == 6)  return new DeltaOpt<6, ALL, 2>(dictionary);
+                else if(delta == 7)  return new DeltaOpt<7, ALL, 2>(dictionary);
+                else if(delta == 8)  return new DeltaOpt<8, ALL, 2>(dictionary);
+                else if(delta == 9)  return new DeltaOpt<9, ALL, 2>(dictionary);
+                else if(delta == 10) return new DeltaOpt<10, ALL, 2>(dictionary);
+                else if(delta == 11) return new DeltaOpt<11, ALL, 2>(dictionary);
+                else if(delta == 12) return new DeltaOpt<12, ALL, 2>(dictionary);
+                else if(delta == 13) return new DeltaOpt<13, ALL, 2>(dictionary);
+                else if(delta == 14) return new DeltaOpt<14, ALL, 2>(dictionary);
+                else if(delta == 15) return new DeltaOpt<15, ALL, 2>(dictionary);
+                else if(delta == 16) return new DeltaOpt<16, ALL, 2>(dictionary);
+                else if(delta == 17) return new DeltaOpt<17, ALL, 2>(dictionary);
+                else if(delta == 18) return new DeltaOpt<18, ALL, 2>(dictionary);
+                else if(delta == 19) return new DeltaOpt<19, ALL, 2>(dictionary);
+                else if(delta == 20) return new DeltaOpt<20, ALL, 2>(dictionary);
                 else {
                     std::cerr<<"[Warning] Using default delta value of 3. Please add delta to template in Main.cpp in order to use it."<<std::endl;
-                    return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
+                    return new DeltaOpt<3, ALL, 2>(dictionary);
                 }
             } else if(tt_dim == 3) {
-                if(delta == 2)       return new TwoSidedDeltaDim<2, ALL, 3>(dictionary);
-                else if(delta == 3)  return new TwoSidedDeltaDim<3, ALL, 3>(dictionary);
-                else if(delta == 4)  return new TwoSidedDeltaDim<4, ALL, 3>(dictionary);
-                else if(delta == 5)  return new TwoSidedDeltaDim<5, ALL, 3>(dictionary);
-                else if(delta == 6)  return new TwoSidedDeltaDim<6, ALL, 3>(dictionary);
-                else if(delta == 7)  return new TwoSidedDeltaDim<7, ALL, 3>(dictionary);
-                else if(delta == 8)  return new TwoSidedDeltaDim<8, ALL, 3>(dictionary);
-                else if(delta == 9)  return new TwoSidedDeltaDim<9, ALL, 3>(dictionary);
-                else if(delta == 10) return new TwoSidedDeltaDim<10, ALL, 3>(dictionary);
-                else if(delta == 11) return new TwoSidedDeltaDim<11, ALL, 3>(dictionary);
-                else if(delta == 12) return new TwoSidedDeltaDim<12, ALL, 3>(dictionary);
-                else if(delta == 13) return new TwoSidedDeltaDim<13, ALL, 3>(dictionary);
-                else if(delta == 14) return new TwoSidedDeltaDim<14, ALL, 3>(dictionary);
-                else if(delta == 15) return new TwoSidedDeltaDim<15, ALL, 3>(dictionary);
-                else if(delta == 16) return new TwoSidedDeltaDim<16, ALL, 3>(dictionary);
-                else if(delta == 17) return new TwoSidedDeltaDim<17, ALL, 3>(dictionary);
-                else if(delta == 18) return new TwoSidedDeltaDim<18, ALL, 3>(dictionary);
-                else if(delta == 19) return new TwoSidedDeltaDim<19, ALL, 3>(dictionary);
-                else if(delta == 20) return new TwoSidedDeltaDim<20, ALL, 3>(dictionary);
+                if(delta == 2)       return new DeltaOpt<2, ALL, 3>(dictionary);
+                else if(delta == 3)  return new DeltaOpt<3, ALL, 3>(dictionary);
+                else if(delta == 4)  return new DeltaOpt<4, ALL, 3>(dictionary);
+                else if(delta == 5)  return new DeltaOpt<5, ALL, 3>(dictionary);
+                else if(delta == 6)  return new DeltaOpt<6, ALL, 3>(dictionary);
+                else if(delta == 7)  return new DeltaOpt<7, ALL, 3>(dictionary);
+                else if(delta == 8)  return new DeltaOpt<8, ALL, 3>(dictionary);
+                else if(delta == 9)  return new DeltaOpt<9, ALL, 3>(dictionary);
+                else if(delta == 10) return new DeltaOpt<10, ALL, 3>(dictionary);
+                else if(delta == 11) return new DeltaOpt<11, ALL, 3>(dictionary);
+                else if(delta == 12) return new DeltaOpt<12, ALL, 3>(dictionary);
+                else if(delta == 13) return new DeltaOpt<13, ALL, 3>(dictionary);
+                else if(delta == 14) return new DeltaOpt<14, ALL, 3>(dictionary);
+                else if(delta == 15) return new DeltaOpt<15, ALL, 3>(dictionary);
+                else if(delta == 16) return new DeltaOpt<16, ALL, 3>(dictionary);
+                else if(delta == 17) return new DeltaOpt<17, ALL, 3>(dictionary);
+                else if(delta == 18) return new DeltaOpt<18, ALL, 3>(dictionary);
+                else if(delta == 19) return new DeltaOpt<19, ALL, 3>(dictionary);
+                else if(delta == 20) return new DeltaOpt<20, ALL, 3>(dictionary);
                 else {
                     std::cerr<<"[Warning] Using default delta value of 3. Please add delta to template in Main.cpp in order to use it."<<std::endl;
-                    return new TwoSidedDeltaDim<3, ALL, 3>(dictionary);
+                    return new DeltaOpt<3, ALL, 3>(dictionary);
                 }
             } else if(tt_dim == 4) {
-                if(delta == 2)       return new TwoSidedDeltaDim<2, ALL, 4>(dictionary);   
-                else if(delta == 3)  return new TwoSidedDeltaDim<3, ALL, 4>(dictionary);
-                else if(delta == 4)  return new TwoSidedDeltaDim<4, ALL, 4>(dictionary);
-                else if(delta == 5)  return new TwoSidedDeltaDim<5, ALL, 4>(dictionary);
-                else if(delta == 6)  return new TwoSidedDeltaDim<6, ALL, 4>(dictionary);
-                else if(delta == 7)  return new TwoSidedDeltaDim<7, ALL, 4>(dictionary);
-                else if(delta == 8)  return new TwoSidedDeltaDim<8, ALL, 4>(dictionary);
-                else if(delta == 9)  return new TwoSidedDeltaDim<9, ALL, 4>(dictionary);
-                else if(delta == 10) return new TwoSidedDeltaDim<10, ALL, 4>(dictionary);
+                if(delta == 2)       return new DeltaOpt<2, ALL, 4>(dictionary);
+                else if(delta == 3)  return new DeltaOpt<3, ALL, 4>(dictionary);
+                else if(delta == 4)  return new DeltaOpt<4, ALL, 4>(dictionary);
+                else if(delta == 5)  return new DeltaOpt<5, ALL, 4>(dictionary);
+                else if(delta == 6)  return new DeltaOpt<6, ALL, 4>(dictionary);
+                else if(delta == 7)  return new DeltaOpt<7, ALL, 4>(dictionary);
+                else if(delta == 8)  return new DeltaOpt<8, ALL, 4>(dictionary);
+                else if(delta == 9)  return new DeltaOpt<9, ALL, 4>(dictionary);
+                else if(delta == 10) return new DeltaOpt<10, ALL, 4>(dictionary);
                 else {
                     std::cerr<<"[Warning] Using default delta value of 3. Please add delta to template in Main.cpp in order to use it."<<std::endl;
-                    return new TwoSidedDeltaDim<3, ALL, 3>(dictionary);
+                    return new DeltaOpt<3, ALL, 3>(dictionary);
                 }
             } else {
                 std::cerr<<"[Warning] Using default tt_dim value of 2. Please add tt_dim to template in Main.cpp in order to use it."<<std::endl;
-                return new TwoSidedDeltaDim<3, ALL, 2>(dictionary);
+                return new DeltaOpt<3, ALL, 2>(dictionary);
             }
             break;
         case COTENGRAWRAPPER:

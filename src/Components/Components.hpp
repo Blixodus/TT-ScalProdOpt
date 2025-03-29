@@ -18,14 +18,10 @@
 using namespace std;
 
 //Enum and map to switch on the algorithms' name
-enum algorithm_e {ALLSPLITS, ALLEDGEBYEDGE, CONVEXSPLITS, GREEDYEDGESORT,
-ONESIDEDONEDIM, SHUFFLE, SPLITSDIMBYDIM, ONESIDEDDELTADIM, TWOSIDEDSWEEPING, TWOSIDEDDELTADIM, COTENGRAWRAPPER};
+enum algorithm_e {SWEEPOPT, DELTAOPT, COTENGRAWRAPPER};
 static std::map<std::string, algorithm_e> ALGO_MAP {
-    {"AllSplits", ALLSPLITS}, {"AllEdgeByEdge", ALLEDGEBYEDGE},{"ConvexSplits", CONVEXSPLITS},
-    {"GreedyEdgeSort", GREEDYEDGESORT},{"OneSidedOneDim", ONESIDEDONEDIM},
-    {"Shuffle", SHUFFLE},{"SplitsDimByDim", SPLITSDIMBYDIM}, {"OneSidedDeltaDim", ONESIDEDDELTADIM},
-    {"TwoSidedSweeping", TWOSIDEDSWEEPING},
-    {"TwoSidedDeltaDim", TWOSIDEDDELTADIM},
+    {"SweepOpt", SWEEPOPT},
+    {"DeltaOpt", DELTAOPT},
     {"CotengraWrapper", COTENGRAWRAPPER}
 };
 

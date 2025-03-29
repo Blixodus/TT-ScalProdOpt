@@ -14,7 +14,7 @@
 #define ORDER second
 
 template <size_t delta = 3, split_direction_e dir = ALL, size_t tt_dim = 2>
-class TwoSidedDeltaDim : public Algorithm {
+class DeltaOpt : public Algorithm {
     public:
     // The memoization table for the costs of each state
     std::vector<std::vector<cost_t>> m_cost[2];
@@ -29,8 +29,8 @@ class TwoSidedDeltaDim : public Algorithm {
     Network<tt_dim> m_network;
 
     // Constructors
-    TwoSidedDeltaDim(){}
-    TwoSidedDeltaDim(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary) {}
+    DeltaOpt(){}
+    DeltaOpt(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary) {}
 
     // Initializers
     void init(std::string filename) {

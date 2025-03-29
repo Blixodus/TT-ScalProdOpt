@@ -24,7 +24,7 @@ enum edge_type_e {
 
 using operation_t = std::pair<int, std::pair<edge_type_e, contraction_type_e>>;
 
-class TwoSidedSweeping : public Algorithm {
+class SweepOpt : public Algorithm {
     private:
     // Solution parameters
     split_direction_e m_direction;  // Direction for the start of the contraction
@@ -90,8 +90,8 @@ class TwoSidedSweeping : public Algorithm {
 
     public:
     // Constructors
-    TwoSidedSweeping(){}
-    TwoSidedSweeping(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){
+    SweepOpt(){}
+    SweepOpt(std::map<std::string, std::any> param_dictionary) : Algorithm(param_dictionary){
         // Direction of the contraction
         if(param_dictionary.find("dir") != param_dictionary.end()) {
             std::string dir = std::any_cast<string>(param_dictionary["dir"]);
@@ -102,7 +102,7 @@ class TwoSidedSweeping : public Algorithm {
             } else if(dir == "BOTH_SIDES") {
                 this->m_direction = split_direction_e::BOTH_SIDES;
             } else if(dir == "ALL") {
-                std::cerr<<"Warning! TwoSidedSweeping algorithm does not support ALL (splits) direction. Using BOTH_SIDES instead."<<std::endl;
+                std::cerr<<"Warning! SweepOpt algorithm does not support ALL (splits) direction. Using BOTH_SIDES instead."<<std::endl;
                 this->m_direction = split_direction_e::BOTH_SIDES;
             } else {
                 std::cerr<<"Warning! Unknown direction '"<<dir<<"'. Using BOTH_SIDES instead."<<std::endl;
