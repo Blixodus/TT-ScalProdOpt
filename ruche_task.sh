@@ -3,9 +3,9 @@
 #SBATCH --exclusive
 #SBATCH --output=/gpfs/workdir/torria/pdominik/ruche_output/%x.o%j
 #SBATCH --ntasks=1
-#SBATCH --time=04:00:00
+#SBATCH --time=06:00:00
 #SBATCH --cpus-per-task=40
-#SBATCH --partition=cpu_med       # (see available partitions)
+#SBATCH --partition=cpu_prod       # (see available partitions)
 
 # To clean and load modules defined at the compile and link phases
 module purge

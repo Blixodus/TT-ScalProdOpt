@@ -1,7 +1,11 @@
 #ifndef NETWORK2D_HPP
 #define NETWORK2D_HPP
+
 #include "Components.hpp"
+
 #include <string>
+#include <iostream>
+#include <fstream>
 #include <cassert>
 
 /**
@@ -23,8 +27,9 @@ struct Network {
     vector<cost_t> m_egde_weight;
 
     // Constructors
-    Network(){}
-    Network(std::string file) {
+    Network(): dim(0), n_edge(0), n_vertex(0) {}
+
+    explicit Network(std::string file) {
         // Initialize the filename
         this->m_filename = file;
 
@@ -32,18 +37,16 @@ struct Network {
         std::ifstream ifile(this->m_filename);
 
         if(!ifile) {
-            std::cerr << "Could not open file : " << file << " at Network initialization" << std::endl;
+            std::cerr << "Could not open file: " << file << " at Network initialization" << std::endl;
             exit(-2);
-        } else {
-            std::cout<<"Instantiating network : " << file << std::endl;
         }
+        std::cout<<"Instantiating network: " << file << std::endl;
 
         // Parse tensor train from file
         std::string line;
         int vertex1, vertex2, weight, file_tt_dim;
         while(getline(ifile, line)) {
             istringstream flux(&line[2]);
-            //std::cout << line << std::endl;
             switch(line[0]) {
                 case 'd':
                     // Parse characteristics of the network
@@ -101,7 +104,6 @@ struct Network {
         // Calculate the final index of edge in the edge list
         const int index = row * (2 * this->dim - 1) + offset + column;
 
-        //std::cout<<"Edge: " << nodeA<<" "<<nodeB<<" "<<index<<std::endl;
         assert(index < this->m_egde_weight.size());
         return this->m_egde_weight[index];
     }

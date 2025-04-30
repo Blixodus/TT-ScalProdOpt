@@ -8,7 +8,7 @@ import subprocess
 import configparser
 
 import cotengra as ctg
-#from cgreedy import #CGreedy work around for CGreedy not working
+from cgreedy import CGreedy
 
 import pandas as pd
 from alive_progress import alive_bar
@@ -129,7 +129,7 @@ def run_algorithm_naive(test_filename, tt_dim, dim):
 # Wrapper function to run computations for given test using either
 # C++ (our algorithms), or Python (cotengra and other algorithms)
 def run_algorithm(algorithm, test_filename, tt_dim, dim, delta):
-    if algorithm in ['OneSidedOneDim', 'TwoSidedSweeping', 'TwoSidedDeltaDim']:
+    if algorithm in ['OneSidedOneDim', 'SweepOpt', 'DeltaOpt']:
         return run_algorithm_cpp(algorithm, test_filename, tt_dim, delta)
     elif algorithm == 'naive':
         return run_algorithm_naive(test_filename, tt_dim, dim)
@@ -182,7 +182,7 @@ def run_algorithm_on_test_case(input):
     if validate_results and order != "naive_order_NA":
         if order != "":
             contraction_recursive = ast.literal_eval(order)
-            if algorithm not in ["OneSidedOneDim", "TwoSidedSweeping"]:
+            if algorithm not in ["OneSidedOneDim", "SweepOpt"]:
                 contraction_flat, _ = generate_contraction_list(contraction_recursive)
             else:
                 contraction_flat = contraction_recursive
@@ -346,7 +346,7 @@ if __name__ == "__main__":
                     case_no += 1
 
                     for algorithm in algorithms:
-                        if algorithm != "TwoSidedDeltaDim":
+                        if algorithm != "DeltaOpt":
                             delta = None
                             parallel_input += generate_arguments_for_test_case(type, algorithm, test_dir_path, result_dir_path, min_size, max_size, step_size, max_size_optimal, tt_dim, None)
                         else:
